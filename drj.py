@@ -7,6 +7,7 @@
 # - Image support for questions that reference figures/diagrams
 # ---------------------------------------------------------
 
+import os
 import time
 import json
 from typing import List, Dict, Tuple
@@ -18,6 +19,8 @@ import fitz  # PyMuPDF
 import pytesseract
 from openai import OpenAI
 
+HIGH_CONFIDENCE_THRESHOLD = 0.95
+
 # -----------------------------
 # 0. CONFIG: TESSERACT PATH
 # -----------------------------
@@ -27,30 +30,38 @@ pytesseract.pytesseract.tesseract_cmd = (
 )
 
 # -----------------------------
-# 0.1 OPENAI CLIENT (HARD-CODED FOR TEST ONLY)
+# 0.1 OPENAI CLIENT (CONFIGURABLE KEY)
 # -----------------------------
-# ⚠️ FOR TESTING ONLY – hard-coded key.
-# Replace "YOUR_TEST_API_KEY_HERE" with your real key LOCALLY,
-# then REVOKE that key after test.
-client = OpenAI(
-    api_key="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"
-)
+def build_openai_client(user_api_key: str | None) -> OpenAI | None:
+    """
+    Build an OpenAI client using a provided key or the OPENAI_API_KEY env var.
+
+    Returns None and shows a Streamlit error if no key is available.
+    """
+
+    api_key = user_api_key or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        st.error("Please provide an OpenAI API key to run extraction.")
+        return None
+
+    return OpenAI(api_key=api_key)
 
 # -----------------------------
-# 1. SYSTEM PROMPT TEMPLATE
+# 1. SYSTEM PROMPT TEMPLATES (DUAL ENGINES)
 # -----------------------------
-SYSTEM_PROMPT = """
+ENGINE_A_PROMPT = """
 You are an expert exam question parser for competitive exams like NEET and JEE.
 
 You will receive raw OCR text from a SINGLE PAGE of a PDF that contains questions,
 options, answers, and sometimes solutions/explanations. The OCR text may have line
-breaks, spacing issues, and minor typos.
+breaks, spacing issues, and minor typos. Some PDFs include an ANSWER KEY or SOLUTION
+KEY at the end of the document—treat those pages carefully.
 
 Your task:
 
 1. Identify individual questions present ONLY on this page.
-2. For each question, extract and structure the information as a JSON object with
-   the following keys:
+2. For each question or answer-key entry, extract and structure the information as a
+   JSON object with the following keys:
    - "id": an integer index starting from 1 for THIS PAGE
    - "question": the full question stem as a single string
    - "options": a list of strings for the options in order (["A. ...", "B. ...", ...]).
@@ -63,10 +74,18 @@ Your task:
         true  -> if the question clearly refers to a diagram/figure/image/table
                  (e.g. "see the figure below", "in the given diagram", etc.)
         false -> otherwise.
+   - "confidence": a float between 0 and 1 representing how certain you are that the
+        OCR text for this question is complete and correct. Use 1.0 only when the
+        question/answer/options are unambiguous and clean. Use values below 0.7 when
+        the OCR is noisy, truncated, or unclear.
 
 Rules and Constraints:
 - The text you receive corresponds to ONE page only. Do not invent questions
   from other pages.
+- Pages that look like an ANSWER KEY (e.g., numbered answers with little text) should
+  still emit structured entries. When only answers are given, set "question" to a short
+  description like "Answer key entry for Question 12" and capture the detected answer
+  in "answer"; leave "options" empty unless they are explicitly shown.
 - Return STRICTLY valid JSON.
 - The final output must be a JSON array of objects: [ { ... }, { ... }, ... ].
 - Do NOT include any extra commentary before or after the JSON.
@@ -75,6 +94,8 @@ Rules and Constraints:
 - Ignore page headers, footers, and noise that are clearly not part of questions.
 - If OCR artifacts cause partial duplication, try to clean them reasonably.
 """.strip()
+
+ENGINE_B_PROMPT = ENGINE_A_PROMPT
 
 
 # -----------------------------
@@ -164,7 +185,10 @@ def _clean_model_output(content: str) -> str:
 
 
 def call_question_engine_openai_for_page(
-    page_text: str, page_number: int
+    page_text: str,
+    page_number: int,
+    client: OpenAI,
+    system_prompt: str,
 ) -> List[Dict]:
     """
     Call OpenAI with SYSTEM_PROMPT + OCR text for a SINGLE PAGE.
@@ -183,7 +207,7 @@ def call_question_engine_openai_for_page(
         resp = client.chat.completions.create(
             model="gpt-4.1-mini",  # change if you want another model
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
             ],
             temperature=0.1,
@@ -201,6 +225,9 @@ def call_question_engine_openai_for_page(
         # Ensure page field is correct for all questions
         for q in questions:
             q["page"] = page_number
+            # Default confidence if the model omitted it
+            if "confidence" not in q:
+                q["confidence"] = 0.0
 
         return questions
     except json.JSONDecodeError:
@@ -213,11 +240,16 @@ def call_question_engine_openai_for_page(
         return []
 
 
-def extract_questions_pagewise(page_texts: List[str]) -> List[Dict]:
+def extract_questions_pagewise(
+    page_texts: List[str], clients: List[OpenAI], system_prompts: List[str]
+) -> List[Dict]:
     """
     Loop over all pages, call the model per page, and merge results.
-    This avoids token/output limit issues and allows per-question `page`.
+    Uses multiple clients/prompts in parallel (alternating per page) to reduce latency.
     """
+    if not clients:
+        return []
+
     all_questions: List[Dict] = []
     global_id = 1
 
@@ -225,21 +257,104 @@ def extract_questions_pagewise(page_texts: List[str]) -> List[Dict]:
     progress = st.progress(0.0)
     status = st.empty()
 
-    for page_number, page_text in enumerate(page_texts, start=1):
-        status.markdown(f"🔍 **Extracting questions from page {page_number} / {total_pages}...**")
-        page_questions = call_question_engine_openai_for_page(page_text, page_number)
+    futures = []
+    future_to_page: Dict = {}
+    results_by_page: Dict[int, List[Dict]] = {}
 
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    with ThreadPoolExecutor(max_workers=len(clients)) as executor:
+        for page_number, page_text in enumerate(page_texts, start=1):
+            client_idx = (page_number - 1) % len(clients)
+            prompt_idx = (page_number - 1) % len(system_prompts)
+            future = executor.submit(
+                call_question_engine_openai_for_page,
+                page_text,
+                page_number,
+                clients[client_idx],
+                system_prompts[prompt_idx],
+            )
+            futures.append(future)
+            future_to_page[future] = page_number
+
+        completed = 0
+        for future in as_completed(futures):
+            page_number = future_to_page[future]
+            status.markdown(
+                f"🔍 **Extracting questions from page {page_number} / {total_pages}...**"
+            )
+            page_questions = future.result()
+            results_by_page[page_number] = page_questions
+            completed += 1
+            if total_pages > 0:
+                progress.progress(completed / total_pages)
+
+    for page_number in range(1, total_pages + 1):
+        page_questions = results_by_page.get(page_number, [])
         for q in page_questions:
-            # Normalize IDs to be global in the merged list
             q["id"] = global_id
             global_id += 1
             all_questions.append(q)
 
-        if total_pages > 0:
-            progress.progress(page_number / total_pages)
-
     status.markdown("✅ **Question extraction completed for all pages.**")
     return all_questions
+
+
+def build_training_dataset(
+    questions: List[Dict], confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD
+) -> Tuple[str, int]:
+    """
+    Build a JSONL training dataset using only high-confidence questions.
+
+    Each JSONL line is a chat-style example suitable for OpenAI fine-tuning.
+    Only questions with confidence >= threshold and a non-empty answer are included.
+    """
+
+    lines: List[str] = []
+    for q in questions:
+        if q.get("confidence", 0.0) < confidence_threshold:
+            continue
+
+        question_text = (q.get("question") or "").strip()
+        answer = q.get("answer")
+        explanation = (q.get("explanation") or "").strip()
+        options = q.get("options") or []
+
+        if not question_text or answer is None or str(answer).strip() == "":
+            continue
+
+        options_block = ""
+        if options:
+            options_block = "Options:\n" + "\n".join(options)
+
+        user_prompt = question_text
+        if options_block:
+            user_prompt = f"{user_prompt}\n\n{options_block}"
+
+        assistant_reply = f"Answer: {answer}"
+        if explanation:
+            assistant_reply = f"{assistant_reply}\nExplanation: {explanation}"
+
+        example = {
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a helpful tutor who answers exam questions concisely.",
+                },
+                {"role": "user", "content": user_prompt},
+                {"role": "assistant", "content": assistant_reply},
+            ],
+            "metadata": {
+                "source_page": q.get("page"),
+                "question_id": q.get("id"),
+                "has_figure": bool(q.get("has_figure", False)),
+                "confidence": q.get("confidence", 0.0),
+            },
+        }
+
+        lines.append(json.dumps(example, ensure_ascii=False))
+
+    return "\n".join(lines), len(lines)
 
 
 # -----------------------------
@@ -275,12 +390,41 @@ def main():
         "Upload a PDF file", type=["pdf"], accept_multiple_files=False
     )
 
+    api_key_input = st.text_input(
+        "OpenAI API key",  # not persisted
+        type="password",
+        help=(
+            "Required to call the OpenAI API. The OPENAI_API_KEY environment variable "
+            "is used if left blank."
+        ),
+    )
+
+    api_key_input_secondary = st.text_input(
+        "Second OpenAI API key (optional)",
+        type="password",
+        help=(
+            "Use a second key to run two AI engines in parallel. If left blank, the "
+            "primary key will be reused so both engines still run."
+        ),
+    )
+
     show_ocr_text = st.checkbox(
         "Show raw OCR text", value=True, help="Useful for debugging."
     )
 
     if uploaded_file is not None:
         if st.button("Run OCR & Extract Questions", type="primary"):
+            primary_client = build_openai_client(api_key_input)
+            if primary_client is None:
+                return
+
+            secondary_client = (
+                build_openai_client(api_key_input_secondary)
+                if api_key_input_secondary
+                else primary_client
+            )
+            clients = [primary_client, secondary_client]
+            system_prompts = [ENGINE_A_PROMPT, ENGINE_B_PROMPT]
             # Read PDF bytes
             pdf_bytes = uploaded_file.read()
 
@@ -321,12 +465,17 @@ def main():
                         height=400,
                     )
 
-            # Step 4: Show system prompt
-            st.subheader("🧠 System Prompt for Question Extraction")
+            # Step 4: Show system prompts for both engines
+            st.subheader("🧠 System Prompts for Question Extraction (Dual Engines)")
             st.markdown(
-                "This is sent as the **system message** to the OpenAI API along with each page's OCR text."
+                "Two prompts are used in parallel (engine A & engine B). They can share the same API "
+                "key or use separate keys for added throughput."
             )
-            st.code(SYSTEM_PROMPT, language="markdown")
+            tab_a, tab_b = st.tabs(["Engine A", "Engine B"])
+            with tab_a:
+                st.code(ENGINE_A_PROMPT, language="markdown")
+            with tab_b:
+                st.code(ENGINE_B_PROMPT, language="markdown")
 
             st.markdown(
                 """
@@ -336,9 +485,13 @@ are handled more reliably, and each question knows its **page number**.
             )
 
             # Step 5: Page-wise question extraction
-            st.subheader("🤖 Extracting Questions (Page-wise)")
-            with st.spinner("Calling OpenAI page by page to extract structured questions..."):
-                questions = extract_questions_pagewise(page_texts)
+            st.subheader("🤖 Extracting Questions (Page-wise, Dual Engines)")
+            with st.spinner(
+                "Calling OpenAI with two parallel engines to extract structured questions..."
+            ):
+                questions = extract_questions_pagewise(
+                    page_texts, clients=clients, system_prompts=system_prompts
+                )
 
             if not questions:
                 st.warning(
@@ -408,6 +561,29 @@ are handled more reliably, and each question knows its **page number**.
                 df = pd.DataFrame(table_rows)
                 st.markdown("### Table View (All Extracted Questions)")
                 st.dataframe(df, use_container_width=True)
+
+            # High-confidence training dataset (JSONL)
+            st.subheader("📦 Training Dataset (High-Confidence Only)")
+            st.markdown(
+                "Only questions the model marked with very high confidence are exported. "
+                f"Threshold: {HIGH_CONFIDENCE_THRESHOLD:.2f} confidence or higher."
+            )
+            training_jsonl, training_count = build_training_dataset(questions)
+            if training_count:
+                st.success(
+                    f"Prepared {training_count} high-confidence examples for fine-tuning."
+                )
+                st.download_button(
+                    label="⬇️ Download Training Dataset (JSONL)",
+                    data=training_jsonl,
+                    file_name="training_dataset.jsonl",
+                    mime="application/json",
+                )
+            else:
+                st.warning(
+                    "No high-confidence questions were found. Increase OCR quality or lower the "
+                    "confidence threshold in code if appropriate."
+                )
 
             # Optional: Download JSON of all questions
             json_str = json.dumps(questions, ensure_ascii=False, indent=2)
