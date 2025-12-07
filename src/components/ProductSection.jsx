@@ -9,8 +9,8 @@ const ProductSection = () => {
       tagline: 'Best in Class AI SEO Optimizer',
       description: 'Maximize your e-commerce success with AI-powered SEO optimization for Amazon and Flipkart. Boost visibility, drive sales, and dominate the marketplace.',
       icon: ShoppingCart,
-      color: '#667eea',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      color: '#fbbf24',
+      gradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
       features: ['Smart Keyword Optimization', 'Competitor Analysis', 'Real-time Performance Tracking']
     },
     {
@@ -19,8 +19,8 @@ const ProductSection = () => {
       tagline: 'AI-Assisted Legal Documentation',
       description: 'Streamline your legal workflow with intelligent documentation tracking and management. Stay organized, compliant, and efficient with cutting-edge AI assistance.',
       icon: Scale,
-      color: '#f093fb',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      color: '#8b5cf6',
+      gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
       features: ['Document Auto-Classification', 'Compliance Monitoring', 'Intelligent Search & Retrieval']
     },
     {
@@ -29,8 +29,8 @@ const ProductSection = () => {
       tagline: 'AI-Powered Central Hub for HR',
       description: 'Transform your HR and management operations with a unified, intelligent platform. Empower your team, streamline processes, and make data-driven decisions.',
       icon: Users,
-      color: '#4ade80',
-      gradient: 'linear-gradient(135deg, #4ade80 0%, #10b981 100%)',
+      color: '#10b981',
+      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
       features: ['Automated Workflows', 'Performance Analytics', 'Smart Resource Allocation']
     }
   ];

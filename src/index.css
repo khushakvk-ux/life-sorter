@@ -15,7 +15,7 @@
 
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  background-color: #0a0a0a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -58,7 +58,7 @@ button {
 }
 
 button:focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid #fbbf24;
   outline-offset: 2px;
 }
 
@@ -83,12 +83,12 @@ button:focus-visible {
 
 /* Selection styles */
 ::selection {
-  background-color: rgba(102, 126, 234, 0.3);
+  background-color: rgba(245, 158, 11, 0.3);
   color: #ffffff;
 }
 
 ::-moz-selection {
-  background-color: rgba(102, 126, 234, 0.3);
+  background-color: rgba(245, 158, 11, 0.3);
   color: #ffffff;
 }
 
@@ -113,7 +113,7 @@ button:focus-visible {
 
 /* Utility classes */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
