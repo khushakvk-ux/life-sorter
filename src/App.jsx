@@ -11,7 +11,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="logo">
-          <div className="logo-icon">I</div>
+          <img src="/ikshan-logo.png" alt="Ikshan Logo" className="logo-image" />
           <span className="logo-text">Ikshan</span>
         </div>
         <nav className="nav-menu">
