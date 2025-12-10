@@ -8,7 +8,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="logo">
-          <img src="/ikshan-logo.png" alt="Ikshan Logo" className="logo-image" />
+          <img src="/ikshan-logo.svg" alt="Ikshan Logo" className="logo-image" />
           <span className="logo-text">Ikshan</span>
         </div>
       </header>
