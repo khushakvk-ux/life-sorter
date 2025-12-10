@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: 'You are Ikshan AI Assistant, a helpful business intelligence chatbot. You help users understand our products: Shakti (AI SEO optimizer), Samarth (legal documentation manager), and Gati (HR management platform).'
+            content: 'You are Ikshan AI Assistant, a helpful business intelligence chatbot. You help users understand our products: ecommerce optimizer (AI SEO optimizer for e-commerce), Samarth (AI legal documentation manager - coming soon), and Gati (AI HR management platform - coming soon).'
           },
           {
             role: 'user',
