@@ -43,6 +43,7 @@ const ChatBot = () => {
 
     try {
       // Call the Vercel serverless function
+      console.log('Sending message to API...');
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -53,11 +54,22 @@ const ChatBot = () => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from server');
-      }
+      console.log('API response status:', response.status);
 
       const data = await response.json();
+
+      if (!response.ok) {
+        console.error('API error:', data);
+        // Show specific error message from API
+        const errorMessage = {
+          id: messages.length + 2,
+          text: data.message || data.error || 'Failed to get response from server. Please check the console for details.',
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        return;
+      }
 
       const botMessage = {
         id: messages.length + 2,
@@ -73,7 +85,7 @@ const ChatBot = () => {
       // Fallback message if API fails
       const errorMessage = {
         id: messages.length + 2,
-        text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment, or feel free to explore our products: ecommerce optimizer, Samarth, and Gati.",
+        text: `Connection error: ${error.message}. Please check your internet connection and try again.`,
         sender: 'bot',
         timestamp: new Date()
       };
