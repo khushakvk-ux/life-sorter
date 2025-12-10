@@ -39,6 +39,12 @@ const ProductSection = () => {
     }
   ];
 
+  const handleLearnMore = (product) => {
+    if (product.available && product.link) {
+      window.open(product.link, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="product-section">
       <div className="section-header">
@@ -78,7 +84,7 @@ const ProductSection = () => {
                   className={`product-cta ${!product.available ? 'disabled' : ''}`}
                   style={{ background: product.available ? product.gradient : 'rgba(255, 255, 255, 0.05)' }}
                   disabled={!product.available}
-                  onClick={() => product.available && product.link && window.open(product.link, '_blank')}
+                  onClick={() => handleLearnMore(product)}
                 >
                   <span>{product.available ? 'Learn More' : 'Coming Soon'}</span>
                   {product.available && <ArrowRight size={16} />}
