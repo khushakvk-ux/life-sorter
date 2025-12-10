@@ -41,12 +41,9 @@ const ProductSection = () => {
   return (
     <div className="product-section">
       <div className="section-header">
-        <div className="sparkle-icon">
-          <Sparkles size={32} />
-        </div>
-        <h1>Our Premium Products</h1>
+        <h1>Products</h1>
         <p className="section-subtitle">
-          Innovative AI solutions designed to transform your business
+          AI solutions designed to transform your business operations
         </p>
       </div>
 
@@ -57,7 +54,7 @@ const ProductSection = () => {
             <div key={product.id} className="product-card">
               <div className="product-card-inner">
                 <div className="product-icon" style={{ background: product.gradient }}>
-                  <IconComponent size={32} />
+                  <IconComponent size={24} />
                 </div>
 
                 <div className="product-header">
@@ -78,22 +75,20 @@ const ProductSection = () => {
 
                 <button
                   className={`product-cta ${!product.available ? 'disabled' : ''}`}
-                  style={{ background: product.available ? product.gradient : 'rgba(255, 255, 255, 0.1)' }}
+                  style={{ background: product.available ? product.gradient : 'rgba(255, 255, 255, 0.05)' }}
                   disabled={!product.available}
                 >
                   <span>{product.available ? 'Learn More' : 'Coming Soon'}</span>
-                  {product.available && <ArrowRight size={18} />}
+                  {product.available && <ArrowRight size={16} />}
                 </button>
               </div>
-
-              <div className="card-glow" style={{ background: product.gradient }}></div>
             </div>
           );
         })}
       </div>
 
       <div className="section-footer">
-        <p>Empowering businesses with cutting-edge AI technology</p>
+        <p>© 2025 Ikshan. All rights reserved.</p>
       </div>
     </div>
   );

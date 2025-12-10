@@ -7,10 +7,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <div className="logo">
-          <img src="/ikshan-logo.png" alt="Ikshan Logo" className="logo-image" />
-          <span className="logo-text">Ikshan</span>
-        </div>
+        <span className="logo-text">Ikshan</span>
       </header>
 
       <main className="main-content">
