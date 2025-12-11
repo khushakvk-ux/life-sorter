@@ -6,13 +6,15 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm Ikshan AI Assistant. How can I help you today?",
+      text: "Hey, I'm Ikshan's AI copilot. What are you here for today?",
       sender: 'bot',
-      timestamp: new Date()
+      timestamp: new Date(),
+      showButtons: true
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [persona, setPersona] = useState(null); // 'product' or 'contributor'
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -25,6 +27,34 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleButtonClick = (buttonType) => {
+    setPersona(buttonType);
+
+    const buttonText = buttonType === 'product'
+      ? 'Explore Ikshan Products'
+      : 'Contribute an Idea';
+
+    const userMessage = {
+      id: messages.length + 1,
+      text: buttonText,
+      sender: 'user',
+      timestamp: new Date()
+    };
+
+    const botResponse = buttonType === 'product'
+      ? "Great! I'm here to help you understand our products. Which product are you curious about: **Shakti** (SEO optimizer), **Legal Doc Classifier**, **Sales & Support Bot**, or **AnyOCR**?"
+      : "Awesome! I'd love to hear your ideas. What's the biggest bottleneck in your current workflow?";
+
+    const botMessage = {
+      id: messages.length + 2,
+      text: botResponse,
+      sender: 'bot',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage, botMessage]);
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -43,14 +73,15 @@ const ChatBot = () => {
 
     try {
       // Call the Vercel serverless function
-      console.log('Sending message to API...');
+      console.log('Sending message to API...', { persona });
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: currentInput
+          message: currentInput,
+          persona: persona
         })
       });
 
@@ -124,6 +155,22 @@ const ChatBot = () => {
             </div>
             <div className="message-content">
               <div className="message-text">{message.text}</div>
+              {message.showButtons && !persona && (
+                <div className="action-buttons">
+                  <button
+                    className="action-button primary"
+                    onClick={() => handleButtonClick('product')}
+                  >
+                    Explore Ikshan Products
+                  </button>
+                  <button
+                    className="action-button secondary"
+                    onClick={() => handleButtonClick('contributor')}
+                  >
+                    Contribute an Idea
+                  </button>
+                </div>
+              )}
               <div className="message-time">{formatTime(message.timestamp)}</div>
             </div>
           </div>

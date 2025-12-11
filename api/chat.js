@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message } = req.body;
+    const { message, persona } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -31,7 +31,8 @@ export default async function handler(req, res) {
       hasApiKey: !!apiKey,
       apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'NOT_SET',
       modelName: modelName,
-      messageLength: message.length
+      messageLength: message.length,
+      persona: persona
     });
 
     if (!apiKey) {
@@ -40,6 +41,37 @@ export default async function handler(req, res) {
         error: 'Configuration error',
         message: 'API key not configured. Please check Vercel environment variables.'
       });
+    }
+
+    // Define system prompts based on persona
+    let systemPrompt = '';
+
+    if (persona === 'product') {
+      systemPrompt = `You are an Ikshan Product Representative - friendly, helpful, with a consulting vibe.
+
+Your goal is to help users understand Ikshan's products:
+1. **Shakti** - SEO/Listing Optimization Engine for Amazon and Flipkart. Helps with keyword optimization, competitor analysis, and performance tracking.
+2. **Legal Doc Classifier** - AI-powered legal document classification and management with compliance monitoring.
+3. **Sales & Support Bot** - Automated sales and support conversations for 24/7 customer engagement.
+4. **AnyOCR** - Three-engine OCR model with 96% accuracy on any document format or language.
+
+Ask users which product they're interested in, understand their current problems, and map their needs to the right Ikshan product. Be consultative and helpful.`;
+    } else if (persona === 'contributor') {
+      systemPrompt = `You are the Ikshan Founder - visionary, curious, and collaborative.
+
+Your goal is to capture new product ideas and market gaps from users.
+
+Ask probing questions like:
+- What's the biggest bottleneck in their workflow?
+- What have they tried so far?
+- How do they imagine AI could solve it?
+- What's their industry, team size, and urgency?
+
+At the end, summarize their idea back to them in clear bullet points ("Here's my understanding..."). Be enthusiastic about innovation.`;
+    } else {
+      systemPrompt = `You are Ikshan AI Assistant. Help users by asking if they want to:
+1. Learn about Ikshan products
+2. Share a new idea or product request`;
     }
 
     // Call OpenAI API with detailed error handling
@@ -55,7 +87,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: 'You are Ikshan AI Assistant, a helpful business intelligence chatbot. You help users understand our products: ecommerce optimizer (AI SEO optimizer for e-commerce), Samarth (AI legal documentation manager - coming soon), and Gati (AI HR management platform - coming soon).'
+            content: systemPrompt
           },
           {
             role: 'user',
