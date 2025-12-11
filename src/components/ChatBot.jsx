@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import './ChatBot.css';
 
 const ChatBot = () => {
@@ -154,7 +155,13 @@ const ChatBot = () => {
               )}
             </div>
             <div className="message-content">
-              <div className="message-text">{message.text}</div>
+              <div className="message-text">
+                {message.sender === 'bot' ? (
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                ) : (
+                  message.text
+                )}
+              </div>
               {message.showButtons && !persona && (
                 <div className="action-buttons">
                   <button
