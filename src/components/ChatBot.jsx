@@ -160,7 +160,7 @@ const ChatBot = () => {
 
     const botMessage = {
       id: getNextMessageId(),
-      text: `Perfect! Let's dive into ${subDomain}. Choose a starting point or type your challenge:`,
+      text: `Great choice! Tell me about your product idea for ${subDomain}. What problem are you trying to solve?`,
       sender: 'bot',
       timestamp: new Date(),
       showGuidedPrompts: true
@@ -469,17 +469,17 @@ const ChatBot = () => {
               {message.showGuidedPrompts && persona === 'contributor' && (
                 <div className="guided-prompts-section">
                   <div className="guided-prompts">
-                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`I need to automate ${selectedSubDomain} workflows`)}>
-                      🤖 Automate workflows
+                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`I have an idea to automate ${selectedSubDomain} workflows`)}>
+                      🤖 Workflow automation idea
                     </button>
-                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`Help me track and analyze ${selectedSubDomain} metrics`)}>
-                      📊 Track metrics
+                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`I want to build something that tracks ${selectedSubDomain} better`)}>
+                      📊 Tracking solution idea
                     </button>
-                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`Reduce manual effort in ${selectedSubDomain}`)}>
-                      ⚡ Reduce manual work
+                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`I'm thinking of a tool to reduce manual ${selectedSubDomain} work`)}>
+                      ⚡ Efficiency tool idea
                     </button>
-                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`Integrate ${selectedSubDomain} with existing tools`)}>
-                      🔗 Integration needs
+                    <button className="guided-prompt-chip" onClick={() => handleSuggestionClick(`I have an idea for ${selectedSubDomain} integration`)}>
+                      🔗 Integration idea
                     </button>
                   </div>
                   <div className="generate-brief-container">
