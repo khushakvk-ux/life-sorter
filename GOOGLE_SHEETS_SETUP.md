@@ -9,9 +9,11 @@ This guide will help you set up Google Sheets to save user ideas from the "Contr
 3. Name it "Ikshan - User Ideas"
 4. Add the following column headers in Row 1:
    - A1: `Timestamp`
-   - B1: `User Message`
-   - C1: `Bot Response`
-   - D1: `Source`
+   - B1: `Name`
+   - C1: `Email`
+   - D1: `User Message`
+   - E1: `Bot Response`
+   - F1: `Source`
 
 ## Step 2: Create Google Apps Script Webhook
 
@@ -31,6 +33,8 @@ function doPost(e) {
     // Append a new row with the data
     sheet.appendRow([
       data.timestamp,
+      data.userName,
+      data.userEmail,
       data.userMessage,
       data.botResponse,
       data.source
@@ -92,6 +96,7 @@ function doPost(e) {
 
 ## Data Privacy
 
-- The sheet will contain user conversations
+- The sheet will contain user names, emails, and conversations
 - Only users with access to your Google account can view the sheet
 - Consider adding access controls if sharing with team members
+- Ensure you comply with privacy regulations (GDPR, CCPA, etc.) when collecting user data

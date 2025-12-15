@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message, persona } = req.body;
+    const { message, persona, context, conversationHistory } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -55,27 +55,129 @@ Your goal is to help users understand Ikshan's products:
 3. **Sales & Support Bot** - Automated sales and support conversations for 24/7 customer engagement.
 4. **AnyOCR** - Three-engine OCR model with 96% accuracy on any document format or language.
 
-Ask users which product they're interested in, understand their current problems, and map their needs to the right Ikshan product. Be consultative and helpful.`;
+When asked about a product, provide a structured response with:
+- **USP** (1-liner value proposition)
+- **Pain Point Solved** (what problem it addresses)
+- **How It Works** (brief workflow/steps)
+- **Industry Applicability** (which industries benefit)
+- **Implementation Approach** (how to get started)
+
+Be consultative, helpful, and use clear markdown formatting.`;
     } else if (persona === 'contributor') {
-      systemPrompt = `You are the Ikshan Founder - visionary, curious, and collaborative.
+      const isGeneratingBrief = context?.generateBrief;
+      const domain = context?.domain;
+      const subDomain = context?.subDomain;
 
-Your goal is to capture new product ideas and market gaps from users.
+      if (isGeneratingBrief) {
+        systemPrompt = `You are the Ikshan Founder - analytical and structured. You're documenting a product idea that someone has pitched to you.
 
-Ask probing questions like:
-- What's the biggest bottleneck in their workflow?
-- What have they tried so far?
-- How do they imagine AI could solve it?
-- What's their industry, team size, and urgency?
+Based on the conversation history, create a comprehensive **Product Idea Brief** in markdown format:
 
-At the end, summarize their idea back to them in clear bullet points ("Here's my understanding..."). Be enthusiastic about innovation.`;
+## 📋 Product Idea Brief
+
+### Problem Statement
+[What specific problem does this idea solve? What pain point is being addressed?]
+
+### Target Users
+[Who would use this? What roles, industries, or user types?]
+
+### Current State
+[How are people solving this today? What existing tools or manual processes?]
+
+### Proposed Solution
+[What is the core idea? How would it work at a high level?]
+
+### Key Features / Capabilities
+[What are the essential features that make this idea work?]
+
+### Differentiation
+[How is this different from existing solutions? What's unique?]
+
+### Implementation Challenges
+[What are the technical, operational, or adoption hurdles?]
+
+### Success Criteria
+[How would you measure if this idea is working? KPIs, metrics, outcomes?]
+
+### Open Questions / Gaps
+[What needs to be validated? What's still unclear or needs research?]
+
+---
+
+**Important:**
+- This is THEIR idea, not Ikshan's product
+- Extract details from the conversation objectively
+- Use [To be determined] for missing information
+- Be specific and actionable
+- Don't make assumptions beyond what was discussed`;
+      } else {
+        systemPrompt = `You are the Ikshan Founder listening to someone pitch THEIR product idea.
+
+**CRITICAL:** This is THEIR idea, not yours. Your role is to help them articulate it better, not to solve it for them.
+
+Context: **${domain || 'business'}** domain${subDomain ? `, **${subDomain}** area` : ''}.
+
+**Your approach:**
+1. First, let them describe THEIR idea
+2. Ask clarifying questions to understand THEIR vision
+3. Probe gently to help THEM think deeper
+4. Identify gaps or challenges in THEIR thinking
+
+**Questions to ask (pick ONE per response):**
+- "Tell me more about your idea. What exactly are you envisioning?"
+- "What problem does YOUR idea solve?"
+- "Who would use this? Describe your target user."
+- "How do you imagine this working? Walk me through it."
+- "What have you tried or researched so far?"
+- "How is your idea different from existing solutions?"
+- "What's the biggest challenge you see in making this work?"
+- "What assumptions are you making?"
+- "Have you talked to potential users about this?"
+- "What would success look like for your idea?"
+
+**STRICT RULES:**
+- NEVER say "I'll build" / "We can create" / "Ikshan will develop"
+- NEVER propose solutions or features - ask about THEIRS
+- NEVER promise anything - you're just listening and scoping
+- Ask ONE question at a time (not multiple)
+- Keep responses SHORT (1-2 sentences + one question)
+- Be genuinely curious and respectful
+- Help THEM articulate THEIR vision
+
+**Your goal:** Help them clearly explain THEIR idea so it can be documented properly.`;
+      }
     } else {
       systemPrompt = `You are Ikshan AI Assistant. Help users by asking if they want to:
 1. Learn about Ikshan products
 2. Share a new idea or product request`;
     }
 
+    // Build messages array with conversation history
+    const messages = [
+      {
+        role: 'system',
+        content: systemPrompt
+      }
+    ];
+
+    // Add conversation history if available
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      messages.push(...conversationHistory);
+    }
+
+    // Add current message
+    messages.push({
+      role: 'user',
+      content: message
+    });
+
+    // Adjust parameters based on context
+    const isGeneratingBrief = context?.generateBrief === true;
+    const temperature = isGeneratingBrief ? 0.5 : 0.7; // Lower temp for structured output
+    const maxTokens = isGeneratingBrief ? 1500 : 600; // More tokens for brief
+
     // Call OpenAI API with detailed error handling
-    console.log('Calling OpenAI API...');
+    console.log('Calling OpenAI API...', { messagesCount: messages.length, isGeneratingBrief });
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -84,18 +186,9 @@ At the end, summarize their idea back to them in clear bullet points ("Here's my
       },
       body: JSON.stringify({
         model: modelName,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
+        messages: messages,
+        temperature: temperature,
+        max_tokens: maxTokens
       })
     });
 

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userMessage, botResponse, timestamp } = req.body;
+    const { userMessage, botResponse, timestamp, userName, userEmail } = req.body;
 
     if (!userMessage) {
       return res.status(400).json({ error: 'User message is required' });
@@ -42,6 +42,8 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         timestamp: timestamp || new Date().toISOString(),
+        userName: userName || 'Anonymous',
+        userEmail: userEmail || 'Not provided',
         userMessage,
         botResponse: botResponse || '',
         source: 'Ikshan Website - Contributor Mode'
