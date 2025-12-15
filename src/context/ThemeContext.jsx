@@ -12,18 +12,13 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check localStorage first
+    // Check localStorage first - respect user's previous choice
     const savedTheme = localStorage.getItem('ikshan-theme');
     if (savedTheme) {
       return savedTheme;
     }
 
-    // Then check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light';
-    }
-
-    // Default to dark
+    // Default to dark theme
     return 'dark';
   });
 
