@@ -11,9 +11,12 @@ This guide will help you set up Google Sheets to save user ideas from the "Contr
    - A1: `Timestamp`
    - B1: `Name`
    - C1: `Email`
-   - D1: `User Message`
-   - E1: `Bot Response`
-   - F1: `Source`
+   - D1: `Domain`
+   - E1: `Sub-domain`
+   - F1: `Requirement`
+   - G1: `User Message`
+   - H1: `Bot Response`
+   - I1: `Source`
 
 ## Step 2: Create Google Apps Script Webhook
 
@@ -35,6 +38,9 @@ function doPost(e) {
       data.timestamp,
       data.userName,
       data.userEmail,
+      data.domain,
+      data.subdomain,
+      data.requirement,
       data.userMessage,
       data.botResponse,
       data.source
