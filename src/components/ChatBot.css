@@ -988,3 +988,61 @@
     padding: 0.9rem;
   }
 }
+
+/* Voice Button */
+.voice-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.voice-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.voice-button:active {
+  transform: scale(0.95);
+}
+
+.voice-button.recording {
+  background: #ef4444;
+  color: #ffffff;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Mobile voice button */
+@media (max-width: 480px) {
+  .voice-button {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.4rem;
+  }
+
+  .voice-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}

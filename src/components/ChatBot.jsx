@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBot.css';
 
@@ -85,9 +85,12 @@ const ChatBot = () => {
   const [userName, setUserName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [flowStage, setFlowStage] = useState('domain'); // 'domain' | 'subdomain' | 'requirement' | 'identity' | 'complete'
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const messageIdCounter = useRef(1);
+  const recognitionRef = useRef(null);
 
   const domains = [
     { id: 'sales', name: 'Sales', emoji: '📈' },
@@ -134,6 +137,52 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initialize voice recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInputValue(transcript);
+        setIsRecording(false);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+      setVoiceSupported(true);
+    }
+  }, []);
+
+  const toggleVoiceRecording = () => {
+    if (!recognitionRef.current) return;
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
+    }
+  };
 
   const handleDomainClick = (domain) => {
     setSelectedDomain(domain);
@@ -393,10 +442,20 @@ const ChatBot = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message here..."
+            placeholder={isRecording ? "Listening..." : "Type your message here..."}
             className="message-input"
             rows="1"
           />
+          {voiceSupported && flowStage === 'requirement' && (
+            <button
+              onClick={toggleVoiceRecording}
+              className={`voice-button ${isRecording ? 'recording' : ''}`}
+              aria-label={isRecording ? "Stop recording" : "Start voice input"}
+              title={isRecording ? "Stop recording" : "Click to speak"}
+            >
+              {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+          )}
           <button
             onClick={handleSend}
             disabled={!inputValue.trim()}
