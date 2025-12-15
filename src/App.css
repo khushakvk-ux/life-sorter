@@ -175,7 +175,7 @@
   position: relative;
   animation: fadeIn 0.8s ease-out;
   transition: background 0.3s ease;
-  background-image: url('/texture.png');
+  background-image: url('/texture-753521.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -186,7 +186,7 @@
 :root[data-theme="dark"] .hero-chat-section {
   background:
     linear-gradient(135deg, rgba(10, 10, 10, 0.85) 0%, rgba(26, 26, 46, 0.85) 100%),
-    url('/texture.png');
+    url('/texture-753521.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -197,7 +197,7 @@
 :root[data-theme="blue"] .hero-chat-section {
   background:
     linear-gradient(135deg, rgba(10, 15, 26, 0.85) 0%, rgba(26, 35, 50, 0.85) 100%),
-    url('/texture.png');
+    url('/texture-753521.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -208,7 +208,7 @@
 :root[data-theme="green"] .hero-chat-section {
   background:
     linear-gradient(135deg, rgba(10, 20, 15, 0.85) 0%, rgba(21, 40, 32, 0.85) 100%),
-    url('/texture.png');
+    url('/texture-753521.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
