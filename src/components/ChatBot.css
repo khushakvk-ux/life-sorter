@@ -38,10 +38,10 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem 0 1.5rem 0; /* Reduced top padding to minimize space */
+  padding: 1rem 0 1.5rem 0; /* Add breathing room at top */
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1.25rem; /* Add space between messages */
   min-height: 0; /* Allow flex to control height */
 }
 
@@ -64,8 +64,8 @@
 
 .message {
   display: flex;
-  gap: 1rem; /* Reduced gap */
-  padding: 1rem 1.5rem; /* Reduced padding for less chunky feel */
+  gap: 1rem;
+  padding: 1.5rem 1.5rem; /* Increased vertical padding for breathing room */
   animation: slideIn 0.3s ease-out;
 }
 
@@ -129,8 +129,8 @@
 }
 
 .message-text {
-  font-size: 14px; /* Smaller, more professional */
-  line-height: 1.6; /* Tighter line height */
+  font-size: 14px;
+  line-height: 1.8; /* More spacious line height for readability */
   color: rgba(255, 255, 255, 0.88);
   word-wrap: break-word;
   font-weight: 400;
@@ -163,8 +163,8 @@
 }
 
 .message-text p {
-  margin: 0.75rem 0;
-  line-height: 1.7;
+  margin: 0.85rem 0;
+  line-height: 1.85;
 }
 
 .message-text p:first-child {
