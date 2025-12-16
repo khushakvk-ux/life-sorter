@@ -74,7 +74,8 @@ const ChatBot = () => {
       id: 1,
       text: "✨ Welcome to Ikshan! 😊\n\nI'll help you find the right AI tools, step by step.\n\nJust pick your domain 🚀 and we'll take it from there.",
       sender: 'bot',
-      timestamp: new Date()
+      timestamp: new Date(),
+      showQuickReplies: true
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -102,6 +103,12 @@ const ChatBot = () => {
     { id: 'supply-chain', name: 'Supply chain', emoji: '🚚' },
     { id: 'research', name: 'Research', emoji: '🔬' },
     { id: 'data-analysis', name: 'Data Analysis', emoji: '📊' }
+  ];
+
+  const quickReplies = [
+    { id: 'about', text: 'What does Ikshan do?', icon: '💡' },
+    { id: 'tools', text: 'Show me AI tools', icon: '🤖' },
+    { id: 'custom', text: 'I have a custom idea', icon: '💭' }
   ];
 
   const subDomains = {
@@ -245,6 +252,55 @@ const ChatBot = () => {
       } catch (error) {
         console.error('Error starting recognition:', error);
       }
+    }
+  };
+
+  const handleQuickReply = async (replyId, replyText) => {
+    // Add user message
+    const userMessage = {
+      id: getNextMessageId(),
+      text: replyText,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    setIsTyping(true);
+
+    // Handle different quick reply actions
+    if (replyId === 'about') {
+      setTimeout(() => {
+        const botMessage = {
+          id: getNextMessageId(),
+          text: "Ikshan empowers startups and small businesses with **best-in-class AI tools** that eliminate barriers. 🚀\n\n✅ We offer AI solutions like SEO Optimizer and AnyOCR\n✅ If we don't have what you need, we'll connect you to the right tool\n✅ If it doesn't exist, we'll help you build it\n\n**Our philosophy:** Come to Ikshan, get a solution - no matter what. 💙\n\nReady to explore? Pick a domain below!",
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsTyping(false);
+      }, 1000);
+    } else if (replyId === 'tools') {
+      setTimeout(() => {
+        const botMessage = {
+          id: getNextMessageId(),
+          text: "Great! I'll help you discover the perfect AI tools for your needs. 🎯\n\nFirst, let's understand what area you're working in. Pick a domain from the options below:",
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsTyping(false);
+      }, 1000);
+    } else if (replyId === 'custom') {
+      setTimeout(() => {
+        const botMessage = {
+          id: getNextMessageId(),
+          text: "Awesome! Custom solutions are our specialty. 💡\n\nTo understand your vision better, let's start by picking the domain that matches your idea:",
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsTyping(false);
+      }, 1000);
     }
   };
 
@@ -658,6 +714,20 @@ const ChatBot = () => {
                   message.text
                 )}
               </div>
+              {message.showQuickReplies && flowStage === 'domain' && (
+                <div className="quick-replies">
+                  {quickReplies.map((reply) => (
+                    <button
+                      key={reply.id}
+                      className="quick-reply-button"
+                      onClick={() => handleQuickReply(reply.id, reply.text)}
+                    >
+                      <span className="quick-reply-icon">{reply.icon}</span>
+                      <span className="quick-reply-text">{reply.text}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {message.showIdentityForm && (
                 <IdentityForm onSubmit={handleIdentitySubmit} />
               )}
