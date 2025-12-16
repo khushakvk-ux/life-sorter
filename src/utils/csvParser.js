@@ -73,10 +73,10 @@ export function searchCompanies(companies, query) {
 }
 
 /**
- * Filters companies by domain and subdomain keywords
- * @param {Array} companies - Array of all companies
- * @param {string} domain - Selected domain
- * @param {string} subdomain - Selected subdomain
+ * Filters companies by subdomain keywords (domain filtering done via sheet selection)
+ * @param {Array} companies - Array of companies from domain-specific sheet
+ * @param {string} domain - Selected domain (not used for filtering since sheet is domain-specific)
+ * @param {string} subdomain - Selected subdomain for optional filtering
  * @returns {Array} Filtered companies
  */
 export function filterCompaniesByDomain(companies, domain, subdomain) {
@@ -84,23 +84,17 @@ export function filterCompaniesByDomain(companies, domain, subdomain) {
     return [];
   }
 
-  // Domain keyword mappings - expanded for better matching
-  const domainKeywords = {
-    'marketing': ['marketing', 'seo', 'content', 'ads', 'advertising', 'campaign', 'brand', 'email', 'outreach', 'lead gen', 'demand'],
-    'sales-support': ['sales', 'crm', 'support', 'customer service', 'lead', 'conversion', 'sdr', 'outbound', 'inbound', 'ticket', 'helpdesk'],
-    'social-media': ['social', 'instagram', 'linkedin', 'twitter', 'video', 'influencer', 'creator', 'content', 'scheduling', 'post', 'engagement'],
-    'legal': ['legal', 'contract', 'compliance', 'law', 'litigation', 'attorney', 'lawyer', 'document', 'clause'],
-    'hr-hiring': ['hr', 'hiring', 'recruit', 'talent', 'interview', 'onboarding', 'employee', 'candidate', 'resume', 'job'],
-    'finance': ['finance', 'accounting', 'invoice', 'expense', 'budget', 'cfo', 'bookkeeping', 'payment', 'billing', 'tax'],
-    'supply-chain': ['supply', 'logistics', 'inventory', 'shipping', 'procurement', 'warehouse', 'fulfillment', 'order', 'delivery'],
-    'research': ['research', 'competitor', 'market', 'intelligence', 'insight', 'trend', 'analysis', 'monitor'],
-    'data-analysis': ['data', 'analytics', 'dashboard', 'reporting', 'forecast', 'bi', 'visualization', 'metrics', 'kpi']
-  };
+  // Since we fetch from domain-specific sheets, all companies are already relevant
+  // Only filter by subdomain if specified and not "others"
+  if (!subdomain || subdomain === 'others') {
+    return companies; // Return all companies from the domain sheet
+  }
 
-  const keywords = domainKeywords[domain] || [domain?.toLowerCase()];
-  const subdomainLower = subdomain?.toLowerCase() || '';
+  const subdomainLower = subdomain.toLowerCase();
+  const subdomainTerms = subdomainLower.split(/\s+/).filter(t => t.length > 2);
 
-  const results = companies.filter(company => {
+  // If subdomain specified, try to find matches but fall back to all if none found
+  const filtered = companies.filter(company => {
     const searchText = [
       company.problem,
       company.description,
@@ -109,20 +103,11 @@ export function filterCompaniesByDomain(companies, domain, subdomain) {
       company.name
     ].join(' ').toLowerCase();
 
-    // Check domain match
-    const domainMatch = keywords.some(kw => searchText.includes(kw));
-
-    // Check subdomain match if provided
-    if (subdomain && subdomain !== 'others') {
-      const subdomainTerms = subdomainLower.split(/\s+/).filter(t => t.length > 2);
-      const subdomainMatch = subdomainTerms.some(term => searchText.includes(term));
-      return domainMatch || subdomainMatch; // Match either domain OR subdomain for broader results
-    }
-
-    return domainMatch;
+    return subdomainTerms.some(term => searchText.includes(term));
   });
 
-  return results;
+  // If no subdomain matches found, return all companies from domain
+  return filtered.length > 0 ? filtered : companies;
 }
 
 /**
