@@ -9,6 +9,7 @@
   background: transparent;
   position: relative;
   z-index: 1;
+  overflow: hidden; /* Prevent double scrollbar */
   font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px; /* Base font size for professional look */
 }
