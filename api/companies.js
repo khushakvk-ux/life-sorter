@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     const { domain } = req.query;
 
     // Get sheet name for this domain
-    const sheetName = DOMAIN_TO_SHEET[domain] || 'Social Media'; // Default to Social Media
+    const sheetName = DOMAIN_TO_SHEET[domain] || 'Social media'; // Default to Social media
 
     // URL to fetch specific sheet by name
     const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
@@ -85,11 +85,21 @@ export default async function handler(req, res) {
       .filter(c => c.name && c.name.trim()); // Filter out empty rows
 
     console.log('Parsed companies:', companies.length);
+    console.log('First company:', companies[0]);
+    console.log('Raw headers:', parsed.meta?.fields);
 
     return res.status(200).json({
       success: true,
       count: companies.length,
-      companies: companies
+      companies: companies,
+      debug: {
+        sheetName,
+        domain,
+        csvLength: csvText.length,
+        csvPreview: csvText.substring(0, 500),
+        headers: parsed.meta?.fields,
+        rawRowCount: parsed.data?.length
+      }
     });
 
   } catch (error) {
