@@ -374,27 +374,99 @@ const ChatBot = () => {
 
     // Handle domain stage - user typed instead of clicking
     if (flowStage === 'domain') {
-      const botMessage = {
-        id: getNextMessageId(),
-        text: `I'd love to help! To get started, please select a business domain from the options above that best matches your needs.`,
-        sender: 'bot',
-        timestamp: new Date()
-      };
+      setIsTyping(true);
 
-      setMessages(prev => [...prev, botMessage]);
+      try {
+        // Call AI to answer their question
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: currentInput,
+            persona: 'assistant',
+            context: { isRedirecting: true }
+          })
+        });
+
+        const data = await response.json();
+        const aiAnswer = data.message || "I'm here to help!";
+
+        // Combine AI answer with redirect message
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `${aiAnswer}\n\nNow, to help you find the right business solution, please select a domain from the options above that matches your needs.`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, botMessage]);
+      } catch (error) {
+        console.error('Error calling AI:', error);
+
+        // Fallback if AI fails
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `I'd love to help! To get started, please select a business domain from the options above that best matches your needs.`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, botMessage]);
+      } finally {
+        setIsTyping(false);
+      }
+
       return;
     }
 
     // Handle subdomain stage - user typed instead of clicking
     if (flowStage === 'subdomain') {
-      const botMessage = {
-        id: getNextMessageId(),
-        text: `Great! Now please choose a specific area from the options above that you'd like to focus on.`,
-        sender: 'bot',
-        timestamp: new Date()
-      };
+      setIsTyping(true);
 
-      setMessages(prev => [...prev, botMessage]);
+      try {
+        // Call AI to answer their question
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: currentInput,
+            persona: 'assistant',
+            context: { isRedirecting: true, domain: selectedDomain?.name }
+          })
+        });
+
+        const data = await response.json();
+        const aiAnswer = data.message || "Great question!";
+
+        // Combine AI answer with redirect message
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `${aiAnswer}\n\nNow, please choose a specific area from the options above that you'd like to focus on in ${selectedDomain?.name}.`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, botMessage]);
+      } catch (error) {
+        console.error('Error calling AI:', error);
+
+        // Fallback if AI fails
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Great! Now please choose a specific area from the options above that you'd like to focus on.`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, botMessage]);
+      } finally {
+        setIsTyping(false);
+      }
+
       return;
     }
 

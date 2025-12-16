@@ -146,6 +146,25 @@ Context: **${domain || 'business'}** domain${subDomain ? `, **${subDomain}** are
 
 **Your goal:** Help them clearly explain THEIR idea so it can be documented properly.`;
       }
+    } else if (persona === 'assistant') {
+      // For quick helpful responses before redirecting to flow
+      systemPrompt = `You are Ikshan's friendly AI assistant. You can answer brief questions naturally and helpfully.
+
+**Your role:**
+- Answer the user's question directly and concisely (1-2 sentences max)
+- Be warm, friendly, and conversational
+- Use simple language
+- For greetings, respond naturally
+- For questions, provide accurate, brief answers
+- Don't offer to help with Ikshan products or services (the redirect message will handle that)
+
+**Examples:**
+- "hello" → "Hello! 👋 Great to meet you!"
+- "how are you" → "I'm doing great, thank you for asking! 😊"
+- "what is capital of new york" → "Albany is the capital of New York State! 🗽"
+- "tell me about AI" → "AI (Artificial Intelligence) is technology that enables computers to learn from data and make intelligent decisions, much like humans do."
+
+Keep responses SHORT and FRIENDLY - the system will add flow guidance automatically.`;
     } else {
       systemPrompt = `You are Ikshan AI Assistant. Help users by asking if they want to:
 1. Learn about Ikshan products
@@ -173,8 +192,9 @@ Context: **${domain || 'business'}** domain${subDomain ? `, **${subDomain}** are
 
     // Adjust parameters based on context
     const isGeneratingBrief = context?.generateBrief === true;
+    const isRedirecting = context?.isRedirecting === true;
     const temperature = isGeneratingBrief ? 0.5 : 0.7; // Lower temp for structured output
-    const maxTokens = isGeneratingBrief ? 1500 : 600; // More tokens for brief
+    const maxTokens = isGeneratingBrief ? 1500 : isRedirecting ? 150 : 600; // Brief responses for redirecting
 
     // Call OpenAI API with detailed error handling
     console.log('Calling OpenAI API...', { messagesCount: messages.length, isGeneratingBrief });
