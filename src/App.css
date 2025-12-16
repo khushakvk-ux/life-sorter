@@ -277,13 +277,38 @@
   font-size: 0.9rem;
 }
 
+/* Large Desktop */
+@media (max-width: 1200px) {
+  .app-header {
+    padding: 1rem 2.5rem;
+  }
+
+  .hero-chat-section {
+    padding: 3.5rem 3rem;
+  }
+}
+
+/* Desktop/Laptop */
 @media (max-width: 1024px) {
+  .app-header {
+    padding: 1rem 2rem;
+  }
+
   .hero-chat-section {
     padding: 3rem 2rem;
     min-height: 80vh;
   }
+
+  .logo-text {
+    font-size: 1.4rem;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+  }
 }
 
+/* Tablet */
 @media (max-width: 768px) {
   .nav-menu {
     display: none;
@@ -298,35 +323,163 @@
   }
 
   .app-header {
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1.5rem;
   }
 
   .hero-chat-section {
     padding: 2rem 1.5rem;
     min-height: 70vh;
+    background-attachment: scroll; /* Better performance on mobile */
+  }
+
+  :root[data-theme="dark"] .hero-chat-section,
+  :root[data-theme="blue"] .hero-chat-section,
+  :root[data-theme="green"] .hero-chat-section {
+    background-attachment: scroll;
   }
 
   .app-footer {
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
   }
 
   .logo-text {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   .logo-image {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .mobile-nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 0;
   }
 }
 
+/* Mobile - Large */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0.85rem 1.25rem;
+  }
+
+  .hero-chat-section {
+    padding: 1.75rem 1.25rem;
+    min-height: 65vh;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .logo-image {
+    width: 32px;
+    height: 32px;
+  }
+
+  .app-footer {
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* Mobile - Standard */
 @media (max-width: 480px) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+
   .hero-chat-section {
     padding: 1.5rem 1rem;
     min-height: 60vh;
   }
 
+  .logo-text {
+    font-size: 1.2rem;
+  }
+
+  .logo-image {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-footer {
+    padding: 1rem;
+  }
+
   .app-footer p {
     font-size: 0.8rem;
+  }
+
+  .mobile-nav-link {
+    font-size: 0.95rem;
+  }
+
+  .mobile-menu {
+    padding: 0.9rem 1rem;
+  }
+}
+
+/* Mobile - Small */
+@media (max-width: 375px) {
+  .app-header {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .hero-chat-section {
+    padding: 1.25rem 0.85rem;
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
+  }
+
+  .logo-image {
+    width: 28px;
+    height: 28px;
+  }
+
+  .app-footer p {
+    font-size: 0.75rem;
+  }
+}
+
+/* Mobile - Extra Small */
+@media (max-width: 320px) {
+  .app-header {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .hero-chat-section {
+    padding: 1rem 0.75rem;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+
+  .logo-image {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Landscape Mode for Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-chat-section {
+    min-height: 85vh;
+    padding: 1.5rem 2rem;
+  }
+
+  .app-header {
+    padding: 0.6rem 1.5rem;
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
+  }
+
+  .logo-image {
+    width: 28px;
+    height: 28px;
   }
 }
