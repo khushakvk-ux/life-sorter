@@ -72,7 +72,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hey, I'm Ikshan's AI Copilot. What are you here for today?\n\nLet's capture your idea! Choose a domain from the options below, or feel free to ask me anything:",
+      text: "✨ Welcome to Ikshan! 😊\n\nI'll help you find the right AI tools, step by step.\n\nJust pick your domain 🚀 and we'll take it from there.",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -726,36 +726,30 @@ const ChatBot = () => {
       {(flowStage === 'domain' || flowStage === 'subdomain') && (
         <div className="persistent-button-bar">
           {flowStage === 'domain' && (
-            <div className="button-bar-content">
-              <div className="button-bar-label">Select a domain:</div>
-              <div className="domain-chips">
-                {domains.map((domain) => (
-                  <button
-                    key={domain.id}
-                    className="domain-chip"
-                    onClick={() => handleDomainClick(domain)}
-                  >
-                    <span className="domain-emoji">{domain.emoji}</span>
-                    <span className="domain-name">{domain.name}</span>
-                  </button>
-                ))}
-              </div>
+            <div className="domain-chips">
+              {domains.map((domain) => (
+                <button
+                  key={domain.id}
+                  className="domain-chip"
+                  onClick={() => handleDomainClick(domain)}
+                >
+                  <span className="domain-emoji">{domain.emoji}</span>
+                  <span className="domain-name">{domain.name}</span>
+                </button>
+              ))}
             </div>
           )}
           {flowStage === 'subdomain' && selectedDomain && (
-            <div className="button-bar-content">
-              <div className="button-bar-label">Select a subdomain in {selectedDomain.name}:</div>
-              <div className="subdomain-chips">
-                {subDomains[selectedDomain.id]?.map((subDomain, index) => (
-                  <button
-                    key={index}
-                    className="subdomain-chip"
-                    onClick={() => handleSubDomainClick(subDomain)}
-                  >
-                    {subDomain}
-                  </button>
-                ))}
-              </div>
+            <div className="subdomain-chips">
+              {subDomains[selectedDomain.id]?.map((subDomain, index) => (
+                <button
+                  key={index}
+                  className="subdomain-chip"
+                  onClick={() => handleSubDomainClick(subDomain)}
+                >
+                  {subDomain}
+                </button>
+              ))}
             </div>
           )}
         </div>
