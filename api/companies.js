@@ -6,14 +6,14 @@ const SHEET_ID = '1JKx3RwPbUL2-r5l8ayDUQfKU3kiIEg-FkFym3yJCNiw';
 // Map domain IDs to actual sheet tab names in Google Sheets
 const DOMAIN_TO_SHEET = {
   'marketing': 'Marketing',
-  'sales-support': 'Sales & Support',
-  'social-media': 'Social Media',
+  'sales-support': 'sales and support',
+  'social-media': 'Social media',
   'legal': 'Legal',
-  'hr-hiring': 'HR & Hiring',
+  'hr-hiring': 'HR',
   'finance': 'Finance',
-  'supply-chain': 'Supply Chain',
+  'supply-chain': 'Supply chain',
   'research': 'Research',
-  'data-analysis': 'Data Analysis'
+  'data-analysis': 'Data'
 };
 
 export default async function handler(req, res) {
