@@ -372,6 +372,32 @@ const ChatBot = () => {
     const currentInput = inputValue;
     setInputValue('');
 
+    // Handle domain stage - user typed instead of clicking
+    if (flowStage === 'domain') {
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `I'd love to help! To get started, please select a business domain from the options above that best matches your needs.`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      return;
+    }
+
+    // Handle subdomain stage - user typed instead of clicking
+    if (flowStage === 'subdomain') {
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Great! Now please choose a specific area from the options above that you'd like to focus on.`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      return;
+    }
+
     // Handle requirement text input
     if (flowStage === 'requirement') {
       setRequirement(currentInput);
@@ -397,6 +423,19 @@ const ChatBot = () => {
       const botMessage = {
         id: getNextMessageId(),
         text: `Please use the form above to enter your name and email.`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      return;
+    }
+
+    // If conversation is complete
+    if (flowStage === 'complete') {
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Thank you for your interest! Our team will review your requirements and get back to you soon. If you'd like to start a new conversation, please click "Start Another Idea" above.`,
         sender: 'bot',
         timestamp: new Date()
       };
