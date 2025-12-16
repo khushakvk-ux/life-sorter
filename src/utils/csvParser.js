@@ -1,10 +1,16 @@
 /**
  * Fetches company data from backend API (which fetches from Google Sheet)
+ * @param {string} domain - Domain ID to fetch the correct sheet tab
  * @returns {Promise<Array>} Array of company objects
  */
-export async function fetchCompaniesCSV() {
+export async function fetchCompaniesCSV(domain) {
   try {
-    const response = await fetch('/api/companies');
+    const url = domain
+      ? `/api/companies?domain=${encodeURIComponent(domain)}`
+      : '/api/companies';
+
+    console.log('Fetching companies for domain:', domain);
+    const response = await fetch(url);
 
     if (!response.ok) {
       console.error('Failed to fetch companies:', response.status);
@@ -18,7 +24,7 @@ export async function fetchCompaniesCSV() {
       return [];
     }
 
-    console.log('Fetched companies:', data.count);
+    console.log('Fetched companies:', data.count, 'for domain:', domain);
     return data.companies || [];
 
   } catch (error) {

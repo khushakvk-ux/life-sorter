@@ -2,7 +2,19 @@
 import Papa from 'papaparse';
 
 const SHEET_ID = '1JKx3RwPbUL2-r5l8ayDUQfKU3kiIEg-FkFym3yJCNiw';
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+
+// Map domain IDs to actual sheet tab names in Google Sheets
+const DOMAIN_TO_SHEET = {
+  'marketing': 'Marketing',
+  'sales-support': 'Sales & Support',
+  'social-media': 'Social Media',
+  'legal': 'Legal',
+  'hr-hiring': 'HR & Hiring',
+  'finance': 'Finance',
+  'supply-chain': 'Supply Chain',
+  'research': 'Research',
+  'data-analysis': 'Data Analysis'
+};
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -20,7 +32,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Fetching Google Sheet from:', SHEET_CSV_URL);
+    // Get domain from query parameter
+    const { domain } = req.query;
+
+    // Get sheet name for this domain
+    const sheetName = DOMAIN_TO_SHEET[domain] || 'Social Media'; // Default to Social Media
+
+    // URL to fetch specific sheet by name
+    const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+
+    console.log('Fetching sheet:', sheetName, 'for domain:', domain);
+    console.log('URL:', SHEET_CSV_URL);
 
     const response = await fetch(SHEET_CSV_URL);
 

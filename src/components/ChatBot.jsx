@@ -400,8 +400,8 @@ const ChatBot = () => {
     // Generate final output with real market data
     setTimeout(async () => {
       try {
-        // Fetch and analyze companies from CSV
-        const allCompanies = await fetchCompaniesCSV();
+        // Fetch companies from the correct sheet tab based on domain
+        const allCompanies = await fetchCompaniesCSV(selectedDomain?.id);
         const relevantCompanies = filterCompaniesByDomain(
           allCompanies,
           selectedDomain?.id,
