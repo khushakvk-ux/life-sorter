@@ -93,35 +93,99 @@ const ChatBot = () => {
   const recognitionRef = useRef(null);
 
   const domains = [
-    { id: 'sales', name: 'Sales', emoji: '📈' },
     { id: 'marketing', name: 'Marketing', emoji: '📢' },
-    { id: 'hr', name: 'HR / Talent', emoji: '👥' },
-    { id: 'finance', name: 'Finance', emoji: '💰' },
+    { id: 'sales-support', name: 'Sales and Customer Support', emoji: '📈' },
+    { id: 'social-media', name: 'Social Media', emoji: '📱' },
     { id: 'legal', name: 'Legal', emoji: '⚖️' },
-    { id: 'research', name: 'Research & Market Intelligence', emoji: '🔬' },
-    { id: 'social', name: 'Social Media', emoji: '📱' },
-    { id: 'youtube', name: 'YouTube', emoji: '🎥' },
-    { id: 'analytics', name: 'Data Analytics', emoji: '📊' },
-    { id: 'supply', name: 'Supply Chain', emoji: '🚚' },
-    { id: 'support', name: 'User Support', emoji: '💬' },
-    { id: 'ops', name: 'Ops / CX', emoji: '⚙️' },
-    { id: 'other', name: 'Other', emoji: '💡' }
+    { id: 'hr-hiring', name: 'HR and talent Hiring', emoji: '👥' },
+    { id: 'finance', name: 'Finance', emoji: '💰' },
+    { id: 'supply-chain', name: 'Supply chain', emoji: '🚚' },
+    { id: 'research', name: 'Research', emoji: '🔬' },
+    { id: 'data-analysis', name: 'Data Analysis', emoji: '📊' }
   ];
 
   const subDomains = {
-    sales: ['Lead Generation', 'CRM Management', 'Outreach Automation', 'Sales Forecasting', 'Pipeline Management'],
-    marketing: ['Content Creation', 'Campaign Management', 'Marketing Analytics', 'SEO Optimization', 'Email Marketing'],
-    hr: ['Recruitment', 'Onboarding', 'Performance Management', 'Training & Development', 'Employee Engagement'],
-    finance: ['Invoicing', 'Expense Tracking', 'Financial Reporting', 'Budget Forecasting', 'Compliance Management'],
-    legal: ['Contract Management', 'Legal Compliance', 'Document Review', 'Legal Research', 'Case Management'],
-    research: ['Market Research', 'Competitive Analysis', 'Data Collection', 'Consumer Insights', 'Trend Analysis'],
-    social: ['Content Scheduling', 'Engagement Tracking', 'Analytics & Reporting', 'Community Management', 'Influencer Outreach'],
-    youtube: ['Video SEO', 'Content Planning', 'Analytics & Insights', 'Audience Growth', 'Monetization'],
-    analytics: ['Data Visualization', 'Predictive Analytics', 'Business Intelligence', 'KPI Tracking', 'Custom Reports'],
-    supply: ['Inventory Management', 'Logistics Optimization', 'Supplier Management', 'Demand Forecasting', 'Order Tracking'],
-    support: ['Ticket Management', 'Live Chat Support', 'Knowledge Base', 'Customer Feedback', 'Support Analytics'],
-    ops: ['Process Automation', 'Quality Control', 'Workflow Optimization', 'Resource Planning', 'Operational Reporting'],
-    other: ['Custom Solution', 'Integration', 'Automation', 'Data Processing', 'Other']
+    marketing: [
+      'Getting more leads',
+      'Replying to customers fast',
+      'Following up properly',
+      'Selling on WhatsApp/Instagram',
+      'Reducing sales/agency cost',
+      'Understanding why customers don\'t convert',
+      'others'
+    ],
+    'sales-support': [
+      'AI Sales Agent / SDR',
+      'Customer Support Automation',
+      'Conversational Chat & Voice Bots',
+      'Lead Qualification & Conversion',
+      'Customer Success & Retention',
+      'Call, Chat & Ticket Intelligence',
+      'others'
+    ],
+    'social-media': [
+      'Content Creation & Scheduling',
+      'Personal Branding & LinkedIn Growth',
+      'Video Repurposing (Long → Short)',
+      'Ad Creative & Performance',
+      'Brand Monitoring & Crisis Alerts',
+      'DM, Leads & Influencer Automation',
+      'others'
+    ],
+    legal: [
+      'Contract Drafting & Review AI',
+      'CLM & Workflow Automation',
+      'Litigation & eDiscovery AI',
+      'Legal Research Copilot',
+      'Legal Ops & Matter Management',
+      'Case Origination & Lead Gen',
+      'others'
+    ],
+    'hr-hiring': [
+      'Find candidates faster',
+      'Automate interviews',
+      'High-volume hiring',
+      'Candidate follow-ups',
+      'Onboarding & HR help',
+      'Improve hire quality',
+      'others'
+    ],
+    finance: [
+      'Bookkeeping & Accounting',
+      'Expenses & Spend Control',
+      'Virtual CFO & Insights',
+      'Budgeting & Forecasting',
+      'Finance Ops & Close',
+      'Invoices & Compliance',
+      'others'
+    ],
+    'supply-chain': [
+      'Inventory & Demand',
+      'Procurement Automation',
+      'Supplier Risk',
+      'Shipping & Logistics',
+      'Track My Orders',
+      'Fully Automated Ops',
+      'others'
+    ],
+    research: [
+      'Track My Competitors',
+      'Find Market & Industry Trends',
+      'Understand Customer Reviews & Sentiment',
+      'Monitor Websites, Prices & Online Changes',
+      'Predict Demand & Business Outcomes',
+      'Get AI Research Summary & Insights',
+      'others'
+    ],
+    'data-analysis': [
+      'Lead Follow-up & Auto Reply',
+      'Sales & Revenue Forecasting',
+      'Customer Churn & Retention Insights',
+      'Instant Business Dashboards',
+      'Marketing & Campaign Performance Tracking',
+      '24/7 Customer Support Assistant',
+      'others'
+    ]
   };
 
   const getNextMessageId = () => {
