@@ -452,6 +452,22 @@ const ChatBot = () => {
 
     // Handle domain stage - user typed instead of clicking
     if (flowStage === 'domain') {
+      // Try to match what they typed to a domain
+      const inputLower = currentInput.toLowerCase().trim();
+      const matchedDomain = domains.find(d =>
+        d.name.toLowerCase() === inputLower ||
+        d.id.toLowerCase() === inputLower ||
+        d.name.toLowerCase().includes(inputLower) ||
+        inputLower.includes(d.name.toLowerCase())
+      );
+
+      // If they typed a valid domain name, select it automatically
+      if (matchedDomain) {
+        handleDomainClick(matchedDomain);
+        return;
+      }
+
+      // Otherwise, treat it as a question - give AI response and redirect
       setIsTyping(true);
 
       try {
@@ -503,6 +519,22 @@ const ChatBot = () => {
 
     // Handle subdomain stage - user typed instead of clicking
     if (flowStage === 'subdomain') {
+      // Try to match what they typed to a subdomain
+      const inputLower = currentInput.toLowerCase().trim();
+      const availableSubDomains = subDomains[selectedDomain?.id] || [];
+      const matchedSubDomain = availableSubDomains.find(sd =>
+        sd.toLowerCase() === inputLower ||
+        sd.toLowerCase().includes(inputLower) ||
+        inputLower.includes(sd.toLowerCase())
+      );
+
+      // If they typed a valid subdomain name, select it automatically
+      if (matchedSubDomain) {
+        handleSubDomainClick(matchedSubDomain);
+        return;
+      }
+
+      // Otherwise, treat it as a question - give AI response and redirect
       setIsTyping(true);
 
       try {
