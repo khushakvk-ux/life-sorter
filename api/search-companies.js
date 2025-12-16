@@ -82,13 +82,21 @@ export default async function handler(req, res) {
       .filter(c => c.name && c.name.trim());
 
     console.log('Parsed companies:', companies.length);
+    console.log('First company name:', companies[0]?.name);
+    console.log('Headers found:', parsed.meta?.fields);
 
     // If no companies found, return empty
     if (companies.length === 0) {
       return res.status(200).json({
         success: true,
         companies: [],
-        message: 'No companies found in this domain'
+        message: 'No companies found in this domain',
+        debug: {
+          requestedDomain: domain,
+          sheetName: sheetName,
+          csvLength: csvText.length,
+          headers: parsed.meta?.fields
+        }
       });
     }
 
@@ -216,7 +224,12 @@ Respond with ONLY a JSON object in this format:
       companies: matchedCompanies,
       totalCount: companies.length,
       searchMethod: 'ai',
-      reasoning: reasoning
+      reasoning: reasoning,
+      debug: {
+        requestedDomain: domain,
+        sheetName: sheetName,
+        firstCompanyInSheet: companies[0]?.name
+      }
     });
 
   } catch (error) {

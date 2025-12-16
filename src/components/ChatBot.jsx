@@ -414,6 +414,8 @@ const ChatBot = () => {
         });
 
         const searchData = await searchResponse.json();
+        console.log('Search API response:', searchData);
+        console.log('Debug info:', searchData.debug);
         const relevantCompanies = searchData.companies || [];
 
         // Format companies for display
