@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBot.css';
-import { fetchCompaniesCSV, filterCompaniesByDomain, formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
+import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
 
 const IdentityForm = ({ onSubmit }) => {
   const [name, setName] = useState('');
@@ -397,16 +397,24 @@ const ChatBot = () => {
     // Save identity to sheet
     await saveToSheet(`User Identity: ${name} (${email})`, '', selectedDomain?.name, selectedSubDomain);
 
-    // Generate final output with real market data
+    // Generate final output with real market data using AI search
     setTimeout(async () => {
       try {
-        // Fetch companies from the correct sheet tab based on domain
-        const allCompanies = await fetchCompaniesCSV(selectedDomain?.id);
-        const relevantCompanies = filterCompaniesByDomain(
-          allCompanies,
-          selectedDomain?.id,
-          selectedSubDomain
-        );
+        // Use AI-powered search to find relevant companies
+        const searchResponse = await fetch('/api/search-companies', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            domain: selectedDomain?.id,
+            subdomain: selectedSubDomain,
+            requirement: requirement
+          })
+        });
+
+        const searchData = await searchResponse.json();
+        const relevantCompanies = searchData.companies || [];
 
         // Format companies for display
         const companiesText = formatCompaniesForDisplay(relevantCompanies, 5);
