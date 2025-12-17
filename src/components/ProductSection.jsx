@@ -59,7 +59,7 @@ const ProductSection = () => {
   return (
     <div className="product-section">
       <div className="section-header">
-        <h1>Products</h1>
+        <h1>Business AI Tools</h1>
         <p className="section-subtitle">
           AI solutions designed to transform your business operations
         </p>

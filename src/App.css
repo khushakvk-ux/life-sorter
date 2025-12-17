@@ -9,17 +9,17 @@
 
 /* Dark theme gradients */
 :root[data-theme="dark"] .app {
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0f0f23 100%);
+  background: linear-gradient(135deg, #101A3D 0%, #0d1530 50%, #080f25 100%);
 }
 
 /* Blue theme gradients */
 :root[data-theme="blue"] .app {
-  background: linear-gradient(135deg, #0a0f1a 0%, #0f1729 50%, #1a2332 100%);
+  background: linear-gradient(135deg, #101A3D 0%, #0d1530 50%, #080f25 100%);
 }
 
 /* Green theme gradients */
 :root[data-theme="green"] .app {
-  background: linear-gradient(135deg, #0a140f 0%, #0f1e17 50%, #152820 100%);
+  background: linear-gradient(135deg, #101A3D 0%, #0d1530 50%, #080f25 100%);
 }
 
 .app-header {
@@ -72,17 +72,18 @@
 .logo-image {
   width: 36px;
   height: 36px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.3));
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  box-shadow: 0 2px 12px rgba(147, 89, 182, 0.4);
 }
 
 .logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FFFFFF;
   letter-spacing: -0.3px;
 }
 
@@ -109,13 +110,13 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: linear-gradient(135deg, #9359B6 0%, #3C8AD1 100%);
   transition: width 0.3s ease;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 8px rgba(147, 89, 182, 0.5);
 }
 
 .nav-link:hover {
-  color: #fbbf24;
+  color: #9359B6;
 }
 
 .nav-link:hover::after {
@@ -185,7 +186,7 @@
 /* Dark theme with texture overlay */
 :root[data-theme="dark"] .hero-chat-section {
   background:
-    linear-gradient(135deg, rgba(10, 10, 10, 0.85) 0%, rgba(26, 26, 46, 0.85) 100%),
+    linear-gradient(135deg, rgba(16, 26, 61, 0.75) 0%, rgba(13, 21, 48, 0.75) 100%),
     url('/texture-753521.png');
   background-size: cover;
   background-position: center;
@@ -196,7 +197,7 @@
 /* Blue theme with texture overlay */
 :root[data-theme="blue"] .hero-chat-section {
   background:
-    linear-gradient(135deg, rgba(10, 15, 26, 0.85) 0%, rgba(26, 35, 50, 0.85) 100%),
+    linear-gradient(135deg, rgba(16, 26, 61, 0.75) 0%, rgba(13, 21, 48, 0.75) 100%),
     url('/texture-753521.png');
   background-size: cover;
   background-position: center;
@@ -207,7 +208,7 @@
 /* Green theme with texture overlay */
 :root[data-theme="green"] .hero-chat-section {
   background:
-    linear-gradient(135deg, rgba(10, 20, 15, 0.85) 0%, rgba(21, 40, 32, 0.85) 100%),
+    linear-gradient(135deg, rgba(16, 26, 61, 0.75) 0%, rgba(13, 21, 48, 0.75) 100%),
     url('/texture-753521.png');
   background-size: cover;
   background-position: center;
@@ -222,16 +223,16 @@
   right: 0;
   width: 50%;
   height: 100%;
-  background: radial-gradient(circle at center right, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle at center right, rgba(147, 89, 182, 0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 
 :root[data-theme="blue"] .hero-chat-section::before {
-  background: radial-gradient(circle at center right, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle at center right, rgba(60, 138, 209, 0.12) 0%, transparent 70%);
 }
 
 :root[data-theme="green"] .hero-chat-section::before {
-  background: radial-gradient(circle at center right, rgba(34, 197, 94, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle at center right, rgba(81, 72, 142, 0.12) 0%, transparent 70%);
 }
 
 .products-section-wrapper {
@@ -241,15 +242,15 @@
 }
 
 :root[data-theme="dark"] .products-section-wrapper {
-  background: linear-gradient(135deg, #0f0f23 0%, #0a0a0a 100%);
+  background: linear-gradient(135deg, #0d1530 0%, #101A3D 100%);
 }
 
 :root[data-theme="blue"] .products-section-wrapper {
-  background: linear-gradient(135deg, #1a2332 0%, #0a0f1a 100%);
+  background: linear-gradient(135deg, #0d1530 0%, #101A3D 100%);
 }
 
 :root[data-theme="green"] .products-section-wrapper {
-  background: linear-gradient(135deg, #152820 0%, #0a140f 100%);
+  background: linear-gradient(135deg, #0d1530 0%, #101A3D 100%);
 }
 
 @keyframes fadeIn {
@@ -266,8 +267,8 @@
 .app-footer {
   padding: 2rem 3rem;
   text-align: center;
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid rgba(245, 158, 11, 0.15);
+  background: rgba(16, 26, 61, 0.5);
+  border-top: 1px solid rgba(147, 89, 182, 0.2);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
 }
 
