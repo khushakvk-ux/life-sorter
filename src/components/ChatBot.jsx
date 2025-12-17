@@ -379,6 +379,102 @@ const ChatBot = () => {
     }
   };
 
+  // Handler for "Learn how to implement" button
+  const handleLearnImplementation = async (companies, userRequirement) => {
+    setIsTyping(true);
+
+    const loadingMessage = {
+      id: getNextMessageId(),
+      text: "Let me put together a simple guide on how you can use these tools for your needs...",
+      sender: 'bot',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, loadingMessage]);
+
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+      if (!apiKey) {
+        // Fallback response without API
+        const fallbackGuide = {
+          id: getNextMessageId(),
+          text: `## Getting Started Guide\n\nHere's how you can begin using these tools:\n\n${companies.map((c, i) =>
+            `**${i + 1}. ${c.name}**\nVisit their website to sign up for a free trial or demo. Most AI tools offer a starter plan to help you get familiar with the features.\n\n`
+          ).join('')}\n**Next Steps:**\n- Pick one tool that seems like the best fit\n- Sign up for their free trial\n- Try it with a small project first\n- See if it solves your problem before committing\n\nNeed help deciding? Feel free to start another conversation!`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, fallbackGuide]);
+        setIsTyping(false);
+        return;
+      }
+
+      const implementationPrompt = `You are a friendly tech advisor helping someone implement AI tools in their business.
+Write in VERY SIMPLE language - like explaining to a friend who isn't technical.
+
+The user wants to: "${userRequirement}"
+
+They're interested in these tools:
+${companies.map((c, i) => `${i + 1}. ${c.name} - ${c.description || c.problem || 'AI solution'}`).join('\n')}
+
+Write a practical, easy-to-follow guide that:
+1. Picks the BEST tool for their specific need (just one recommendation)
+2. Explains step-by-step how to get started (4-5 simple steps)
+3. Gives one practical tip for success
+4. Mentions what results they can expect
+
+Rules:
+- NO technical jargon
+- Keep it under 200 words
+- Use simple numbered steps
+- Be encouraging and helpful
+- Don't overwhelm with too many options`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: implementationPrompt },
+            { role: 'user', content: `Help me implement a solution for: "${userRequirement}"` }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const guide = data.choices[0]?.message?.content || '';
+
+        const guideMessage = {
+          id: getNextMessageId(),
+          text: `## Your Implementation Guide\n\n${guide}\n\n---\n\nGood luck with your implementation! Feel free to start a new conversation if you need more help.`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, guideMessage]);
+      } else {
+        throw new Error('API request failed');
+      }
+    } catch (error) {
+      console.error('Error generating implementation guide:', error);
+      const errorMessage = {
+        id: getNextMessageId(),
+        text: `## Quick Start Tips\n\nHere's how to get started:\n\n1. **Pick one tool** - Start with ${companies[0]?.name || 'the first option'}\n2. **Sign up** - Most offer free trials\n3. **Start small** - Test with one simple task\n4. **Learn as you go** - Don't try to master everything at once\n\nThe best way to learn is by doing. Give it a try!`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+
+    setIsTyping(false);
+  };
+
   const handleIdentitySubmit = async (name, email) => {
     setUserName(name);
     setUserEmail(email);
@@ -417,66 +513,37 @@ const ChatBot = () => {
         console.log('Search API response:', searchData);
         console.log('Debug info:', searchData.debug);
         const relevantCompanies = searchData.companies || [];
+        const helpfulResponse = searchData.helpfulResponse || '';
 
-        // Format companies for display
-        const companiesText = formatCompaniesForDisplay(relevantCompanies, 5);
-        const gapsAnalysis = analyzeMarketGaps(requirement, relevantCompanies);
+        // Build user-friendly response
+        let marketAnalysis = '';
 
-        // Build market analysis message
-        let marketAnalysis = `## 🔍 Market Analysis\n\n`;
-
-        // Existing Tools Section
-        marketAnalysis += `### Existing Tools in ${selectedDomain?.name}`;
-        if (selectedSubDomain) {
-          marketAnalysis += ` - ${selectedSubDomain}`;
-        }
-        marketAnalysis += `\n\n${companiesText}\n\n`;
-
-        // Market Gaps Section
-        marketAnalysis += `### 💡 Market Gaps & Opportunities\n\n${gapsAnalysis}\n\n`;
-
-        // Ikshan's Direction
-        marketAnalysis += `## 🎯 Ikshan's Suggested Direction\n\n`;
-        marketAnalysis += `### Your Requirement\n"${requirement}"\n\n`;
-
-        marketAnalysis += `### Proposed Approach\n`;
-        if (relevantCompanies.length === 0) {
-          marketAnalysis += `Since there are limited existing solutions in this space, we can:\n`;
-          marketAnalysis += `- Build a pioneering solution tailored to your specific needs\n`;
-          marketAnalysis += `- Establish your product as the market leader\n`;
-          marketAnalysis += `- Capture first-mover advantage\n\n`;
-        } else if (relevantCompanies.length <= 2) {
-          marketAnalysis += `With limited competition, we can:\n`;
-          marketAnalysis += `- Analyze what existing solutions are missing\n`;
-          marketAnalysis += `- Build a superior product with better UX and features\n`;
-          marketAnalysis += `- Position as the modern, user-friendly alternative\n\n`;
+        if (helpfulResponse) {
+          // Use the AI-generated helpful response
+          marketAnalysis = `## Here's what I found for you\n\n${helpfulResponse}\n\n`;
         } else {
-          marketAnalysis += `In this competitive market, we'll focus on:\n`;
-          marketAnalysis += `- Identifying specific gaps in existing solutions\n`;
-          marketAnalysis += `- Creating unique value through innovation\n`;
-          marketAnalysis += `- Targeting underserved user segments or use cases\n\n`;
+          // Fallback to simple listing
+          marketAnalysis = `## Here's what I found\n\n`;
+          if (relevantCompanies.length > 0) {
+            relevantCompanies.forEach((company, i) => {
+              marketAnalysis += `**${company.name}** - ${company.problem || 'Helps with business automation'}\n\n`;
+            });
+          } else {
+            marketAnalysis += `I couldn't find exact matches, but don't worry - this could be a great opportunity to build something new!\n\n`;
+          }
         }
 
-        marketAnalysis += `### Key Differentiators\n`;
-        marketAnalysis += `- **Tailored Solution**: Built specifically for your requirements\n`;
-        marketAnalysis += `- **Modern Technology**: Latest AI and cloud infrastructure\n`;
-        marketAnalysis += `- **User-Centric Design**: Focus on exceptional user experience\n`;
-        marketAnalysis += `- **Scalable Architecture**: Ready to grow with your business\n\n`;
-
-        marketAnalysis += `### 🚀 Next Steps\n\n`;
-        marketAnalysis += `1. **Discovery Call**: Deep dive into your requirements and vision\n`;
-        marketAnalysis += `2. **Competitive Analysis**: Detailed review of similar solutions\n`;
-        marketAnalysis += `3. **Technical Design**: Architecture and feature specifications\n`;
-        marketAnalysis += `4. **Timeline & Budget**: Clear roadmap and cost estimates\n`;
-        marketAnalysis += `5. **MVP Development**: Start building your solution\n\n`;
-        marketAnalysis += `**We're excited to help bring your vision to life!** 💙`;
+        marketAnalysis += `---\n\n`;
+        marketAnalysis += `Would you like to explore a different idea or learn how to use one of these tools for your specific needs?`;
 
         const finalOutput = {
           id: getNextMessageId(),
           text: marketAnalysis,
           sender: 'bot',
           timestamp: new Date(),
-          showFinalActions: true
+          showFinalActions: true,
+          companies: relevantCompanies,
+          userRequirement: requirement
         };
 
         setMessages(prev => [...prev, finalOutput]);
@@ -746,9 +813,17 @@ const ChatBot = () => {
               )}
               {message.showFinalActions && (
                 <div className="final-actions">
-                  <button className="action-button primary" onClick={() => window.location.reload()}>
+                  <button className="action-button secondary" onClick={() => window.location.reload()}>
                     🔄 Start Another Idea
                   </button>
+                  {message.companies && message.companies.length > 0 && (
+                    <button
+                      className="action-button primary"
+                      onClick={() => handleLearnImplementation(message.companies, message.userRequirement)}
+                    >
+                      📚 Learn How to Implement
+                    </button>
+                  )}
                 </div>
               )}
               <div className="message-time">{formatTime(message.timestamp)}</div>

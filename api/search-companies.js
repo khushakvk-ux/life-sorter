@@ -109,16 +109,9 @@ export default async function handler(req, res) {
       `[${i}] ${c.name}: ${c.problem || ''} | ${c.description || ''} | ${c.differentiator || ''}`
     ).join('\n');
 
-    const systemPrompt = `You are an AI assistant that matches user requirements to relevant AI/SaaS companies from a consolidated database.
-Given a user's requirement, identify the TOP 5 most relevant companies that can solve their problem.
-
-IMPORTANT:
-- Search across ALL companies regardless of their original domain category
-- Only return company indices that exist in the list (0 to ${companies.length - 1})
-- Return indices as a JSON array of numbers
-- Consider semantic similarity, not just keyword matching
-- A company is relevant if it solves a similar problem, targets similar users, or offers similar capabilities
-- Prioritize companies that directly address the user's specific need
+    // First GPT call: Find relevant companies
+    const searchPrompt = `You are an AI assistant that matches user requirements to relevant AI/SaaS companies.
+Find the TOP 3 most relevant companies that can solve the user's problem.
 
 User's context: ${subdomain ? `${subdomain} in ${domain}` : domain || 'General business'}
 User's requirement: "${requirement}"
@@ -126,12 +119,11 @@ User's requirement: "${requirement}"
 Available companies (${companies.length} total):
 ${companySummaries}
 
-Respond with ONLY a JSON object in this format:
-{"indices": [0, 2, 5], "reasoning": "Brief explanation of why these match"}`;
+Return ONLY a JSON array of indices: [0, 2, 5]`;
 
     console.log('Calling GPT for intelligent search...');
 
-    const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    const searchResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,65 +132,96 @@ Respond with ONLY a JSON object in this format:
       body: JSON.stringify({
         model: modelName,
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Find the most relevant companies for: "${requirement}"` }
+          { role: 'system', content: searchPrompt },
+          { role: 'user', content: `Find relevant companies for: "${requirement}"` }
         ],
         temperature: 0.3,
-        max_tokens: 500
+        max_tokens: 100
       })
     });
 
-    if (!gptResponse.ok) {
-      console.error('GPT API error:', gptResponse.status);
-      // Fallback to returning first few companies
+    if (!searchResponse.ok) {
+      console.error('GPT API error:', searchResponse.status);
       return res.status(200).json({
         success: true,
-        companies: companies.slice(0, 5),
+        companies: companies.slice(0, 3),
         totalCount: companies.length,
         searchMethod: 'fallback'
       });
     }
 
-    const gptData = await gptResponse.json();
-    const gptMessage = gptData.choices[0]?.message?.content || '';
+    const searchData = await searchResponse.json();
+    const searchMessage = searchData.choices[0]?.message?.content || '';
 
-    console.log('GPT response:', gptMessage);
-
-    // Parse GPT response
+    // Parse indices
     let matchedIndices = [];
-    let reasoning = '';
-
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = gptMessage.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        matchedIndices = parsed.indices || [];
-        reasoning = parsed.reasoning || '';
-      }
-    } catch (parseError) {
-      console.error('Error parsing GPT response:', parseError);
-      // Try to extract just numbers
-      const numbers = gptMessage.match(/\d+/g);
+      const numbers = searchMessage.match(/\d+/g);
       if (numbers) {
-        matchedIndices = numbers.map(n => parseInt(n)).filter(n => n < companies.length);
+        matchedIndices = numbers.map(n => parseInt(n)).filter(n => n >= 0 && n < companies.length).slice(0, 3);
       }
+    } catch (e) {
+      matchedIndices = [0, 1, 2];
+    }
+
+    if (matchedIndices.length === 0) {
+      matchedIndices = [0, 1, 2].filter(i => i < companies.length);
     }
 
     // Get matched companies
-    const matchedCompanies = matchedIndices
-      .filter(i => i >= 0 && i < companies.length)
-      .map(i => companies[i]);
+    const matchedCompanies = matchedIndices.map(i => companies[i]);
 
-    // If GPT didn't return good matches, fall back to all companies
-    if (matchedCompanies.length === 0) {
-      return res.status(200).json({
-        success: true,
-        companies: companies.slice(0, 5),
-        totalCount: companies.length,
-        searchMethod: 'fallback',
-        reasoning: 'No specific matches found, showing top companies'
-      });
+    // Second GPT call: Generate helpful, layman explanation
+    const explanationPrompt = `You are a friendly business advisor helping someone find the right AI tool for their needs.
+Write in VERY SIMPLE language - like explaining to a friend who isn't technical.
+
+The user needs help with: "${requirement}"
+Context: ${subdomain ? `${subdomain} in ${domain}` : domain || 'their business'}
+
+Here are the best solutions I found:
+
+${matchedCompanies.map((c, i) => `
+Tool ${i + 1}: ${c.name}
+- Problem they solve: ${c.problem || 'General business automation'}
+- What they do: ${c.description || 'AI-powered solution'}
+- What makes them special: ${c.differentiator || 'Unique approach'}
+`).join('\n')}
+
+Write a helpful response that:
+1. Starts with a brief understanding of what the user is trying to solve (1 sentence)
+2. For each tool, explain in simple words:
+   - The tool name (bold it with **)
+   - What problem it actually solves (in everyday language)
+   - Why it might be a good fit for their specific need (be specific!)
+3. Keep each tool explanation to 2-3 short sentences max
+4. Use a warm, helpful tone - like a knowledgeable friend giving advice
+5. End with an encouraging note
+
+DO NOT use technical jargon. Imagine explaining to your grandmother.
+DO NOT use bullet points - write in flowing sentences.
+Keep the total response under 250 words.`;
+
+    const explanationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelName,
+        messages: [
+          { role: 'system', content: explanationPrompt },
+          { role: 'user', content: `Help me understand these tools for: "${requirement}"` }
+        ],
+        temperature: 0.7,
+        max_tokens: 600
+      })
+    });
+
+    let helpfulExplanation = '';
+    if (explanationResponse.ok) {
+      const explanationData = await explanationResponse.json();
+      helpfulExplanation = explanationData.choices[0]?.message?.content || '';
     }
 
     return res.status(200).json({
@@ -206,12 +229,12 @@ Respond with ONLY a JSON object in this format:
       companies: matchedCompanies,
       totalCount: companies.length,
       searchMethod: 'ai',
-      reasoning: reasoning,
+      helpfulResponse: helpfulExplanation,
+      userRequirement: requirement,
       debug: {
         requestedDomain: domain,
         subdomain: subdomain,
-        totalCompaniesSearched: companies.length,
-        firstCompanyInSheet: companies[0]?.name
+        totalCompaniesSearched: companies.length
       }
     });
 
