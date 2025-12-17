@@ -95,8 +95,8 @@
 }
 
 .bot-message .message-avatar {
-  background: linear-gradient(135deg, #9359B6 0%, #3C8AD1 100%);
-  color: #ffffff;
+  background: #FFFFFF;
+  color: #101A3D;
 }
 
 .bot-message .message-avatar svg {
