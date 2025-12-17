@@ -1,21 +1,11 @@
 // Vercel Serverless Function for GPT-powered company search
 import Papa from 'papaparse';
 
-const SHEET_ID = '1JKx3RwPbUL2-r5l8ayDUQfKU3kiIEg-FkFym3yJCNiw';
+// Consolidated sheet with all companies
+const SHEET_ID = '1d6nrGP4yRbx_ddzClAheicsavF2OsmINJmMDIQIL4m0';
 
-// Map domain IDs to actual sheet tab names in Google Sheets
-// NOTE: Tab names must match EXACTLY (case-sensitive)
-const DOMAIN_TO_SHEET = {
-  'marketing': 'Marketing',
-  'sales-support': 'Sales and support',  // Capital S
-  'social-media': 'Social media',
-  'legal': 'Legal',
-  'hr-hiring': 'HR',
-  'finance': 'Finance',
-  'supply-chain': 'Supply chain',
-  'research': 'Research',
-  'data-analysis': 'Data'
-};
+// URL to fetch the consolidated sheet (first/default tab)
+const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -35,17 +25,7 @@ export default async function handler(req, res) {
   try {
     const { domain, subdomain, requirement } = req.body;
 
-    if (!domain) {
-      return res.status(400).json({ error: 'Domain is required' });
-    }
-
-    // Get sheet name for this domain
-    const sheetName = DOMAIN_TO_SHEET[domain] || 'Social media';
-
-    // URL to fetch specific sheet by name
-    const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-
-    console.log('Fetching sheet:', sheetName, 'for domain:', domain);
+    console.log('Fetching consolidated sheet for domain:', domain, 'subdomain:', subdomain);
 
     const response = await fetch(SHEET_CSV_URL);
 
@@ -91,10 +71,9 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         companies: [],
-        message: 'No companies found in this domain',
+        message: 'No companies found in the database',
         debug: {
           requestedDomain: domain,
-          sheetName: sheetName,
           csvLength: csvText.length,
           headers: parsed.meta?.fields
         }
@@ -130,19 +109,21 @@ export default async function handler(req, res) {
       `[${i}] ${c.name}: ${c.problem || ''} | ${c.description || ''} | ${c.differentiator || ''}`
     ).join('\n');
 
-    const systemPrompt = `You are an AI assistant that matches user requirements to relevant companies.
-Given a user's requirement and a list of companies, identify the TOP 5 most relevant companies.
+    const systemPrompt = `You are an AI assistant that matches user requirements to relevant AI/SaaS companies from a consolidated database.
+Given a user's requirement, identify the TOP 5 most relevant companies that can solve their problem.
 
 IMPORTANT:
-- Only return company indices that exist in the list
+- Search across ALL companies regardless of their original domain category
+- Only return company indices that exist in the list (0 to ${companies.length - 1})
 - Return indices as a JSON array of numbers
 - Consider semantic similarity, not just keyword matching
 - A company is relevant if it solves a similar problem, targets similar users, or offers similar capabilities
+- Prioritize companies that directly address the user's specific need
 
-User is looking for solutions in: ${subdomain || domain}
+User's context: ${subdomain ? `${subdomain} in ${domain}` : domain || 'General business'}
 User's requirement: "${requirement}"
 
-Available companies:
+Available companies (${companies.length} total):
 ${companySummaries}
 
 Respond with ONLY a JSON object in this format:
@@ -228,7 +209,8 @@ Respond with ONLY a JSON object in this format:
       reasoning: reasoning,
       debug: {
         requestedDomain: domain,
-        sheetName: sheetName,
+        subdomain: subdomain,
+        totalCompaniesSearched: companies.length,
         firstCompanyInSheet: companies[0]?.name
       }
     });
