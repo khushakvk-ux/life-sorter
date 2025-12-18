@@ -23,9 +23,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { domain, subdomain, requirement } = req.body;
+    const { domain, subdomain, requirement, userContext } = req.body;
 
     console.log('Fetching consolidated sheet for domain:', domain, 'subdomain:', subdomain);
+    console.log('User context:', userContext);
 
     const response = await fetch(SHEET_CSV_URL);
 
@@ -124,12 +125,36 @@ export default async function handler(req, res) {
       `[${i}] ${c.name}: ${c.problem || ''} | ${c.description || ''} | ${c.differentiator || ''}`
     ).join('\n');
 
+    // Build user profile from context
+    let userProfile = '';
+    if (userContext) {
+      if (userContext.role === 'business-owner') {
+        userProfile = `User Profile: Business Owner
+- Business type: ${userContext.businessType || 'Not specified'}
+- Industry: ${userContext.industry || 'Not specified'}
+- Target audience: ${userContext.targetAudience || 'Not specified'}
+- Market segment: ${userContext.marketSegment || 'Not specified'}`;
+      } else if (userContext.role === 'professional') {
+        userProfile = `User Profile: Working Professional
+- Role & Industry: ${userContext.roleAndIndustry || 'Not specified'}
+- Solution for: ${userContext.solutionFor || 'Not specified'}${userContext.salaryContext ? `\n- Context: ${userContext.salaryContext}` : ''}`;
+      } else if (userContext.role === 'freelancer') {
+        userProfile = `User Profile: Freelancer
+- Type of work: ${userContext.freelanceType || 'Not specified'}
+- Main challenge: ${userContext.challenge || 'Not specified'}`;
+      } else if (userContext.role === 'student') {
+        userProfile = `User Profile: Student/Learner exploring solutions`;
+      }
+    }
+
     // First GPT call: Find relevant companies
     const searchPrompt = `You are an AI assistant that matches user requirements to AI/SaaS companies.
 You MUST always find the TOP 3 BEST matches from the available companies - there is ALWAYS a best match.
 
 IMPORTANT: Even if no company is a perfect match, find the 3 CLOSEST ones that could potentially help.
 Think creatively - a marketing tool might help with sales, a data tool might help with research, etc.
+
+${userProfile}
 
 User's context: ${subdomain ? `${subdomain} in ${domain}` : domain || 'General business'}
 User's requirement: "${requirement}"
@@ -192,6 +217,8 @@ You MUST return exactly 3 indices. Return ONLY a JSON array: [0, 2, 5]`;
     // Second GPT call: Generate helpful, layman explanation
     const explanationPrompt = `You are a friendly business advisor helping someone find AI tools for their needs.
 Write in VERY SIMPLE language - like explaining to a friend who isn't technical.
+
+${userProfile}
 
 The user needs help with: "${requirement}"
 Context: ${subdomain ? `${subdomain} in ${domain}` : domain || 'their business'}

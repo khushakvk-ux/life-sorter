@@ -82,11 +82,26 @@ const ChatBot = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState(null);
   const [selectedSubDomain, setSelectedSubDomain] = useState(null);
-  const [userRole, setUserRole] = useState(null); // 'business-owner' | 'professional' | 'other'
+  const [userRole, setUserRole] = useState(null); // 'business-owner' | 'professional' | 'freelancer' | 'student'
   const [requirement, setRequirement] = useState(null);
   const [userName, setUserName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
-  const [flowStage, setFlowStage] = useState('domain'); // 'domain' | 'subdomain' | 'role' | 'requirement' | 'identity' | 'complete'
+  const [flowStage, setFlowStage] = useState('domain'); // 'domain' | 'subdomain' | 'role' | 'role-q1' | 'role-q2' | 'role-q3' | 'role-q4' | 'requirement' | 'identity' | 'complete'
+
+  // Context collection for business owners
+  const [businessContext, setBusinessContext] = useState({
+    businessType: null,      // What kind of business
+    industry: null,          // Which sector/industry
+    targetAudience: null,    // Who is target audience
+    marketSegment: null      // What market segment
+  });
+
+  // Context collection for professionals
+  const [professionalContext, setProfessionalContext] = useState({
+    roleAndIndustry: null,   // Role/job title and industry
+    solutionFor: null,       // For self or company
+    salaryContext: null      // If salary related, the context
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -426,7 +441,6 @@ const ChatBot = () => {
 
   const handleRoleClick = (role) => {
     setUserRole(role);
-    setFlowStage('requirement');
 
     const userMessage = {
       id: getNextMessageId(),
@@ -435,29 +449,211 @@ const ChatBot = () => {
       timestamp: new Date()
     };
 
-    // Personalized message based on role
-    let contextMessage = '';
-    if (role.id === 'business-owner') {
-      contextMessage = `As a business owner, you\'re looking for solutions that can help grow your business.`;
-    } else if (role.id === 'professional') {
-      contextMessage = `As a professional, you\'re looking for tools to help you work smarter.`;
-    } else if (role.id === 'freelancer') {
-      contextMessage = `As a freelancer, you need flexible tools that scale with your work.`;
-    } else {
-      contextMessage = `Great! Let me help you find the right tools.`;
-    }
+    // Save role selection to sheet
+    saveToSheet(`User Role: ${role.text}`, '', selectedDomain?.name, selectedSubDomain);
 
-    const botMessage = {
+    // Start the appropriate questioning flow based on role
+    if (role.id === 'business-owner') {
+      setFlowStage('role-q1');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Great! As a business owner, I'd love to understand your business better to find the perfect solution. 🏢\n\n**What kind of business do you run?**\n\n_(e.g., E-commerce store, Consulting firm, Restaurant, SaaS company, etc.)_`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+
+    } else if (role.id === 'professional') {
+      setFlowStage('role-q1');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Thanks! Let me understand your professional context better. 💼\n\n**What is your role/job title and which industry are you in?**\n\n_(e.g., Marketing Manager in Healthcare, Software Developer in Fintech, HR Lead in Retail, etc.)_`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+
+    } else if (role.id === 'freelancer') {
+      setFlowStage('role-q1');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Awesome! Freelancers often have unique needs. 🎯\n\n**What type of freelance work do you do and who are your typical clients?**\n\n_(e.g., Web design for small businesses, Content writing for startups, etc.)_`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+
+    } else {
+      // Student/Learner - simpler flow
+      setFlowStage('requirement');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Great! Let me help you explore and learn. 📚\n\n**What specific problem or topic are you trying to learn about or solve?**\n\n_(Tell me in 2-3 lines what you're looking for)_`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+    }
+  };
+
+  // Handle step-by-step role questions
+  const handleRoleQuestion = (answer) => {
+    const userMessage = {
       id: getNextMessageId(),
-      text: `${contextMessage}\n\nNow, **tell me in 2-3 lines**: What problem are you trying to solve? What would success look like for you?`,
-      sender: 'bot',
+      text: answer,
+      sender: 'user',
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage, botMessage]);
+    // Business Owner Flow
+    if (userRole?.id === 'business-owner') {
+      if (flowStage === 'role-q1') {
+        // Q1: What kind of business
+        setBusinessContext(prev => ({ ...prev, businessType: answer }));
+        setFlowStage('role-q2');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Got it! 👍\n\n**Which sector or industry is your business in?**\n\n_(e.g., Technology, Healthcare, Education, Fashion, Food & Beverage, Finance, etc.)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
 
-    // Save role selection to sheet
-    saveToSheet(`User Role: ${role.text}`, '', selectedDomain?.name, selectedSubDomain);
+      } else if (flowStage === 'role-q2') {
+        // Q2: Which industry/sector
+        setBusinessContext(prev => ({ ...prev, industry: answer }));
+        setFlowStage('role-q3');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Interesting! 🎯\n\n**Who is your target audience?**\n\n_(e.g., Young professionals aged 25-35, Small business owners, Parents with young children, B2B enterprise clients, etc.)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+      } else if (flowStage === 'role-q3') {
+        // Q3: Target audience
+        setBusinessContext(prev => ({ ...prev, targetAudience: answer }));
+        setFlowStage('role-q4');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Perfect! Last question about your business: 📊\n\n**What market segment do you target?**\n\n• **Size:** Small businesses / SMBs / Mid-market / Enterprises\n• **Reach:** Local / National / Global\n\n_(e.g., "SMBs, National" or "Enterprises, Global")_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+      } else if (flowStage === 'role-q4') {
+        // Q4: Market segment - now ask the main problem
+        setBusinessContext(prev => ({ ...prev, marketSegment: answer }));
+        setFlowStage('requirement');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Excellent! Now I have a good picture of your business. 🎉\n\n**What specific problem are you trying to solve right now?**\n\n_(Tell me in 2-3 lines what challenge you're facing and what success would look like for you)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+        // Save business context to sheet
+        saveToSheet(`Business Context: ${JSON.stringify({ ...businessContext, marketSegment: answer })}`, '', selectedDomain?.name, selectedSubDomain);
+      }
+
+    // Professional Flow
+    } else if (userRole?.id === 'professional') {
+      if (flowStage === 'role-q1') {
+        // Q1: Role and industry
+        setProfessionalContext(prev => ({ ...prev, roleAndIndustry: answer }));
+        setFlowStage('role-q2');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Thanks for sharing! 👍\n\n**Are you looking for a solution for yourself personally, or for the company/team you work for?**\n\n_(e.g., "For myself to be more productive" or "For my team/department" or "For the whole company")_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+      } else if (flowStage === 'role-q2') {
+        // Q2: For self or company
+        setProfessionalContext(prev => ({ ...prev, solutionFor: answer }));
+
+        // Check if the context involves salary/compensation
+        const lowerAnswer = answer.toLowerCase();
+        const prevContext = (selectedSubDomain || '').toLowerCase() + ' ' + (selectedDomain?.name || '').toLowerCase();
+        const isSalaryRelated = ['salary', 'compensation', 'pay', 'payroll', 'wage', 'bonus'].some(term =>
+          lowerAnswer.includes(term) || prevContext.includes(term)
+        );
+
+        if (isSalaryRelated) {
+          setFlowStage('role-q3');
+          const botMessage = {
+            id: getNextMessageId(),
+            text: `I notice this might involve compensation. Let me clarify: 💰\n\n**Is this about your own salary/compensation, or about employee payroll/company compensation structure?**\n\n_(This helps me recommend the right type of solution)_`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, userMessage, botMessage]);
+        } else {
+          // Skip salary question and go to requirement
+          setFlowStage('requirement');
+          const botMessage = {
+            id: getNextMessageId(),
+            text: `Great context! 🎉\n\n**What's the specific situation and goal you're trying to achieve?**\n\n_(Tell me in 2-3 lines what problem you're facing and what success would look like)_`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, userMessage, botMessage]);
+
+          // Save professional context to sheet
+          saveToSheet(`Professional Context: ${JSON.stringify({ ...professionalContext, solutionFor: answer })}`, '', selectedDomain?.name, selectedSubDomain);
+        }
+
+      } else if (flowStage === 'role-q3') {
+        // Q3: Salary context (only if salary-related)
+        setProfessionalContext(prev => ({ ...prev, salaryContext: answer }));
+        setFlowStage('requirement');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Got it! Now I understand the context better. 🎉\n\n**What's the specific situation and goal you're trying to achieve?**\n\n_(Tell me in 2-3 lines what problem you're facing and what success would look like)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+        // Save professional context to sheet
+        saveToSheet(`Professional Context: ${JSON.stringify({ ...professionalContext, salaryContext: answer })}`, '', selectedDomain?.name, selectedSubDomain);
+      }
+
+    // Freelancer Flow
+    } else if (userRole?.id === 'freelancer') {
+      if (flowStage === 'role-q1') {
+        // Q1: Type of freelance work
+        setBusinessContext(prev => ({ ...prev, businessType: answer }));
+        setFlowStage('role-q2');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `Nice! 🎯\n\n**What's your biggest challenge or bottleneck in your freelance work right now?**\n\n_(e.g., Finding clients, Managing projects, Invoicing, Time management, etc.)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+      } else if (flowStage === 'role-q2') {
+        // Q2: Biggest challenge - now ask the main problem
+        setBusinessContext(prev => ({ ...prev, targetAudience: answer }));
+        setFlowStage('requirement');
+        const botMessage = {
+          id: getNextMessageId(),
+          text: `I understand! 🎉\n\n**What specific problem are you trying to solve right now?**\n\n_(Tell me in 2-3 lines what you need help with and what would make your work easier)_`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage, botMessage]);
+
+        // Save freelancer context to sheet
+        saveToSheet(`Freelancer Context: ${JSON.stringify(businessContext)}`, '', selectedDomain?.name, selectedSubDomain);
+      }
+    }
   };
 
 
@@ -601,6 +797,27 @@ Rules:
     // Generate final output with real market data using AI search
     setTimeout(async () => {
       try {
+        // Build user context for richer search results
+        const userContext = {
+          role: userRole?.id,
+          roleText: userRole?.text,
+          ...(userRole?.id === 'business-owner' && {
+            businessType: businessContext.businessType,
+            industry: businessContext.industry,
+            targetAudience: businessContext.targetAudience,
+            marketSegment: businessContext.marketSegment
+          }),
+          ...(userRole?.id === 'professional' && {
+            roleAndIndustry: professionalContext.roleAndIndustry,
+            solutionFor: professionalContext.solutionFor,
+            salaryContext: professionalContext.salaryContext
+          }),
+          ...(userRole?.id === 'freelancer' && {
+            freelanceType: businessContext.businessType,
+            challenge: businessContext.targetAudience
+          })
+        };
+
         // Use AI-powered search to find relevant companies
         const searchResponse = await fetch('/api/search-companies', {
           method: 'POST',
@@ -610,7 +827,8 @@ Rules:
           body: JSON.stringify({
             domain: selectedDomain?.id,
             subdomain: selectedSubDomain,
-            requirement: requirement
+            requirement: requirement,
+            userContext: userContext
           })
         });
 
@@ -814,6 +1032,14 @@ Rules:
         setIsTyping(false);
       }
 
+      return;
+    }
+
+    // Handle role question stages (step-by-step questioning)
+    if (flowStage.startsWith('role-q')) {
+      // Remove the user message we already added above, since handleRoleQuestion will add it
+      setMessages(prev => prev.slice(0, -1));
+      handleRoleQuestion(currentInput);
       return;
     }
 
