@@ -25,14 +25,14 @@
 @media (max-width: 768px) {
   .chatbot-container {
     padding: 0 0.5rem;
-    height: 85vh; /* Fixed height for tablet */
+    height: calc(100vh - 80px); /* More space for tablet */
   }
 }
 
 @media (max-width: 480px) {
   .chatbot-container {
     padding: 0;
-    height: 80vh; /* Fixed height for mobile */
+    height: calc(100vh - 56px); /* Maximize mobile screen usage */
   }
 }
 
@@ -1186,55 +1186,55 @@
 /* Mobile Styles - 480px and below */
 @media (max-width: 480px) {
   .messages-container {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   .message {
-    padding: 1rem 0.75rem;
-    gap: 0.75rem;
+    padding: 0.5rem 0.5rem;
+    gap: 0.5rem;
   }
 
   .message-avatar {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
 
   .message-avatar svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
   .message-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 
   .message-text h2 {
-    font-size: 1.1rem;
-    margin: 1rem 0 0.5rem;
+    font-size: 0.95rem;
+    margin: 0.5rem 0 0.3rem;
   }
 
   .message-text h3 {
-    font-size: 1rem;
-    margin: 0.75rem 0 0.4rem;
+    font-size: 0.875rem;
+    margin: 0.4rem 0 0.25rem;
   }
 
   .message-text p {
-    margin: 0.5rem 0;
-  }
-
-  .message-text ul, .message-text ol {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-  }
-
-  .message-text li {
     margin: 0.3rem 0;
   }
 
+  .message-text ul, .message-text ol {
+    margin: 0.3rem 0;
+    padding-left: 1.25rem;
+  }
+
+  .message-text li {
+    margin: 0.2rem 0;
+  }
+
   .message-time {
-    font-size: 0.65rem;
-    margin-top: 0.5rem;
+    font-size: 0.6rem;
+    margin-top: 0.25rem;
   }
 
   /* Persistent Button Bar - Mobile */
@@ -1313,32 +1313,33 @@
 
   /* Input Area */
   .input-container {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .input-wrapper {
-    padding: 0.7rem 0.9rem;
-    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
   }
 
   .message-input {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    min-height: 36px;
   }
 
   .send-button {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .send-button svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
   /* Identity Form - Better mobile layout */
   .identity-form {
-    padding: 1rem;
-    margin-top: 0.75rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
   }
 
   .identity-input {
