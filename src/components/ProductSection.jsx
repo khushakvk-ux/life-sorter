@@ -1,4 +1,4 @@
-import { ShoppingCart, Scale, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { ShoppingCart, Scale, Users, ArrowRight, Sparkles, Youtube } from 'lucide-react';
 import './ProductSection.css';
 
 const ProductSection = () => {
@@ -46,6 +46,17 @@ const ProductSection = () => {
       color: '#f59e0b',
       gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
       features: ['96% Accuracy', 'Multi-Format Support', 'Three-Engine Technology'],
+      available: false
+    },
+    {
+      id: 5,
+      name: 'Tube Helper',
+      tagline: 'AI YouTube Video Planning & Production Assistant',
+      description: 'End-to-end YouTube content assistant that turns any video idea into a publish-ready package. Get competitor analysis, trend insights, hooks, scripts, titles, thumbnail concepts, and SEO-optimized metadata—all in one creator-ready blueprint.',
+      icon: Youtube,
+      color: '#ef4444',
+      gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+      features: ['Competitor & Trend Analysis', 'Script & Hook Generation', 'SEO-Optimized Metadata', 'Thumbnail Concepts'],
       available: false
     }
   ];

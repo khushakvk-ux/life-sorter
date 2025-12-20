@@ -74,8 +74,7 @@ const ChatBot = () => {
       id: 1,
       text: "✨ Welcome to Ikshan! 😊\n\nI'll help you find the right AI tools, step by step.\n\nJust pick your domain 🚀 and we'll take it from there.",
       sender: 'bot',
-      timestamp: new Date(),
-      showQuickReplies: true
+      timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -121,12 +120,6 @@ const ChatBot = () => {
     { id: 'supply-chain', name: 'Supply chain', emoji: '🚚' },
     { id: 'research', name: 'Research', emoji: '🔬' },
     { id: 'data-analysis', name: 'Data Analysis', emoji: '📊' }
-  ];
-
-  const quickReplies = [
-    { id: 'about', text: 'What does Ikshan do?', icon: '💡' },
-    { id: 'tools', text: 'Show me AI tools', icon: '🤖' },
-    { id: 'custom', text: 'I have a custom idea', icon: '💭' }
   ];
 
   const roleOptions = [
@@ -338,55 +331,6 @@ const ChatBot = () => {
       } catch (error) {
         console.error('Error starting recognition:', error);
       }
-    }
-  };
-
-  const handleQuickReply = async (replyId, replyText) => {
-    // Add user message
-    const userMessage = {
-      id: getNextMessageId(),
-      text: replyText,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    setIsTyping(true);
-
-    // Handle different quick reply actions
-    if (replyId === 'about') {
-      setTimeout(() => {
-        const botMessage = {
-          id: getNextMessageId(),
-          text: "Ikshan empowers startups and small businesses with **best-in-class AI tools** that eliminate barriers. 🚀\n\n✅ We offer AI solutions like Ecom Listing Optimizer and AnyOCR\n✅ If we don't have what you need, we'll connect you to the right tool\n✅ If it doesn't exist, we'll help you build it\n\n**Our philosophy:** Come to Ikshan, get a solution - no matter what. 💙\n\nReady to explore? Pick a domain below!",
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 1000);
-    } else if (replyId === 'tools') {
-      setTimeout(() => {
-        const botMessage = {
-          id: getNextMessageId(),
-          text: "Great! I'll help you discover the perfect AI tools for your needs. 🎯\n\nFirst, let's understand what area you're working in. Pick a domain from the options below:",
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 1000);
-    } else if (replyId === 'custom') {
-      setTimeout(() => {
-        const botMessage = {
-          id: getNextMessageId(),
-          text: "Awesome! Custom solutions are our specialty. 💡\n\nTo understand your vision better, let's start by picking the domain that matches your idea:",
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 1000);
     }
   };
 
@@ -692,98 +636,277 @@ const ChatBot = () => {
     };
     setMessages(prev => [...prev, loadingMessage]);
 
-    // Build context from collected user info
-    const contextSummary = userRole?.id === 'business-owner'
-      ? `Business: ${businessContext.businessType || 'Not specified'}, Industry: ${businessContext.industry || 'Not specified'}, Target: ${businessContext.targetAudience || 'Not specified'}, Segment: ${businessContext.marketSegment || 'Not specified'}`
+    // Build detailed context from collected user info
+    const userType = userRole?.text || 'General user';
+    const businessType = businessContext.businessType || '[YOUR BUSINESS TYPE]';
+    const industry = businessContext.industry || '[YOUR INDUSTRY]';
+    const targetAudience = businessContext.targetAudience || '[YOUR TARGET AUDIENCE]';
+    const marketSegment = businessContext.marketSegment || '[YOUR MARKET SEGMENT]';
+    const roleAndIndustry = professionalContext.roleAndIndustry || '[YOUR ROLE & INDUSTRY]';
+    const solutionFor = professionalContext.solutionFor || '[YOURSELF/TEAM/COMPANY]';
+    const domainName = selectedDomain?.name || '[YOUR DOMAIN]';
+    const subDomainName = selectedSubDomain || '[YOUR FOCUS AREA]';
+    const topTool = companies[0];
+
+    // Build context summary for prompts
+    const contextForPrompts = userRole?.id === 'business-owner'
+      ? `I run a ${businessType} in the ${industry} industry. My target audience is ${targetAudience} and I serve ${marketSegment}.`
       : userRole?.id === 'professional'
-      ? `Role: ${professionalContext.roleAndIndustry || 'Not specified'}, For: ${professionalContext.solutionFor || 'Not specified'}`
+      ? `I'm a ${roleAndIndustry}. I'm looking for a solution ${solutionFor}.`
       : userRole?.id === 'freelancer'
-      ? `Freelance work: ${businessContext.businessType || 'Not specified'}, Challenge: ${businessContext.targetAudience || 'Not specified'}`
-      : 'General user';
+      ? `I'm a freelancer doing ${businessType}. My main challenge is ${targetAudience}.`
+      : `I'm exploring solutions in ${domainName}.`;
+
+    // Build the comprehensive starter prompts pre-filled with user context
+    const starterPrompts = `
+---
+
+## 🎯 START RIGHT NOW - Copy-Paste These Prompts into ChatGPT/Claude
+
+**These prompts are pre-filled with YOUR context. Copy, paste, and get instant results!**
+
+---
+
+### 📋 Prompt 1: Clarify Your Problem (Decision-Ready Spec)
+
+\`\`\`
+You are my senior operations analyst. Convert my situation into a decision-ready one-page spec with zero fluff.
+
+CONTEXT (messy notes): ${contextForPrompts} My problem: ${userRequirement}
+GOAL (desired outcome): [DESCRIBE WHAT SUCCESS LOOKS LIKE]
+WHO IT AFFECTS (users/teams): ${userRole?.id === 'business-owner' ? targetAudience : userRole?.id === 'professional' ? solutionFor : '[WHO USES THIS]'}
+CONSTRAINTS (time/budget/tools/policy): [LIST YOUR CONSTRAINTS]
+WHAT I'VE TRIED (if any): [PAST ATTEMPTS OR "None yet"]
+DEADLINE/URGENCY: [WHEN DO YOU NEED THIS SOLVED?]
+
+Deliver exactly these sections:
+
+1) One-sentence problem statement (include impact)
+2) 3 user stories (Primary / Secondary / Admin)
+3) Success metrics (3–5) with how to measure each
+4) Scope:
+   - In-scope (5 bullets)
+   - Out-of-scope (5 bullets)
+5) Requirements:
+   - Must-have (top 5, testable)
+   - Nice-to-have (top 5)
+6) Constraints & assumptions (bulleted)
+7) Top risks + mitigations (5)
+8) "First 48 hours" plan (3 concrete actions)
+
+Ask ONLY 3 clarifying questions if required. If not required, proceed with reasonable assumptions and list them.
+\`\`\`
+
+---
+
+### 🔄 Prompt 2: Design Your Workflow (Swimlanes + Automation Map)
+
+\`\`\`
+Act as a process architect. Design a workflow that actually works in real life (handoffs, exceptions, and checks included).
+
+PROBLEM: ${userRequirement}
+USERS/ROLES: ${userRole?.id === 'business-owner' ? 'Me (owner), team members, ' + targetAudience : userRole?.id === 'professional' ? 'Me (' + roleAndIndustry + '), colleagues, stakeholders' : '[LIST ROLES INVOLVED]'}
+INPUTS: [WHAT DATA/DOCUMENTS/INFO DO YOU START WITH?]
+OUTPUTS: [WHAT DO YOU NEED PRODUCED?]
+CONSTRAINTS: ${userRole?.id === 'business-owner' ? 'Business in ' + industry + ', serving ' + marketSegment : '[TIME/BUDGET/TOOLS/POLICY]'}
+VOLUME (how often): [DAILY/WEEKLY/MONTHLY + approx count]
+QUALITY BAR: [accuracy/SLAs/compliance expectations]
+
+Output:
+
+A) Workflow overview (5–8 steps, numbered)
+B) Swimlane workflow (by role):
+   For each role, list:
+   - Actions they take
+   - What they need to know
+   - What they produce
+C) Failure points & exceptions:
+   - 10 likely failure modes
+   - Detection signal for each
+   - Fix / fallback procedure
+D) Automation opportunities:
+   - "Automate now" (quick wins)
+   - "Automate later" (needs changes)
+   - What data/inputs are required for automation
+E) Controls & QA:
+   - Checks at 3 points (before / during / after)
+   - Acceptance criteria for the final output
+F) Time estimate per step + total cycle time
+
+Keep it practical—no theory. If something is unclear, ask max 2 questions.
+\`\`\`
+
+---
+
+### 📄 Prompt 3: Generate First Working Artifact (Ready-to-Use)
+
+\`\`\`
+You are an expert practitioner. Produce a real, ready-to-use first draft AND a reusable template.
+
+ARTIFACT TYPE: [DOC/TEMPLATE/EMAIL/CONTRACT/PLAN/SOP/REPORT - pick what you need]
+AUDIENCE: ${userRole?.id === 'business-owner' ? targetAudience : userRole?.id === 'professional' ? 'My ' + solutionFor : '[WHO WILL READ/USE IT]'}
+CONTEXT: ${contextForPrompts} Problem: ${userRequirement}
+REQUIREMENTS: [SPECIFIC REQUIREMENTS FOR THIS ARTIFACT]
+TONE/STYLE: [Professional/Casual/Formal/Technical]
+FORMAT: [bullet / table / memo / email / etc.]
+MUST INCLUDE: [KEY POINTS THAT MUST BE COVERED]
+MUST AVOID: [THINGS TO NOT INCLUDE]
+
+Deliver:
+
+1) Version A — "Ready to send/use" (complete)
+2) Version B — "Short version" (<= 40% length)
+3) Version C — Fill-in-the-blank template (placeholders + guidance)
+4) Checklist — 10-item QA checklist to validate it before use
+5) Notes — 5 common mistakes people make with this artifact + how to avoid them
+
+If any required info is missing, make assumptions but clearly label them.
+\`\`\`
+
+---
+
+### 🔍 Prompt 4: Quality & Risk Review (Find Gaps, Fix Them)
+
+\`\`\`
+You are my quality reviewer and risk auditor. Your job is to break this output, find gaps, and then fix it.
+
+OUTPUT TO REVIEW:
+[PASTE YOUR DRAFT/PLAN/DOCUMENT HERE]
+
+CONTEXT / GOAL: ${contextForPrompts} I'm trying to: ${userRequirement}
+CONSTRAINTS: ${userRole?.id === 'business-owner' ? 'Business: ' + businessType + ' in ' + industry + ', Target: ' + targetAudience : '[YOUR CONSTRAINTS]'}
+NON-NEGOTIABLES: [POLICY/COMPLIANCE/STYLE RULES THAT CANNOT BE BROKEN]
+
+Return:
+
+A) Issues list (table):
+- Issue
+- Severity (Critical / High / Medium / Low)
+- Why it matters (1 line)
+- Exact fix (specific)
+
+B) Edge cases & failure scenarios:
+- List 10 scenarios the output doesn't handle well
+- For each: what breaks + how to patch it
+
+C) Final revised output:
+- Provide a revised version that fixes all Critical + High issues
+- Mark changes using **[CHANGED]** tags inline
+
+D) "Confidence check":
+- What assumptions remain?
+- What I should verify before using this in production?
+\`\`\`
+
+---
+
+### 🚀 Prompt 5: 14-Day Implementation Plan (Rollout with KPIs)
+
+\`\`\`
+You are my implementation lead. Create a 14-day rollout plan that proves value fast and avoids chaos.
+
+CURRENT STATE: [DESCRIBE HOW YOU DO THIS TODAY - or "No process yet"]
+TARGET STATE: ${userRequirement} solved using ${topTool?.name || 'the recommended solution'}
+TEAM / ROLES: ${userRole?.id === 'business-owner' ? 'Me (owner) + ' + (targetAudience ? 'team serving ' + targetAudience : 'small team') : userRole?.id === 'professional' ? 'Me (' + roleAndIndustry + ') + relevant colleagues' : '[PEOPLE INVOLVED]'}
+TOOLS AVAILABLE: [CURRENT TOOLS YOU USE + ${topTool?.name || 'new solution'}]
+CONSTRAINTS: ${userRole?.id === 'business-owner' ? industry + ' industry, ' + marketSegment + ' market' : '[TIME/BUDGET/POLICY]'}
+RISKS/CONCERNS: [WHAT COULD GO WRONG?]
+SUCCESS METRICS: [HOW WILL YOU KNOW IT'S WORKING?]
+
+Deliver:
+
+1) Pilot definition:
+   - Smallest scope that proves value (1–2 workflows)
+   - What will NOT be attempted in the pilot
+2) 14-day plan (day-by-day table):
+   - Day
+   - Owner
+   - Task
+   - Deliverable
+   - Success check
+3) Adoption plan:
+   - Training (30–60 min plan)
+   - Habits/rituals (what happens weekly)
+   - How to handle resistance
+4) KPI dashboard:
+   - 5 KPIs
+   - How to measure each
+   - Baseline estimate vs target
+5) Decision rule on Day 14:
+   - Scale if: [conditions]
+   - Iterate if: [conditions]
+   - Stop if: [conditions]
+6) "Quick wins" list:
+   - 5 wins you can deliver in the first 72 hours
+\`\`\`
+
+---
+
+💡 **Pro tip:** Run Prompt 1 first to clarify your problem, then use Prompt 3 to create your first artifact. You'll have real, usable outputs within 30 minutes—before your first vendor demo!
+`;
 
     try {
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
-      if (!apiKey) {
-        // Fallback response without API - still provide starter prompts
-        const topTool = companies[0];
-        const fallbackGuide = {
-          id: getNextMessageId(),
-          text: `## 🚀 Your Implementation Guide for ${topTool?.name || 'Your Solution'}
+      // Build the implementation guide header
+      const guideHeader = `## 🚀 Your Implementation Guide for ${topTool?.name || 'Your Solution'}
 
 ### 1️⃣ Where This Fits in Your Workflow
-This solution helps at the **processing & execution stage** - taking your inputs and automating the heavy lifting.
 
-### 2️⃣ What to Prepare (Checklist)
-Before you start:
-- ☐ 3-5 example documents/data you currently work with
-- ☐ Your current step-by-step process written down
-- ☐ List of edge cases or special situations
-- ☐ Your success metric (time saved? errors reduced?)
+This solution helps at the **${subDomainName}** stage of your ${domainName} operations:
+- **Intake:** Collecting and organizing your inputs
+- **Processing:** Automating analysis and generation
+- **Execution:** Delivering outputs to ${userRole?.id === 'business-owner' ? targetAudience : 'stakeholders'}
+
+### 2️⃣ What to Prepare Before You Start (Checklist)
+
+Before onboarding or running the prompts below:
+- ☐ **3-5 example documents/data** you currently work with
+- ☐ **Current workflow steps** written out (even rough notes)
+- ☐ **Edge cases list** - situations that don't fit the norm
+- ☐ **Success metric** - What does "solved" look like? (time saved? errors reduced? revenue impact?)
+- ☐ **Constraints** - Budget, timeline, compliance requirements
 
 ### 3️⃣ Minimal Pilot Plan (14 days)
-**Week 1:** Test with ONE workflow or use case
-**Week 2:** Expand to 2-3 similar cases, measure results
 
-### 4️⃣ Questions to Ask in Demo
-- "Can you show me a case study in my industry?"
-- "What's the typical setup time?"
-- "How does it handle [your edge case]?"
-- "What integrations are available?"
-- "What's the pricing for my scale?"
+**Week 1: Single Workflow Test**
+- Pick ONE specific use case from your ${subDomainName} work
+- Run it through ${topTool?.name || 'the solution'} end-to-end
+- Document what works and what doesn't
 
----
+**Week 2: Expand & Measure**
+- Add 2-3 similar cases
+- Track time saved vs. old process
+- Decide: scale, iterate, or stop
 
-## 🎯 Start RIGHT NOW - Starter Prompts
+### 4️⃣ Questions to Ask in Demo/Onboarding
 
-**While waiting for demos, use these prompts in ChatGPT/Claude:**
+When you talk to ${topTool?.name || 'the vendor'}:
+1. "Can you show a case study for ${industry || domainName}?"
+2. "What's the typical setup time for a ${userRole?.id === 'business-owner' ? businessType : 'team like mine'}?"
+3. "How do you handle [your biggest edge case]?"
+4. "What integrations are available for tools I already use?"
+5. "What's pricing for my scale: ${marketSegment || solutionFor || 'my current volume'}?"
+6. "What proof can you share? (accuracy data, customer results, security certifications)"
 
-### Prompt 1: Clarify Your Problem
-\`\`\`
-You are my analyst. Convert this into a clear one-page spec:
-Context: ${userRequirement}
-Goal: [WHAT SUCCESS LOOKS LIKE]
-Users: [WHO USES THIS]
-Constraints: [TIME/BUDGET/TOOLS]
-Output: problem statement, success metrics, top requirements, and non-goals.
-\`\`\`
+### 5️⃣ Decision Criteria
 
-### Prompt 2: Design Your Workflow
-\`\`\`
-Act as a process designer. Build a step-by-step workflow for:
-Problem: ${userRequirement}
-Inputs: [YOUR TYPICAL INPUTS]
-Outputs: [WHAT YOU NEED PRODUCED]
-Include: steps, handoffs, failure points, and where automation should happen.
-\`\`\`
+**Adopt if:**
+- Saves >30% time on target workflow
+- Accuracy meets your quality bar
+- Team can use it without constant support
 
-### Prompt 3: Create First Draft
-\`\`\`
-Create a ready-to-use first draft of:
-Artifact: [DOCUMENT/TEMPLATE/EMAIL/PLAN needed]
-Requirements: ${userRequirement}
-Tone: [Professional/Casual/Formal]
-Return: (1) full version (2) short version (3) checklist to use it.
-\`\`\`
+**Reject if:**
+- Setup takes >2 weeks with no quick wins
+- Doesn't handle your critical edge cases
+- Pricing doesn't scale with your growth
+`;
 
-### Prompt 4: Review for Gaps
-\`\`\`
-Critique and improve this for gaps, edge cases, and risks:
-[PASTE YOUR DRAFT HERE]
-Return: issues list (severity), fixes, and a revised improved version.
-\`\`\`
-
-### Prompt 5: Create Pilot Plan
-\`\`\`
-Create a 14-day rollout plan for implementing this in a small team:
-Current process: [HOW YOU DO IT NOW]
-Target process: [HOW YOU WANT IT TO WORK]
-Tools available: [YOUR CURRENT TOOLS]
-Return: day-by-day plan, owners, quick wins, KPIs, and review cadence.
-\`\`\`
-
----
-💡 **Pro tip:** Run these prompts NOW - you'll have real outputs before your first demo!`,
+      if (!apiKey) {
+        // Fallback response without API - provide the pre-filled prompts directly
+        const fallbackGuide = {
+          id: getNextMessageId(),
+          text: guideHeader + starterPrompts,
           sender: 'bot',
           timestamp: new Date()
         };
@@ -792,75 +915,45 @@ Return: day-by-day plan, owners, quick wins, KPIs, and review cadence.
         return;
       }
 
-      const implementationPrompt = `You are an expert implementation advisor. Create a COMPREHENSIVE, ACTIONABLE guide.
+      // With API: Generate a more personalized guide header, then append the standard prompts
+      const implementationPrompt = `You are an expert implementation advisor. Create a brief, personalized implementation guide header.
 
 USER CONTEXT:
+- User Type: ${userType}
 - Requirement: "${userRequirement}"
-- Profile: ${contextSummary}
-- Domain: ${selectedDomain?.name || 'General'}
-- Subdomain: ${selectedSubDomain || 'Not specified'}
+- Domain: ${domainName}
+- Subdomain: ${subDomainName}
+${userRole?.id === 'business-owner' ? `- Business: ${businessType}
+- Industry: ${industry}
+- Target Audience: ${targetAudience}
+- Market Segment: ${marketSegment}` : ''}
+${userRole?.id === 'professional' ? `- Role: ${roleAndIndustry}
+- Solution For: ${solutionFor}` : ''}
 
-RECOMMENDED TOOLS:
-${companies.map((c, i) => `${i + 1}. ${c.name}
-   - Problem: ${c.problem || 'Business automation'}
-   - Description: ${c.description || 'AI-powered solution'}
-   - Domain: ${c.domain || 'General'}`).join('\n')}
+RECOMMENDED TOOL: ${topTool?.name || 'AI Solution'}
+- What it solves: ${topTool?.problem || 'Business automation'}
+- Description: ${topTool?.description || 'AI-powered solution'}
 
-CREATE A GUIDE WITH THESE EXACT SECTIONS:
+Write ONLY these sections (keep it concise, ~300 words total):
 
-## 🚀 Your Implementation Guide for [TOP TOOL NAME]
+## 🚀 Your Implementation Guide for ${topTool?.name || 'Your Solution'}
 
 ### 1️⃣ Where This Fits in Your Workflow
-Explain which stage this plugs into:
-- Intake (input collection)
-- Processing (generation/analysis)
-- Review (approval/collaboration)
-- Execution (handoff/publish/send)
-- Monitoring (tracking/audits)
-Be specific to their use case.
+(2-3 sentences specific to their use case)
 
 ### 2️⃣ What to Prepare (Checklist)
-4-5 specific items they should gather NOW:
-- Example documents/data
-- Current workflow documentation
-- Edge cases list
-- Success metrics
+(5 bullet points with checkboxes, specific to their problem)
 
-### 3️⃣ Minimal Pilot Plan (3 Steps)
-Specific 14-day pilot:
-- Week 1: [specific first step]
-- Week 2: [expansion step]
-- Success criteria
+### 3️⃣ Your 14-Day Pilot Plan
+(Week 1 and Week 2, specific to their requirement)
 
 ### 4️⃣ Demo Questions to Ask
-5 specific questions for their demo call, tailored to their problem.
+(5 questions tailored to their specific situation)
 
-### 5️⃣ Start RIGHT NOW - Starter Prompts
-Provide 5 COPY-PASTE prompts they can use in ChatGPT/Claude IMMEDIATELY:
+### 5️⃣ Decision Criteria
+(Adopt if / Reject if - specific to their context)
 
-**Prompt 1: Clarify the Problem → Turn into Spec**
-Create a prompt that helps them document their problem clearly.
-
-**Prompt 2: Design the Workflow**
-Create a prompt that helps them map their process.
-
-**Prompt 3: Generate First Working Artifact**
-Create a prompt that produces something useful (document, template, plan).
-
-**Prompt 4: Quality/Risk/Edge-Case Review**
-Create a prompt that reviews and improves their work.
-
-**Prompt 5: Pilot Plan + Rollout**
-Create a prompt that creates their implementation plan.
-
-IMPORTANT:
-- Each prompt must be in code block format
-- Include placeholders like [PASTE YOUR DATA], [YOUR GOAL], etc.
-- Make prompts directly relevant to their specific requirement: "${userRequirement}"
-- Prompts must produce ACTIONABLE outputs, not vague advice
-- Add a pro tip at the end
-
-TONE: Friendly, practical, no jargon. User should feel empowered to start immediately.`;
+Be specific to their industry, role, and requirement. No generic advice.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -872,20 +965,20 @@ TONE: Friendly, practical, no jargon. User should feel empowered to start immedi
           model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: implementationPrompt },
-            { role: 'user', content: `Create a comprehensive implementation guide for: "${userRequirement}"` }
+            { role: 'user', content: `Create an implementation guide for: "${userRequirement}"` }
           ],
           temperature: 0.7,
-          max_tokens: 2000
+          max_tokens: 1000
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        const guide = data.choices[0]?.message?.content || '';
+        const personalizedHeader = data.choices[0]?.message?.content || guideHeader;
 
         const guideMessage = {
           id: getNextMessageId(),
-          text: guide + `\n\n---\n\n🎉 **You're all set!** Start with the prompts above while exploring ${companies[0]?.name || 'the recommended tools'}. Feel free to start a new conversation if you need more help!`,
+          text: personalizedHeader + starterPrompts,
           sender: 'bot',
           timestamp: new Date()
         };
@@ -895,62 +988,10 @@ TONE: Friendly, practical, no jargon. User should feel empowered to start immedi
       }
     } catch (error) {
       console.error('Error generating implementation guide:', error);
-      // Provide meaningful fallback with starter prompts
-      const topTool = companies[0];
+      // Provide the pre-filled prompts even on error
       const errorMessage = {
         id: getNextMessageId(),
-        text: `## 🚀 Quick Start Guide for ${topTool?.name || 'Your Solution'}
-
-### What to Do First
-1. **Prepare Examples** - Gather 3-5 samples of your current work
-2. **Document Your Process** - Write down your current steps
-3. **Define Success** - What would "solved" look like?
-
-### Demo Checklist
-When you talk to ${topTool?.name || 'the vendor'}:
-- Ask for a case study in your industry
-- Request a sandbox/trial environment
-- Clarify pricing for your scale
-- Understand integration requirements
-
----
-
-## 🎯 Start NOW - Use These Prompts in ChatGPT/Claude
-
-### Prompt 1: Problem Spec
-\`\`\`
-Convert this into a clear spec:
-Problem: ${userRequirement}
-Output: problem statement, success metrics, requirements list.
-\`\`\`
-
-### Prompt 2: Workflow Design
-\`\`\`
-Design a workflow for: ${userRequirement}
-Include: steps, inputs, outputs, handoffs, automation opportunities.
-\`\`\`
-
-### Prompt 3: First Draft
-\`\`\`
-Create a first draft for solving: ${userRequirement}
-Format: Ready-to-use document with checklist.
-\`\`\`
-
-### Prompt 4: Gap Analysis
-\`\`\`
-Review this solution for gaps and edge cases:
-[PASTE YOUR DRAFT]
-Return: issues, fixes, improved version.
-\`\`\`
-
-### Prompt 5: 14-Day Pilot Plan
-\`\`\`
-Create a 14-day pilot plan for: ${userRequirement}
-Include: daily tasks, owners, KPIs, review points.
-\`\`\`
-
----
-💡 Run these prompts NOW to make progress before any demo!`,
+        text: guideHeader + starterPrompts,
         sender: 'bot',
         timestamp: new Date()
       };
@@ -1308,20 +1349,6 @@ Include: daily tasks, owners, KPIs, review points.
                   message.text
                 )}
               </div>
-              {message.showQuickReplies && flowStage === 'domain' && (
-                <div className="quick-replies">
-                  {quickReplies.map((reply) => (
-                    <button
-                      key={reply.id}
-                      className="quick-reply-button"
-                      onClick={() => handleQuickReply(reply.id, reply.text)}
-                    >
-                      <span className="quick-reply-icon">{reply.icon}</span>
-                      <span className="quick-reply-text">{reply.text}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
               {message.showRoleOptions && flowStage === 'role' && (
                 <div className="role-options">
                   {roleOptions.map((role) => (
