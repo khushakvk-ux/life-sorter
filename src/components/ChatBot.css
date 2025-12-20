@@ -437,7 +437,7 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* Mobile Role Options - Compact 2 column grid with icons */
+/* Mobile Role Options - Compact 2 column grid, text only */
 @media (max-width: 480px) {
   .role-options {
     display: grid;
@@ -447,11 +447,11 @@
   }
 
   .role-option-button {
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    text-align: left;
-    padding: 8px 8px;
-    gap: 6px;
+    text-align: center;
+    padding: 10px 8px;
+    gap: 2px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -465,20 +465,12 @@
   }
 
   .role-emoji {
-    font-size: 1.1rem;
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(147, 89, 182, 0.15);
-    border-radius: 6px;
-    flex-shrink: 0;
+    display: none;
   }
 
   .role-info {
-    align-items: flex-start;
-    gap: 1px;
+    align-items: center;
+    gap: 2px;
     flex: 1;
     min-width: 0;
   }
@@ -486,7 +478,7 @@
   .role-text {
     font-size: 0.7rem;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.3;
     color: #ffffff;
   }
 
@@ -494,9 +486,6 @@
     font-size: 0.55rem;
     color: rgba(255, 255, 255, 0.5);
     display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
@@ -507,15 +496,9 @@
   }
 
   .role-option-button {
-    padding: 6px 6px;
-    gap: 4px;
+    padding: 8px 6px;
+    gap: 2px;
     border-radius: 6px;
-  }
-
-  .role-emoji {
-    font-size: 1rem;
-    width: 22px;
-    height: 22px;
   }
 
   .role-text {
@@ -1320,7 +1303,7 @@
     gap: 4px;
   }
 
-  /* Domain Chips - Compact grid with icons */
+  /* Domain Chips - Text only, compact grid */
   .domain-chips {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1328,15 +1311,16 @@
   }
 
   .domain-chip {
-    padding: 6px 4px;
-    flex-direction: column;
+    padding: 8px 6px;
+    flex-direction: row;
     text-align: center;
-    gap: 2px;
+    gap: 0;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    min-height: 44px;
+    min-height: 36px;
     justify-content: center;
+    align-items: center;
   }
 
   .domain-chip:active {
@@ -1345,13 +1329,13 @@
   }
 
   .domain-emoji {
-    font-size: 1rem;
+    display: none;
   }
 
   .domain-name {
-    font-size: 0.6rem;
-    line-height: 1.1;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.65rem;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
   }
 
@@ -1519,31 +1503,27 @@
 /* Extra Small Mobile - 360px and below */
 @media (max-width: 360px) {
   .message {
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 6px 10px;
+    gap: 6px;
   }
 
   .message-avatar {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .message-text {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
   }
 
   .domain-chips {
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 4px;
   }
 
   .domain-chip {
-    padding: 8px 4px;
-    min-height: 54px;
-  }
-
-  .domain-emoji {
-    font-size: 1.1rem;
+    padding: 6px 4px;
+    min-height: 32px;
   }
 
   .domain-name {
@@ -1551,27 +1531,27 @@
   }
 
   .subdomain-chip {
-    padding: 10px 12px;
-    font-size: 0.75rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
   }
 
   .input-wrapper {
-    padding: 6px 10px;
-    border-radius: 20px;
+    padding: 5px 8px;
+    border-radius: 18px;
   }
 
   .send-button {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .identity-form {
-    padding: 12px;
+    padding: 10px;
   }
 
   .identity-input {
-    padding: 12px 14px;
-    font-size: 0.9375rem;
+    padding: 10px 12px;
+    font-size: 0.875rem;
   }
 }
 
