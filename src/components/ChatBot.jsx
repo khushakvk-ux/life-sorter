@@ -72,7 +72,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "✨ Welcome to Ikshan! 😊\n\nI'll help you find the right AI tools, step by step.\n\nJust pick your domain 🚀 and we'll take it from there.",
+      text: "✨ Welcome to Ikshan! 😊\n\nTo find the right AI tools for your work,\nJust pick your domain.",
       sender: 'bot',
       timestamp: new Date()
     }
