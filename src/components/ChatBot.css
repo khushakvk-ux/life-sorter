@@ -1,8 +1,8 @@
 .chatbot-container {
   display: flex;
   flex-direction: column;
-  height: 90vh;
-  max-height: 90vh; /* Prevent container from exceeding viewport */
+  height: calc(100vh - 120px); /* Account for header/nav */
+  max-height: calc(100vh - 120px);
   max-width: 820px;
   width: 100%;
   margin: 0 auto;
@@ -25,14 +25,14 @@
 @media (max-width: 768px) {
   .chatbot-container {
     padding: 0 0.5rem;
-    height: 85vh; /* Fixed height for tablet */
+    height: calc(100vh - 80px); /* More space for tablet */
   }
 }
 
 @media (max-width: 480px) {
   .chatbot-container {
     padding: 0;
-    height: 80vh; /* Fixed height for mobile */
+    height: calc(100vh - 56px); /* Maximize mobile screen usage */
   }
 }
 
@@ -399,7 +399,7 @@
   padding: 1rem 1.25rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -416,8 +416,7 @@
 }
 
 .role-emoji {
-  font-size: 1.75rem;
-  flex-shrink: 0;
+  display: none;
 }
 
 .role-info {
@@ -437,6 +436,79 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* Mobile Role Options - Compact 2 column grid, text only */
+@media (max-width: 480px) {
+  .role-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .role-option-button {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 8px;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+  }
+
+  .role-option-button:hover,
+  .role-option-button:active {
+    background: rgba(147, 89, 182, 0.12);
+    border-color: rgba(147, 89, 182, 0.3);
+    transform: none;
+  }
+
+  .role-emoji {
+    display: none;
+  }
+
+  .role-info {
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .role-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #ffffff;
+  }
+
+  .role-description {
+    font-size: 0.55rem;
+    color: rgba(255, 255, 255, 0.5);
+    display: block;
+  }
+}
+
+/* Small mobile - even more compact */
+@media (max-width: 360px) {
+  .role-options {
+    gap: 4px;
+  }
+
+  .role-option-button {
+    padding: 8px 6px;
+    gap: 2px;
+    border-radius: 6px;
+  }
+
+  .role-text {
+    font-size: 0.65rem;
+  }
+
+  .role-description {
+    display: none;
+  }
+}
+
 /* Product Chips */
 .product-chips {
   display: grid;
@@ -449,7 +521,7 @@
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -469,8 +541,7 @@
 }
 
 .product-emoji {
-  font-size: 1.75rem;
-  flex-shrink: 0;
+  display: none;
 }
 
 .product-info {
@@ -492,19 +563,77 @@
   font-weight: 400;
 }
 
+/* Mobile Product Chips */
+@media (max-width: 480px) {
+  .product-chips {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .product-chip {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.65rem 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .product-chip:hover {
+    transform: none;
+  }
+
+  .product-emoji {
+    font-size: 1.25rem;
+  }
+
+  .product-info {
+    align-items: center;
+    gap: 0.1rem;
+  }
+
+  .product-name {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  .product-tagline {
+    display: none; /* Hide tagline on mobile for compact view */
+  }
+}
+
+@media (max-width: 360px) {
+  .product-chips {
+    gap: 0.4rem;
+  }
+
+  .product-chip {
+    padding: 0.5rem 0.35rem;
+    gap: 0.25rem;
+    border-radius: 8px;
+  }
+
+  .product-emoji {
+    font-size: 1.1rem;
+  }
+
+  .product-name {
+    font-size: 0.65rem;
+  }
+}
+
 /* Domain Chips */
 .domain-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .domain-chip {
   padding: 0.375rem 0.625rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.15s ease;
   display: inline-flex;
@@ -526,7 +655,7 @@
 }
 
 .domain-emoji {
-  font-size: 0.875rem;
+  display: none;
 }
 
 .domain-name {
@@ -538,14 +667,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .subdomain-chip {
   padding: 0.35rem 0.6rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  border-radius: 16px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.7rem;
   font-weight: 400;
@@ -1064,229 +1193,371 @@
   }
 }
 
-/* Mobile Styles - 480px and below */
+/* ========================================
+   MOBILE STYLES - Professional Redesign
+   ======================================== */
 @media (max-width: 480px) {
+  /* Container - Full screen mobile experience */
+  .chatbot-container {
+    padding: 0;
+    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px); /* Dynamic viewport for mobile browsers */
+  }
+
+  /* Messages Area - Tight, WhatsApp-style */
   .messages-container {
-    padding: 1rem 0;
+    padding: 4px 0;
   }
 
+  /* Message Bubbles - Compact */
   .message {
-    padding: 1rem 0.75rem;
-    gap: 0.75rem;
+    padding: 6px 12px;
+    gap: 8px;
   }
 
+  .bot-message {
+    background: transparent;
+  }
+
+  .user-message {
+    background: transparent;
+  }
+
+  /* Avatar - Minimal */
   .message-avatar {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .bot-message .message-avatar {
+    background: linear-gradient(135deg, #9359B6 0%, #3C8AD1 100%);
+    color: #ffffff;
   }
 
   .message-avatar svg {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
   }
 
+  /* Text Content - Readable */
   .message-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .message-text h2 {
-    font-size: 1.1rem;
-    margin: 1rem 0 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 8px 0 6px;
+    color: #ffffff;
   }
 
   .message-text h3 {
-    font-size: 1rem;
-    margin: 0.75rem 0 0.4rem;
+    font-size: 0.875rem;
+    margin: 6px 0 4px;
   }
 
   .message-text p {
-    margin: 0.5rem 0;
+    margin: 4px 0;
+  }
+
+  .message-text strong {
+    color: #60a5fa;
   }
 
   .message-text ul, .message-text ol {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
+    margin: 4px 0;
+    padding-left: 16px;
   }
 
   .message-text li {
-    margin: 0.3rem 0;
+    margin: 2px 0;
   }
 
+  /* Timestamp - Hidden on mobile for cleaner look */
   .message-time {
-    font-size: 0.65rem;
-    margin-top: 0.5rem;
+    display: none;
   }
 
-  /* Persistent Button Bar - Mobile */
+  /* Persistent Button Bar - Compact */
   .persistent-button-bar {
-    padding: 0.625rem 0.75rem;
-    max-height: 140px;
+    padding: 6px 8px;
+    max-height: 180px;
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .button-bar-label {
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .persistent-button-bar .domain-chips,
   .persistent-button-bar .subdomain-chips {
-    gap: 0.4rem;
+    gap: 4px;
   }
 
-  /* Domain Chips - Stack on small screens */
+  /* Message content - tighter gap */
+  .message-content {
+    gap: 8px;
+  }
+
+  /* Domain Chips - Text only, compact grid */
   .domain-chips {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 4px;
   }
 
   .domain-chip {
-    padding: 0.7rem 0.8rem;
-    flex-direction: column;
+    padding: 8px 6px;
+    flex-direction: row;
     text-align: center;
-    gap: 0.4rem;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    min-height: 36px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .domain-chip:active {
+    background: rgba(147, 89, 182, 0.15);
+    border-color: rgba(147, 89, 182, 0.3);
   }
 
   .domain-emoji {
-    font-size: 1.8rem;
+    display: none;
   }
 
   .domain-name {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
     line-height: 1.2;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
   }
 
-  /* Subdomain Chips - Full width for easy tapping */
+  /* Subdomain Chips - Compact list with wrap */
   .subdomain-chips {
-    flex-direction: column;
-    gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
   }
 
   .subdomain-chip {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    font-size: 0.9rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
     text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 450;
+    white-space: nowrap;
   }
 
-  /* Action Buttons - Full width */
+  .subdomain-chip:active {
+    background: rgba(147, 89, 182, 0.12);
+    border-color: rgba(147, 89, 182, 0.3);
+  }
+
+  /* Action Buttons - Compact with icons */
   .action-buttons {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
   }
 
   .action-button {
-    width: 100%;
-    padding: 0.85rem 1.25rem;
-    font-size: 0.95rem;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
     justify-content: center;
+    border-radius: 16px;
+    gap: 4px;
   }
 
-  /* Final Actions */
+  .action-button.primary {
+    background: linear-gradient(135deg, #9359B6 0%, #3C8AD1 100%);
+  }
+
+  .action-button.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* Final Actions - Row layout */
   .final-actions {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
   }
 
   .final-actions .action-button {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
   }
 
-  /* Input Area */
+  /* Input Area - Compact pill design */
   .input-container {
-    padding: 0.75rem;
+    padding: 6px 10px 12px;
+    background: transparent;
+    margin-bottom: 80px;
   }
 
   .input-wrapper {
-    padding: 0.7rem 0.9rem;
-    gap: 0.75rem;
+    padding: 6px 10px;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+  }
+
+  .input-wrapper:focus-within {
+    border-color: rgba(147, 89, 182, 0.4);
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .message-input {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    min-height: 20px;
+    padding: 2px 0;
+  }
+
+  .message-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
   }
 
   .send-button {
     width: 32px;
     height: 32px;
+    background: linear-gradient(135deg, #9359B6 0%, #3C8AD1 100%);
+    border-radius: 50%;
+    color: #ffffff;
+  }
+
+  .send-button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    opacity: 1;
   }
 
   .send-button svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
-  /* Identity Form - Better mobile layout */
+  /* Identity Form - Compact mobile */
   .identity-form {
-    padding: 1rem;
-    margin-top: 0.75rem;
+    padding: 12px;
+    margin-top: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+  }
+
+  .identity-form form {
+    gap: 8px;
   }
 
   .identity-input {
-    padding: 0.85rem 1rem;
-    font-size: 1rem; /* 1rem for better mobile input */
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .identity-input:focus {
+    border-color: rgba(147, 89, 182, 0.4);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   .form-error {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    color: #f87171;
   }
 
   .identity-form .action-button {
     width: 100%;
-    padding: 0.9rem 1.25rem;
-    font-size: 1rem;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    margin-top: 2px;
   }
 
   /* Typing Indicator */
   .typing-indicator {
-    gap: 0.3rem;
+    gap: 3px;
   }
 
   .typing-indicator span {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
+    background: rgba(147, 89, 182, 0.6);
   }
 }
 
 /* Extra Small Mobile - 360px and below */
 @media (max-width: 360px) {
   .message {
-    padding: 0.9rem 0.5rem;
-    gap: 0.6rem;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .message-avatar {
+    width: 22px;
+    height: 22px;
   }
 
   .message-text {
-    font-size: 0.85rem;
-  }
-
-  .domain-chips {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.5rem;
-  }
-
-  .domain-chip {
-    padding: 0.6rem 0.7rem;
-  }
-
-  .domain-emoji {
-    font-size: 1.5rem;
-  }
-
-  .domain-name {
     font-size: 0.75rem;
   }
 
+  .domain-chips {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .domain-chip {
+    padding: 6px 4px;
+    min-height: 32px;
+  }
+
+  .domain-name {
+    font-size: 0.6rem;
+  }
+
   .subdomain-chip {
-    padding: 0.75rem 0.9rem;
-    font-size: 0.85rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
   }
 
   .input-wrapper {
-    padding: 0.6rem 0.8rem;
+    padding: 5px 8px;
+    border-radius: 18px;
+  }
+
+  .send-button {
+    width: 28px;
+    height: 28px;
   }
 
   .identity-form {
-    padding: 0.9rem;
+    padding: 10px;
+  }
+
+  .identity-input {
+    padding: 10px 12px;
+    font-size: 0.875rem;
   }
 }
 
@@ -1337,14 +1608,53 @@
 /* Mobile voice button */
 @media (max-width: 480px) {
   .voice-button {
-    width: 32px;
-    height: 32px;
-    margin-right: 0.4rem;
+    width: 36px;
+    height: 36px;
+    margin-right: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .voice-button.recording {
+    background: #ef4444;
+    color: #ffffff;
   }
 
   .voice-button svg {
     width: 16px;
     height: 16px;
+  }
+}
+
+/* Mobile Auth Modal */
+@media (max-width: 480px) {
+  .auth-modal {
+    width: 92%;
+    padding: 24px 20px;
+    border-radius: 16px;
+    margin: 16px;
+  }
+
+  .auth-modal-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .auth-modal-content p {
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+  }
+
+  .google-signin-button {
+    padding: 14px 20px;
+    font-size: 0.9375rem;
+    border-radius: 10px;
+  }
+
+  .skip-auth-button {
+    padding: 12px 20px;
+    font-size: 0.875rem;
+    border-radius: 10px;
   }
 }
 

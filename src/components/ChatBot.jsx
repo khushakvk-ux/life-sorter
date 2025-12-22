@@ -72,7 +72,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "✨ Welcome to Ikshan! 😊\n\nI'll help you find the right AI tools, step by step.\n\nJust pick your domain 🚀 and we'll take it from there.",
+      text: "✨ Welcome to Ikshan! 😊",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -1446,7 +1446,7 @@ Be specific to their industry, role, and requirement. No generic advice.`;
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isRecording ? "Listening..." : "Type your message here..."}
+            placeholder={isRecording ? "Listening..." : "To find the right AI tools, just pick your domain."}
             className="message-input"
             rows="1"
           />
