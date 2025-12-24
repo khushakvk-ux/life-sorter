@@ -12,7 +12,7 @@
   overflow: hidden;
   font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 /* Responsive container widths */
@@ -44,6 +44,7 @@
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 0.25rem;
   min-height: 0;
   max-width: 800px;
