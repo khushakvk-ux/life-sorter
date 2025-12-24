@@ -1411,7 +1411,7 @@
   .input-container {
     padding: 6px 10px 12px;
     background: transparent;
-    margin-bottom: 80px;
+    margin-bottom: calc(50vh - 80px);
   }
 
   .input-wrapper {
