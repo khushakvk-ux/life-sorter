@@ -1,0 +1,232 @@
+.product-selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0a0f1e 0%, #101a3d 50%, #0d1530 100%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.product-selection-container {
+  max-width: 900px;
+  width: 100%;
+  text-align: center;
+}
+
+.back-button {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.selection-header {
+  margin-bottom: 3rem;
+}
+
+.selection-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #ffffff 0%, #9359B6 50%, #3C8AD1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.selection-header p {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Domain Grid */
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.domain-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.domain-card:hover,
+.domain-card.hovered {
+  background: rgba(147, 89, 182, 0.15);
+  border-color: rgba(147, 89, 182, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(147, 89, 182, 0.2);
+}
+
+.domain-card-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Subdomain Grid */
+.subdomain-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.subdomain-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.subdomain-card:hover {
+  background: rgba(147, 89, 182, 0.15);
+  border-color: rgba(147, 89, 182, 0.4);
+  transform: translateY(-2px);
+}
+
+.subdomain-text {
+  font-size: 0.95rem;
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .product-selection-overlay {
+    padding: 1rem;
+    align-items: flex-start;
+    padding-top: 5rem;
+  }
+
+  .back-button {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .selection-header {
+    margin-bottom: 2rem;
+  }
+
+  .selection-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .selection-header p {
+    font-size: 0.95rem;
+  }
+
+  .domain-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .domain-card {
+    padding: 1.25rem 0.75rem;
+    min-height: 70px;
+  }
+
+  .domain-card-name {
+    font-size: 0.85rem;
+  }
+
+  .subdomain-grid {
+    gap: 0.5rem;
+  }
+
+  .subdomain-card {
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+  }
+
+  .subdomain-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-selection-overlay {
+    padding: 0.75rem;
+    padding-top: 4rem;
+  }
+
+  .selection-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .selection-header p {
+    font-size: 0.875rem;
+  }
+
+  .domain-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .domain-card {
+    padding: 1rem 0.5rem;
+    min-height: 60px;
+    border-radius: 12px;
+  }
+
+  .domain-card-name {
+    font-size: 0.75rem;
+  }
+
+  .subdomain-card {
+    padding: 0.65rem 0.875rem;
+    border-radius: 14px;
+  }
+
+  .subdomain-text {
+    font-size: 0.8rem;
+  }
+}

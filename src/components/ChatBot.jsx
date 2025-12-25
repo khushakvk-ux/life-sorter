@@ -3,6 +3,7 @@ import { Send, Bot, User, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBot.css';
 import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
+import ProductSelection from './ProductSelection';
 
 const IdentityForm = ({ onSubmit }) => {
   const [name, setName] = useState('');
@@ -119,7 +120,8 @@ const ChatBot = () => {
     { id: 'finance', name: 'Finance', emoji: '💰' },
     { id: 'supply-chain', name: 'Supply chain', emoji: '🚚' },
     { id: 'research', name: 'Research', emoji: '🔬' },
-    { id: 'data-analysis', name: 'Data Analysis', emoji: '📊' }
+    { id: 'data-analysis', name: 'Data Analysis', emoji: '📊' },
+    { id: 'other', name: 'Other', emoji: '✨' }
   ];
 
   const roleOptions = [
@@ -304,17 +306,67 @@ const ChatBot = () => {
     setUserName(payload.name);
     setUserEmail(payload.email);
     setShowAuthModal(false);
-    window.location.reload();
+
+    // Continue in same chat - reset to domain selection
+    setSelectedDomain(null);
+    setSelectedSubDomain(null);
+    setUserRole(null);
+    setRequirement(null);
+    setBusinessContext({
+      businessType: null,
+      industry: null,
+      targetAudience: null,
+      marketSegment: null
+    });
+    setProfessionalContext({
+      roleAndIndustry: null,
+      solutionFor: null,
+      salaryContext: null
+    });
+    setFlowStage('domain');
+
+    // Add a message to continue the conversation
+    const botMessage = {
+      id: messageIdCounter.current++,
+      text: `Welcome back, ${payload.name}! 🚀\n\nLet's explore another idea. Pick a domain to get started:`,
+      sender: 'bot',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, botMessage]);
   };
 
   const handleStartNewIdea = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     if (clientId && isGoogleLoaded) {
+      // Show Google OAuth modal
       setShowAuthModal(true);
     } else {
-      // No Google Auth configured, just reload
-      window.location.reload();
+      // No Google Auth configured, just continue in same chat
+      setSelectedDomain(null);
+      setSelectedSubDomain(null);
+      setUserRole(null);
+      setRequirement(null);
+      setBusinessContext({
+        businessType: null,
+        industry: null,
+        targetAudience: null,
+        marketSegment: null
+      });
+      setProfessionalContext({
+        roleAndIndustry: null,
+        solutionFor: null,
+        salaryContext: null
+      });
+      setFlowStage('domain');
+
+      const botMessage = {
+        id: getNextMessageId(),
+        text: "Let's explore another idea! 🚀\n\nPick a domain to get started:",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
     }
   };
 
@@ -336,7 +388,6 @@ const ChatBot = () => {
 
   const handleDomainClick = (domain) => {
     setSelectedDomain(domain);
-    setFlowStage('subdomain');
 
     const userMessage = {
       id: getNextMessageId(),
@@ -345,14 +396,26 @@ const ChatBot = () => {
       timestamp: new Date()
     };
 
-    const botMessage = {
-      id: getNextMessageId(),
-      text: `Great choice! Now pick a specific area from the options below:`,
-      sender: 'bot',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage, botMessage]);
+    // Handle "Other" domain differently
+    if (domain.id === 'other') {
+      setFlowStage('other-domain');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `No problem! Tell us about your domain.\n\n**What area or industry do you work in?**\n\n_(e.g., Education, Healthcare, Real Estate, Agriculture, Entertainment, etc.)_`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+    } else {
+      setFlowStage('subdomain');
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Great choice! Now pick a specific area from the options below:`,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage, botMessage]);
+    }
 
     // Save domain selection to sheet
     saveToSheet(`Selected Domain: ${domain.name}`, '', domain.name, '');
@@ -449,58 +512,22 @@ const ChatBot = () => {
       timestamp: new Date()
     };
 
-    // Business Owner Flow
+    // Business Owner Flow - simplified (removed industry, target audience, market segment questions)
     if (userRole?.id === 'business-owner') {
       if (flowStage === 'role-q1') {
-        // Q1: What kind of business
+        // Q1: What kind of business - then go directly to requirement
         setBusinessContext(prev => ({ ...prev, businessType: answer }));
-        setFlowStage('role-q2');
-        const botMessage = {
-          id: getNextMessageId(),
-          text: `Got it! 👍\n\n**Which sector or industry is your business in?**\n\n_(e.g., Technology, Healthcare, Education, Fashion, Food & Beverage, Finance, etc.)_`,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage, botMessage]);
-
-      } else if (flowStage === 'role-q2') {
-        // Q2: Which industry/sector
-        setBusinessContext(prev => ({ ...prev, industry: answer }));
-        setFlowStage('role-q3');
-        const botMessage = {
-          id: getNextMessageId(),
-          text: `Interesting! 🎯\n\n**Who is your target audience?**\n\n_(e.g., Young professionals aged 25-35, Small business owners, Parents with young children, B2B enterprise clients, etc.)_`,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage, botMessage]);
-
-      } else if (flowStage === 'role-q3') {
-        // Q3: Target audience
-        setBusinessContext(prev => ({ ...prev, targetAudience: answer }));
-        setFlowStage('role-q4');
-        const botMessage = {
-          id: getNextMessageId(),
-          text: `Perfect! Last question about your business: 📊\n\n**What market segment do you target?**\n\n• **Size:** Small businesses / SMBs / Mid-market / Enterprises\n• **Reach:** Local / National / Global\n\n_(e.g., "SMBs, National" or "Enterprises, Global")_`,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage, botMessage]);
-
-      } else if (flowStage === 'role-q4') {
-        // Q4: Market segment - now ask the main problem
-        setBusinessContext(prev => ({ ...prev, marketSegment: answer }));
         setFlowStage('requirement');
         const botMessage = {
           id: getNextMessageId(),
-          text: `Excellent! Now I have a good picture of your business. 🎉\n\n**What specific problem are you trying to solve right now?**\n\n_(Tell me in 2-3 lines what challenge you're facing and what success would look like for you)_`,
+          text: `Got it! 👍\n\n**What specific problem are you trying to solve right now?**\n\n_(Tell me in 2-3 lines what challenge you're facing and what success would look like for you)_`,
           sender: 'bot',
           timestamp: new Date()
         };
         setMessages(prev => [...prev, userMessage, botMessage]);
 
         // Save business context to sheet
-        saveToSheet(`Business Context: ${JSON.stringify({ ...businessContext, marketSegment: answer })}`, '', selectedDomain?.name, selectedSubDomain);
+        saveToSheet(`Business Context: ${JSON.stringify({ ...businessContext, businessType: answer })}`, '', selectedDomain?.name, selectedSubDomain);
       }
 
     // Professional Flow
@@ -1260,6 +1287,28 @@ Be specific to their industry, role, and requirement. No generic advice.`;
       return;
     }
 
+    // Handle 'other' domain - user tells us their domain
+    if (flowStage === 'other-domain') {
+      // Update the domain name with what user typed
+      setSelectedDomain({ id: 'other', name: currentInput, emoji: '✨' });
+      setSelectedSubDomain(currentInput); // Use their input as the subdomain too
+      setFlowStage('role');
+
+      const botMessage = {
+        id: getNextMessageId(),
+        text: `Got it! **${currentInput}** - that's interesting! 🎯\n\nNow tell me a bit about yourself:`,
+        sender: 'bot',
+        timestamp: new Date(),
+        showRoleOptions: true
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+
+      // Save to sheet
+      saveToSheet(`Custom Domain: ${currentInput}`, '', currentInput, currentInput);
+      return;
+    }
+
     // Handle role question stages (step-by-step questioning)
     if (flowStage.startsWith('role-q')) {
       // Remove the user message we already added above, since handleRoleQuestion will add it
@@ -1305,9 +1354,10 @@ Be specific to their industry, role, and requirement. No generic advice.`;
     if (flowStage === 'complete') {
       const botMessage = {
         id: getNextMessageId(),
-        text: `Thank you for your interest! Our team will review your requirements and get back to you soon. If you'd like to start a new conversation, please click "Start Another Idea" above.`,
+        text: `Great! Feel free to explore more AI tools for different needs. Just click the button below to check another idea! 🚀`,
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        showFinalActions: true
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -1371,12 +1421,12 @@ Be specific to their industry, role, and requirement. No generic advice.`;
               )}
               {message.showFinalActions && (
                 <div className="final-actions">
-                  <button className="action-button secondary" onClick={handleStartNewIdea}>
-                    🔄 Start Another Idea
+                  <button className="action-button primary" onClick={handleStartNewIdea}>
+                    🚀 Check Another Idea
                   </button>
                   {message.companies && message.companies.length > 0 && (
                     <button
-                      className="action-button primary"
+                      className="action-button secondary"
                       onClick={() => handleLearnImplementation(message.companies, message.userRequirement)}
                     >
                       📚 Learn How to Implement
@@ -1407,37 +1457,19 @@ Be specific to their industry, role, and requirement. No generic advice.`;
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Persistent Button Bar - Above input for better UX */}
+      {/* Product Selection Overlay */}
       {(flowStage === 'domain' || flowStage === 'subdomain') && (
-        <div className="persistent-button-bar">
-          {flowStage === 'domain' && (
-            <div className="domain-chips">
-              {domains.map((domain) => (
-                <button
-                  key={domain.id}
-                  className="domain-chip"
-                  onClick={() => handleDomainClick(domain)}
-                >
-                  <span className="domain-emoji">{domain.emoji}</span>
-                  <span className="domain-name">{domain.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {flowStage === 'subdomain' && selectedDomain && (
-            <div className="subdomain-chips">
-              {subDomains[selectedDomain.id]?.map((subDomain, index) => (
-                <button
-                  key={index}
-                  className="subdomain-chip"
-                  onClick={() => handleSubDomainClick(subDomain)}
-                >
-                  {subDomain}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductSelection
+          domains={domains}
+          subDomains={subDomains}
+          selectedDomain={flowStage === 'subdomain' ? selectedDomain : null}
+          onDomainSelect={handleDomainClick}
+          onSubDomainSelect={handleSubDomainClick}
+          onBack={() => {
+            setSelectedDomain(null);
+            setFlowStage('domain');
+          }}
+        />
       )}
 
       <div className="input-container">
