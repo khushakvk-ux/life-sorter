@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Package } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import ChatBot from './components/ChatBot';
 import ProductSection from './components/ProductSection';
 import { ThemeProvider } from './context/ThemeContext';
@@ -52,6 +53,8 @@ function AppContent() {
       <footer className="app-footer">
         <p>&copy; 2025 Ikshan. All rights reserved. Empowering businesses with AI innovation.</p>
       </footer>
+
+      <Analytics />
     </div>
   );
 }
