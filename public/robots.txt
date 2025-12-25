@@ -1,0 +1,6 @@
+# Robots.txt for Ikshan
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://ikshan.ai/sitemap.xml
