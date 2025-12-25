@@ -1354,9 +1354,10 @@ Be specific to their industry, role, and requirement. No generic advice.`;
     if (flowStage === 'complete') {
       const botMessage = {
         id: getNextMessageId(),
-        text: `Thank you for your interest! Our team will review your requirements and get back to you soon. If you'd like to start a new conversation, please click "Start Another Idea" above.`,
+        text: `Great! Feel free to explore more AI tools for different needs. Just click the button below to check another idea! 🚀`,
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        showFinalActions: true
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -1420,12 +1421,12 @@ Be specific to their industry, role, and requirement. No generic advice.`;
               )}
               {message.showFinalActions && (
                 <div className="final-actions">
-                  <button className="action-button secondary" onClick={handleStartNewIdea}>
-                    🔄 Start Another Idea
+                  <button className="action-button primary" onClick={handleStartNewIdea}>
+                    🚀 Check Another Idea
                   </button>
                   {message.companies && message.companies.length > 0 && (
                     <button
-                      className="action-button primary"
+                      className="action-button secondary"
                       onClick={() => handleLearnImplementation(message.companies, message.userRequirement)}
                     >
                       📚 Learn How to Implement
