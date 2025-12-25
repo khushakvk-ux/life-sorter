@@ -1,11 +1,12 @@
-import { Moon, Droplet, Leaf } from 'lucide-react';
+import { useState } from 'react';
+import { Package } from 'lucide-react';
 import ChatBot from './components/ChatBot';
 import ProductSection from './components/ProductSection';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
 function AppContent() {
-  const { theme, toggleTheme } = useTheme();
+  const [showProducts, setShowProducts] = useState(false);
 
   return (
     <div className="app">
@@ -15,14 +16,12 @@ function AppContent() {
           <span className="logo-text">Ikshan</span>
         </div>
         <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Change theme"
-          title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} theme - Click to cycle`}
+          className="products-button"
+          onClick={() => setShowProducts(true)}
+          aria-label="View Products"
+          title="View our AI Products"
         >
-          {theme === 'dark' && <Moon size={20} />}
-          {theme === 'blue' && <Droplet size={20} />}
-          {theme === 'green' && <Leaf size={20} />}
+          <Package size={20} />
         </button>
       </header>
 
@@ -30,11 +29,25 @@ function AppContent() {
         <section className="hero-chat-section" id="chat">
           <ChatBot />
         </section>
-
-        <section className="products-section-wrapper" id="products">
-          <ProductSection />
-        </section>
       </main>
+
+      {/* Products Page Overlay */}
+      {showProducts && (
+        <div className="products-page-overlay">
+          <div className="products-page-header">
+            <button
+              className="back-to-chat-button"
+              onClick={() => setShowProducts(false)}
+            >
+              ← Back to Chat
+            </button>
+            <h1>Our AI Products</h1>
+          </div>
+          <div className="products-page-content">
+            <ProductSection />
+          </div>
+        </div>
+      )}
 
       <footer className="app-footer">
         <p>&copy; 2025 Ikshan. All rights reserved. Empowering businesses with AI innovation.</p>
