@@ -10,6 +10,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: 2rem;
+  padding-top: 100px; /* Space for header */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   animation: fadeIn 0.3s ease;
