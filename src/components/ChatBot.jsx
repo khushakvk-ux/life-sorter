@@ -530,69 +530,22 @@ const ChatBot = () => {
         saveToSheet(`Business Context: ${JSON.stringify({ ...businessContext, businessType: answer })}`, '', selectedDomain?.name, selectedSubDomain);
       }
 
-    // Professional Flow
+    // Professional Flow - simplified (go directly to requirement)
     } else if (userRole?.id === 'professional') {
       if (flowStage === 'role-q1') {
-        // Q1: Role and industry
+        // Q1: Role and industry - then go directly to requirement
         setProfessionalContext(prev => ({ ...prev, roleAndIndustry: answer }));
-        setFlowStage('role-q2');
-        const botMessage = {
-          id: getNextMessageId(),
-          text: `Thanks for sharing! 👍\n\n**Are you looking for a solution for yourself personally, or for the company/team you work for?**\n\n_(e.g., "For myself to be more productive" or "For my team/department" or "For the whole company")_`,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage, botMessage]);
-
-      } else if (flowStage === 'role-q2') {
-        // Q2: For self or company
-        setProfessionalContext(prev => ({ ...prev, solutionFor: answer }));
-
-        // Check if the context involves salary/compensation
-        const lowerAnswer = answer.toLowerCase();
-        const prevContext = (selectedSubDomain || '').toLowerCase() + ' ' + (selectedDomain?.name || '').toLowerCase();
-        const isSalaryRelated = ['salary', 'compensation', 'pay', 'payroll', 'wage', 'bonus'].some(term =>
-          lowerAnswer.includes(term) || prevContext.includes(term)
-        );
-
-        if (isSalaryRelated) {
-          setFlowStage('role-q3');
-          const botMessage = {
-            id: getNextMessageId(),
-            text: `I notice this might involve compensation. Let me clarify: 💰\n\n**Is this about your own salary/compensation, or about employee payroll/company compensation structure?**\n\n_(This helps me recommend the right type of solution)_`,
-            sender: 'bot',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, userMessage, botMessage]);
-        } else {
-          // Skip salary question and go to requirement
-          setFlowStage('requirement');
-          const botMessage = {
-            id: getNextMessageId(),
-            text: `Great context! 🎉\n\n**What's the specific situation and goal you're trying to achieve?**\n\n_(Tell me in 2-3 lines what problem you're facing and what success would look like)_`,
-            sender: 'bot',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, userMessage, botMessage]);
-
-          // Save professional context to sheet
-          saveToSheet(`Professional Context: ${JSON.stringify({ ...professionalContext, solutionFor: answer })}`, '', selectedDomain?.name, selectedSubDomain);
-        }
-
-      } else if (flowStage === 'role-q3') {
-        // Q3: Salary context (only if salary-related)
-        setProfessionalContext(prev => ({ ...prev, salaryContext: answer }));
         setFlowStage('requirement');
         const botMessage = {
           id: getNextMessageId(),
-          text: `Got it! Now I understand the context better. 🎉\n\n**What's the specific situation and goal you're trying to achieve?**\n\n_(Tell me in 2-3 lines what problem you're facing and what success would look like)_`,
+          text: `Thanks for sharing! 👍\n\n**What's the specific problem you're trying to solve?**\n\n_(Tell me in 2-3 lines what challenge you're facing and what success would look like)_`,
           sender: 'bot',
           timestamp: new Date()
         };
         setMessages(prev => [...prev, userMessage, botMessage]);
 
         // Save professional context to sheet
-        saveToSheet(`Professional Context: ${JSON.stringify({ ...professionalContext, salaryContext: answer })}`, '', selectedDomain?.name, selectedSubDomain);
+        saveToSheet(`Professional Context: ${JSON.stringify({ ...professionalContext, roleAndIndustry: answer })}`, '', selectedDomain?.name, selectedSubDomain);
       }
 
     // Freelancer Flow - simplified (go directly to requirement)
