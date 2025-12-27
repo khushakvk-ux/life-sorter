@@ -6,20 +6,44 @@ import Papa from 'papaparse';
  */
 export async function fetchCompaniesCSV() {
   try {
-    const response = await fetch('/AI SaaS Biz - Research .csv');
+    // Try different possible filenames
+    const possiblePaths = [
+      '/AI SaaS Biz - Research .csv',
+      '/AI SaaS Biz - Research.csv',
+      '/ai-saas-biz.csv',
+      '/AI-SaaS-Biz-Research.csv'
+    ];
 
-    if (!response.ok) {
-      console.warn('CSV file not found, using fallback data');
-      return [];
+    let csvText = null;
+    let successPath = null;
+
+    for (const path of possiblePaths) {
+      try {
+        const response = await fetch(path);
+        if (response.ok) {
+          csvText = await response.text();
+          successPath = path;
+          console.log(`✅ CSV loaded from: ${path}`);
+          break;
+        }
+      } catch (e) {
+        continue;
+      }
     }
 
-    const csvText = await response.text();
+    if (!csvText) {
+      console.warn('❌ CSV file not found at any expected path');
+      return [];
+    }
 
     return new Promise((resolve, reject) => {
       Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
+          console.log(`📊 Total companies loaded: ${results.data.length}`);
+          console.log('📋 Sample row:', results.data[0]);
+          console.log('🔑 CSV Headers:', Object.keys(results.data[0] || {}));
           resolve(results.data);
         },
         error: (error) => {
@@ -43,15 +67,34 @@ export async function fetchCompaniesCSV() {
  */
 export function filterCompaniesByDomain(companies, domain, subdomain) {
   if (!companies || companies.length === 0) {
+    console.warn('⚠️ No companies data to filter');
     return [];
   }
 
-  // Normalize domain for matching (remove hyphens, lowercase)
-  const normalizedDomain = domain?.toLowerCase().replace(/-/g, ' ').trim();
+  console.log(`🔍 Filtering for domain: "${domain}", subdomain: "${subdomain}"`);
+  console.log(`📦 Total companies before filter: ${companies.length}`);
+
+  // Map domain IDs to expected sheet/category names
+  const domainMap = {
+    'marketing': ['marketing', 'mktg'],
+    'sales-support': ['sales and customer support', 'sales', 'customer support', 'crm'],
+    'social-media': ['social media', 'social'],
+    'legal': ['legal', 'law'],
+    'hr-hiring': ['hr and talent hiring', 'hr', 'human resources', 'talent', 'hiring', 'recruitment'],
+    'finance': ['finance', 'financial', 'fintech'],
+    'supply-chain': ['supply chain', 'logistics', 'procurement'],
+    'research': ['research', 'r&d'],
+    'data-analysis': ['data analysis', 'analytics', 'business intelligence', 'bi']
+  };
+
+  // Get possible domain names
+  const possibleDomainNames = domainMap[domain?.toLowerCase()] || [domain?.toLowerCase().replace(/-/g, ' ')];
   const normalizedSubdomain = subdomain?.toLowerCase().trim();
 
-  return companies.filter(company => {
-    // Check various column names that might contain domain info
+  console.log(`🎯 Looking for domain names: ${possibleDomainNames.join(', ')}`);
+
+  const filtered = companies.filter(company => {
+    // Get all possible domain field names
     const companyDomain = (
       company.Domain ||
       company.domain ||
@@ -59,6 +102,9 @@ export function filterCompaniesByDomain(companies, domain, subdomain) {
       company.category ||
       company.Industry ||
       company.industry ||
+      company['Focus Area'] ||
+      company['Sheet'] ||
+      company['Tab'] ||
       ''
     ).toLowerCase().trim();
 
@@ -68,23 +114,41 @@ export function filterCompaniesByDomain(companies, domain, subdomain) {
       company.Subcategory ||
       company.subcategory ||
       company['Sub-domain'] ||
+      company['Use Case'] ||
       ''
     ).toLowerCase().trim();
 
-    // Match domain
-    const domainMatch = companyDomain.includes(normalizedDomain) ||
-                       normalizedDomain.includes(companyDomain);
+    // Check if company domain matches any of the possible domain names
+    const domainMatch = possibleDomainNames.some(domainName =>
+      companyDomain === domainName ||
+      companyDomain.includes(domainName) ||
+      domainName.includes(companyDomain)
+    );
+
+    if (!domainMatch) {
+      return false;
+    }
 
     // If subdomain provided, match it too
     if (subdomain && companySubdomain) {
-      return domainMatch && (
+      const subdomainMatch =
         companySubdomain.includes(normalizedSubdomain) ||
-        normalizedSubdomain.includes(companySubdomain)
-      );
+        normalizedSubdomain.includes(companySubdomain);
+
+      if (subdomainMatch) {
+        console.log(`✅ Match found: ${company.Name || company.Company} (Domain: ${companyDomain}, Subdomain: ${companySubdomain})`);
+      }
+
+      return subdomainMatch;
     }
 
-    return domainMatch;
+    console.log(`✅ Match found: ${company.Name || company.Company} (Domain: ${companyDomain})`);
+    return true;
   });
+
+  console.log(`📊 Filtered results: ${filtered.length} companies`);
+
+  return filtered;
 }
 
 /**
@@ -100,19 +164,41 @@ export function formatCompaniesForDisplay(companies, limit = 5) {
 
   const limitedCompanies = companies.slice(0, limit);
 
-  return limitedCompanies.map(company => {
+  return limitedCompanies.map((company, index) => {
     const name = company.Name || company.name || company.Company || company.company || 'Unknown';
-    const description = company.Description || company.description || company.Product || company.product || '';
+    const problem = company.Problem || company.problem || '';
+    const solution = company['What they do'] || company.Solution || company.solution || '';
+    const differentiator = company.Differentiator || company.differentiator || company['Key Feature'] || '';
+    const funding = company.Funding || company.funding || '';
     const url = company.URL || company.url || company.Website || company.website || '';
+    const country = company.Country || company.country || company.Location || '';
 
-    let formatted = `- **${name}**`;
+    let formatted = `**${name}**`;
 
-    if (description) {
-      formatted += `: ${description}`;
+    if (country) {
+      formatted += ` (${country})`;
+    }
+
+    formatted += '\n\n';
+
+    if (problem) {
+      formatted += `- **Problem:** ${problem}\n`;
+    }
+
+    if (solution) {
+      formatted += `- **What they do:** ${solution}\n`;
+    }
+
+    if (differentiator) {
+      formatted += `- **Differentiator:** ${differentiator}\n`;
+    }
+
+    if (funding) {
+      formatted += `- **Funding:** ${funding}\n`;
     }
 
     if (url) {
-      formatted += ` ([Visit](${url}))`;
+      formatted += `- **Website:** [Visit](${url})\n`;
     }
 
     return formatted;
