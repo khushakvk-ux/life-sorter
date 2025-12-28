@@ -3500,42 +3500,49 @@
 }
 
 .copy-btn-slim {
-  padding: 0.4rem 0.6rem;
-  background: rgba(16, 185, 129, 0.2);
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
-  border-radius: 6px;
-  color: #34d399;
+  border-radius: 8px;
+  color: white;
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .copy-btn-slim:hover {
-  background: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .copy-btn-slim.copied {
-  background: #10b981;
+  background: linear-gradient(135deg, #34d399, #10b981);
   color: white;
 }
 
 .prompt-preview {
   margin: 0.75rem 0 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
   white-space: pre-wrap;
   overflow: hidden;
-  max-height: 60px;
+  max-height: 100px;
   font-family: 'Monaco', 'Menlo', monospace;
+  border-left: 3px solid #10b981;
 }
 
 .customize-hint {
   margin: 0;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  color: #34d399;
+  font-weight: 500;
 }
 
 .customize-hint code {

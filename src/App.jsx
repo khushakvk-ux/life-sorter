@@ -1,25 +1,12 @@
-import { useState, useRef } from 'react';
-import { LayoutGrid, MessageSquare, Package } from 'lucide-react';
-import ChatBot from './components/ChatBot';
+import { useState } from 'react';
+import { Package } from 'lucide-react';
 import ChatBotHorizontal from './components/ChatBotHorizontal';
 import ProductSection from './components/ProductSection';
 import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
 function AppContent() {
-  const [viewMode, setViewMode] = useState('vertical'); // 'vertical' | 'horizontal'
   const [showProducts, setShowProducts] = useState(false);
-  const productsRef = useRef(null);
-
-  const handleProductsClick = () => {
-    if (viewMode === 'vertical') {
-      // Scroll to products section
-      productsRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // Toggle products modal/overlay in horizontal mode
-      setShowProducts(!showProducts);
-    }
-  };
 
   return (
     <div className="app">
@@ -51,27 +38,9 @@ function AppContent() {
         </div>
         
         <div className="header-controls">
-          {/* View Mode Toggle */}
-          <div className="view-toggle">
-            <button
-              className={`view-btn ${viewMode === 'vertical' ? 'active' : ''}`}
-              onClick={() => setViewMode('vertical')}
-              title="Classic Chat View"
-            >
-              <MessageSquare size={18} />
-            </button>
-            <button
-              className={`view-btn ${viewMode === 'horizontal' ? 'active' : ''}`}
-              onClick={() => setViewMode('horizontal')}
-              title="Step Card View (Beta)"
-            >
-              <LayoutGrid size={18} />
-            </button>
-          </div>
-          
           <button
             className="products-btn"
-            onClick={handleProductsClick}
+            onClick={() => setShowProducts(!showProducts)}
             aria-label="View Products"
             title="View Our Products"
           >
@@ -83,17 +52,11 @@ function AppContent() {
 
       <main className="main-content">
         <section className="hero-chat-section" id="chat">
-          {viewMode === 'vertical' ? <ChatBot /> : <ChatBotHorizontal />}
+          <ChatBotHorizontal />
         </section>
 
-        {viewMode === 'vertical' && (
-          <section className="products-section-wrapper" id="products" ref={productsRef}>
-            <ProductSection />
-          </section>
-        )}
-
-        {/* Products Overlay for Horizontal Mode */}
-        {viewMode === 'horizontal' && showProducts && (
+        {/* Products Overlay */}
+        {showProducts && (
           <div className="products-overlay">
             <div className="products-overlay-content">
               <button className="close-overlay" onClick={() => setShowProducts(false)}>

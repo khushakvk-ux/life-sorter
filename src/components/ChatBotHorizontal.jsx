@@ -755,127 +755,220 @@ Be warm and conversational. Reference their specific answers. Max 2-3 follow-up 
     setTimeout(() => setCopiedPrompt(null), 2000);
   };
 
-  // Generate starter prompts based on user context
+  // Generate dynamic prompts based on deep dive conversation
   const getStarterPrompts = () => {
     const domainName = domains.find(d => d.id === selections.domain)?.name || 'your domain';
-    const roleName = roleOptions.find(r => r.id === selections.role)?.text || 'user';
+    const roleName = roleOptions.find(r => r.id === selections.role)?.text || 'professional';
     const topTool = searchResults.companies[0];
     
-    const contextForPrompts = `I'm a ${roleName} working in ${domainName}, focusing on ${selections.subdomain}.`;
+    // Extract conversation context from deep dive
+    const userMessages = consultantMessages.filter(m => m.role === 'user').map(m => m.content);
+    const aiMessages = consultantMessages.filter(m => m.role === 'assistant').map(m => m.content);
     
+    // Build rich context from the conversation
+    const conversationSummary = userMessages.length > 0 
+      ? userMessages.join('\n- ') 
+      : selections.details || 'Not specified';
+    
+    // Extract key insights from AI responses
+    const keyInsights = deepInsights || (aiMessages.length > 0 
+      ? aiMessages[aiMessages.length - 1].slice(0, 300) 
+      : '');
+    
+    // Create detailed context block that's already filled in
+    const filledContext = `
+## My Situation
+- **Role:** ${roleName}
+- **Domain:** ${domainName}
+- **Focus Area:** ${selections.subdomain || 'General'}
+- **Initial Problem:** ${selections.details || 'Need AI automation solution'}
+
+## From Our Deep Dive Conversation
+${userMessages.length > 0 ? userMessages.map((msg, i) => `- ${msg}`).join('\n') : '- No additional context provided yet'}
+
+## Key Insights Identified
+${keyInsights || 'Seeking solutions for process optimization and efficiency improvements'}
+
+## Recommended Tool
+${topTool ? `${topTool.name} - ${topTool.description || 'AI solution for your use case'}` : 'Exploring AI solutions'}
+`.trim();
+
     return [
       {
-        id: 'clarify',
-        title: '📋 Clarify Your Problem',
-        description: 'Convert your situation into a decision-ready spec',
-        prompt: `You are my senior operations analyst. Convert my situation into a decision-ready one-page spec with zero fluff.
+        id: 'solution',
+        title: '🎯 Build My Solution',
+        description: 'Get a complete implementation plan based on our conversation',
+        prompt: `You are an expert ${domainName} consultant. Based on my specific situation, create a detailed, actionable solution.
 
-CONTEXT (messy notes): ${contextForPrompts} My problem: ${selections.details}
-GOAL (desired outcome): [DESCRIBE WHAT SUCCESS LOOKS LIKE]
-WHO IT AFFECTS (users/teams): [WHO USES THIS]
-CONSTRAINTS (time/budget/tools/policy): [LIST YOUR CONSTRAINTS]
-WHAT I'VE TRIED (if any): [PAST ATTEMPTS OR "None yet"]
-DEADLINE/URGENCY: [WHEN DO YOU NEED THIS SOLVED?]
+${filledContext}
 
-Deliver exactly these sections:
+## What I Need From You
 
-1) One-sentence problem statement (include impact)
-2) 3 user stories (Primary / Secondary / Admin)
-3) Success metrics (3–5) with how to measure each
-4) Scope:
-   - In-scope (5 bullets)
-   - Out-of-scope (5 bullets)
-5) Requirements:
-   - Must-have (top 5, testable)
-   - Nice-to-have (top 5)
-6) Constraints & assumptions (bulleted)
-7) Top risks + mitigations (5)
-8) "First 48 hours" plan (3 concrete actions)
+1. **Solution Overview** (2-3 paragraphs)
+   - Exactly how to solve my specific problem
+   - Why this approach will work for my situation
 
-Ask ONLY 3 clarifying questions if required.`
+2. **Step-by-Step Implementation** (numbered, detailed)
+   - Each step should be actionable TODAY
+   - Include specific tools, templates, or scripts needed
+   - Time estimate for each step
+
+3. **Quick Wins** (3 things I can do in the next 30 minutes)
+   - Immediate actions that show progress
+   - Low effort, high impact
+
+4. **Potential Roadblocks & Solutions**
+   - What might go wrong
+   - How to handle each issue
+
+5. **Success Metrics**
+   - How will I know this is working?
+   - What should I measure?
+
+Be specific to MY situation - don't give generic advice. Reference my actual problem and context.`
       },
       {
-        id: 'workflow',
-        title: '🔄 Design Your Workflow',
-        description: 'Create swimlanes + automation map',
-        prompt: `Act as a process architect. Design a workflow that actually works in real life.
+        id: 'template',
+        title: '📄 Create My Template',
+        description: 'Generate a ready-to-use document for your specific need',
+        prompt: `You are a senior ${domainName} expert. Create a professional, ready-to-use template based on my exact situation.
 
-PROBLEM: ${selections.details}
-USERS/ROLES: ${roleName} and relevant stakeholders
-INPUTS: [WHAT DATA/DOCUMENTS/INFO DO YOU START WITH?]
-OUTPUTS: [WHAT DO YOU NEED PRODUCED?]
-CONSTRAINTS: Working in ${domainName}, focusing on ${selections.subdomain}
-VOLUME (how often): [DAILY/WEEKLY/MONTHLY + approx count]
+${filledContext}
 
-Output:
+## Template Request
 
-A) Workflow overview (5–8 steps, numbered)
-B) Swimlane workflow (by role)
-C) Failure points & exceptions (10 likely failure modes)
-D) Automation opportunities (quick wins vs needs changes)
-E) Controls & QA (checks before / during / after)
-F) Time estimate per step + total cycle time`
+Create a complete, fill-in-the-blank template that I can use immediately. The template should:
+
+1. **Be specific to my situation** - not generic
+2. **Include example content** filled in based on my context
+3. **Have clear [PLACEHOLDERS]** only for things you genuinely don't know
+4. **Be professionally formatted** and ready to share
+
+Also provide:
+- A "completed example" showing how it looks when filled out
+- 5 tips for customizing this template
+- Common mistakes to avoid
+
+Output the template in a format I can copy directly into Google Docs or Word.`
       },
       {
-        id: 'artifact',
-        title: '📄 Generate First Artifact',
-        description: 'Create a ready-to-use document/template',
-        prompt: `You are an expert practitioner. Produce a real, ready-to-use first draft AND a reusable template.
+        id: 'automation',
+        title: '⚡ Automate This For Me',
+        description: 'Get specific automation scripts and workflows',
+        prompt: `You are an automation expert specializing in ${domainName}. Build me a practical automation based on my exact situation.
 
-ARTIFACT TYPE: [DOC/TEMPLATE/EMAIL/CONTRACT/PLAN/SOP/REPORT]
-AUDIENCE: [WHO WILL READ/USE IT]
-CONTEXT: ${contextForPrompts} Problem: ${selections.details}
-REQUIREMENTS: [SPECIFIC REQUIREMENTS]
-TONE/STYLE: [Professional/Casual/Formal/Technical]
+${filledContext}
 
-Deliver:
+## Automation Request
 
-1) Version A — "Ready to send/use" (complete)
-2) Version B — "Short version" (<= 40% length)
-3) Version C — Fill-in-the-blank template
-4) Checklist — 10-item QA checklist
-5) Notes — 5 common mistakes to avoid`
+Create automation solutions I can implement TODAY:
+
+### Option 1: No-Code Solution (Zapier/Make/n8n)
+- Exact workflow steps
+- Which triggers and actions to use
+- How to connect the tools
+
+### Option 2: Google Sheets + Apps Script
+- Complete script I can copy-paste
+- How to set it up (step-by-step with screenshots description)
+- How to trigger it (manually, on schedule, etc.)
+
+### Option 3: AI Prompt Automation
+- Prompts I can save and reuse
+- How to batch process multiple items
+- Integration with my existing tools
+
+For each option:
+- Time to implement
+- Cost (free vs paid)
+- Maintenance required
+- Limitations
+
+Recommend which option is best for MY specific situation and why.`
       },
       {
-        id: 'review',
-        title: '🔍 Quality & Risk Review',
-        description: 'Find gaps and fix them',
-        prompt: `You are my quality reviewer and risk auditor. Your job is to break this output, find gaps, and fix it.
+        id: 'analyze',
+        title: '🔍 Analyze My Situation',
+        description: 'Deep analysis with specific recommendations',
+        prompt: `You are a senior business analyst specializing in ${domainName}. Perform a thorough analysis of my situation.
 
-OUTPUT TO REVIEW:
-[PASTE YOUR DRAFT/PLAN/DOCUMENT HERE]
+${filledContext}
 
-CONTEXT / GOAL: ${contextForPrompts} I'm trying to: ${selections.details}
-CONSTRAINTS: ${domainName} domain, ${selections.subdomain} focus area
+## Analysis Request
 
-Return:
+Provide a comprehensive analysis:
 
-A) Issues list (table with Severity: Critical/High/Medium/Low)
-B) Edge cases & failure scenarios (10 scenarios)
-C) Final revised output with **[CHANGED]** tags
-D) "Confidence check" - assumptions to verify`
+### 1. Root Cause Analysis
+- What's really causing my problem?
+- Hidden factors I might not have considered
+- How this connects to bigger issues
+
+### 2. Opportunity Assessment
+- What's the potential improvement (time/money/quality)?
+- Quick wins vs long-term gains
+- ROI estimate if applicable
+
+### 3. Competitive Landscape
+- How do others in ${domainName} solve this?
+- Best practices I should know about
+- Emerging trends and tools
+
+### 4. Risk Analysis
+- What could go wrong with different approaches?
+- How to mitigate each risk
+- Warning signs to watch for
+
+### 5. Prioritized Recommendations
+- Top 3 actions ranked by impact
+- For each: effort required, timeline, expected outcome
+- What to do first, second, third
+
+Be brutally honest - tell me what I need to hear, not what I want to hear.`
       },
       {
-        id: 'implement',
-        title: '🚀 14-Day Implementation Plan',
-        description: 'Rollout plan with KPIs',
-        prompt: `You are my implementation lead. Create a 14-day rollout plan that proves value fast.
+        id: 'pitch',
+        title: '🚀 Help Me Get Buy-In',
+        description: 'Create a compelling pitch for stakeholders',
+        prompt: `You are a persuasion expert. Help me get buy-in for solving my problem from stakeholders/management.
 
-CURRENT STATE: [HOW YOU DO THIS TODAY]
-TARGET STATE: ${selections.details} solved using ${topTool?.name || 'AI solution'}
-TEAM / ROLES: ${roleName} + relevant team members
-TOOLS AVAILABLE: [CURRENT TOOLS + new solution]
-CONSTRAINTS: ${domainName} domain constraints
-SUCCESS METRICS: [HOW WILL YOU KNOW IT'S WORKING?]
+${filledContext}
 
-Deliver:
+## Create a Compelling Pitch
 
-1) Pilot definition (smallest scope that proves value)
-2) 14-day plan (day-by-day table)
-3) Adoption plan (training, habits, resistance handling)
-4) KPI dashboard (5 KPIs with baselines)
-5) Decision rule on Day 14 (scale/iterate/stop conditions)
-6) "Quick wins" list (5 wins in first 72 hours)`
+### 1. Executive Summary (2-3 sentences)
+- The problem in business terms
+- The solution in one line
+- The expected outcome
+
+### 2. Problem Statement
+- Current state (pain points, costs, risks)
+- Impact on business (quantified if possible)
+- Why this matters NOW
+
+### 3. Proposed Solution
+- What we'll do (high-level)
+- Why this approach (vs alternatives)
+- Proof it works (examples, case studies)
+
+### 4. Investment & Returns
+- Time/resources needed
+- Expected benefits (be specific)
+- Timeline to see results
+
+### 5. Risk Mitigation
+- What could go wrong
+- How we'll handle it
+- Fallback options
+
+### 6. Call to Action
+- Specific ask (budget, approval, resources)
+- Next steps if approved
+- Decision deadline
+
+Also provide:
+- 3 likely objections and responses
+- A one-page visual summary I can present
+- Email template to send to decision makers`
       }
     ];
   };
@@ -1294,9 +1387,9 @@ Deliver:
                           )}
                           {cat.id === 'prompts' && (
                             <>
-                              <span className="preview-chip green">Clarify</span>
-                              <span className="preview-chip green">Design</span>
-                              <span className="preview-chip green">Generate</span>
+                              <span className="preview-chip green">Solution</span>
+                              <span className="preview-chip green">Automate</span>
+                              <span className="preview-chip green">Analyze</span>
                             </>
                           )}
                           {cat.id === 'workflows' && (
@@ -1362,8 +1455,8 @@ Deliver:
 
                     {expandedSection === 'prompts' && (
                       <div className="panel-content">
-                        <h4>📝 Action Prompts</h4>
-                        <p className="panel-desc">Copy these prompts into ChatGPT, Claude, or Gemini for instant results</p>
+                        <h4>📝 Action Prompts — Personalized For You</h4>
+                        <p className="panel-desc">These prompts include YOUR context from our conversation. Just copy, paste, and get instant results!</p>
                         
                         <div className="platform-bar">
                           <span><strong>ChatGPT</strong> - General tasks</span>
@@ -1377,18 +1470,18 @@ Deliver:
                               <div className="prompt-item-header">
                                 <span className="prompt-num">{idx + 1}</span>
                                 <div>
-                                  <strong>{prompt.title.replace(/^[📋🔄📄🔍🚀]\s*/, '')}</strong>
+                                  <strong>{prompt.title.replace(/^[📋🔄📄🔍🚀🎯⚡]\s*/, '')}</strong>
                                   <p>{prompt.description}</p>
                                 </div>
                                 <button 
                                   className={`copy-btn-slim ${copiedPrompt === prompt.id ? 'copied' : ''}`}
                                   onClick={() => copyToClipboard(prompt.prompt, prompt.id)}
                                 >
-                                  {copiedPrompt === prompt.id ? '✓' : '📋'}
+                                  {copiedPrompt === prompt.id ? '✓ Copied!' : '📋 Copy'}
                                 </button>
                               </div>
-                              <pre className="prompt-preview">{prompt.prompt.slice(0, 150)}...</pre>
-                              <p className="customize-hint">✏️ Edit: <code>[YOUR GOAL]</code>, <code>[CONSTRAINTS]</code>, <code>[DEADLINE]</code></p>
+                              <pre className="prompt-preview">{prompt.prompt.slice(0, 250)}...</pre>
+                              <p className="customize-hint">✅ Your context is already included — just copy and paste!</p>
                             </div>
                           ))}
                         </div>
