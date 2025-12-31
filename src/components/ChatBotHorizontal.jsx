@@ -1156,9 +1156,16 @@ Also provide:
                 </button>
               ))}
             </div>
-            <button className="skip-link" onClick={nextStep}>
-              Skip - I'll tell you later →
-            </button>
+            <div className="tools-actions">
+              {selections.currentTools.length > 0 && (
+                <button className="primary-btn" onClick={nextStep}>
+                  Continue with {selections.currentTools.length} tool{selections.currentTools.length > 1 ? 's' : ''} <ChevronRight size={20} />
+                </button>
+              )}
+              <button className="skip-link" onClick={nextStep}>
+                {selections.currentTools.length > 0 ? 'Skip anyway →' : "Skip - I'll tell you later →"}
+              </button>
+            </div>
           </div>
         );
 

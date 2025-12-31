@@ -2745,6 +2745,40 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* Tools Actions Container */
+.tools-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.tools-actions .primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #9359B6, #3C8AD1);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.tools-actions .primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(147, 89, 182, 0.4);
+}
+
+.tools-actions .skip-link {
+  margin-top: 0;
+}
+
 /* ========================================
    NEW DEEP DIVE STEP - GUIDED MODE
    ======================================== */
