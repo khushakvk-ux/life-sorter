@@ -1171,7 +1171,6 @@ Also provide:
                 <span>Deep Dive Mode</span>
               </div>
               <h2>Let me understand your situation better</h2>
-              <p>Most people describe symptoms, not root causes. A few questions will help me find the <strong>right</strong> solution.</p>
             </div>
 
             <div className="consultant-chat" ref={consultantChatRef}>
