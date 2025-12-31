@@ -1062,15 +1062,14 @@ Also provide:
           <div className="step-content">
             <h2>What area are you interested in?</h2>
             <p>Select your primary domain</p>
-            <div className="options-grid">
+            <div className="options-list">
               {domains.map((domain) => (
                 <button
                   key={domain.id}
-                  className={`option-card ${selections.domain === domain.id ? 'selected' : ''}`}
+                  className={`option-pill ${selections.domain === domain.id ? 'selected' : ''}`}
                   onClick={() => handleDomainSelect(domain.id)}
                 >
-                  <span className="option-emoji">{domain.emoji}</span>
-                  <span className="option-text">{domain.name}</span>
+                  {domain.emoji} {domain.name}
                 </button>
               ))}
             </div>
