@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3 } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3, Chrome, Zap, Brain, Copy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBotNew.css';
 import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
@@ -7,7 +7,207 @@ import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser
 // Generate unique message IDs to prevent React key conflicts
 const generateUniqueId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+// ============================================
+// SOLUTION RECOMMENDATIONS DATA
+// ============================================
+
+// Chrome Extensions & Plugins mapped to categories
+const CHROME_EXTENSIONS_DATA = {
+  'social-media': [
+    { name: 'Buffer', url: 'https://chrome.google.com/webstore/detail/buffer', description: 'Schedule posts across all social platforms', free: true },
+    { name: 'Hootsuite', url: 'https://chrome.google.com/webstore/detail/hootsuite', description: 'Social media management dashboard', free: false },
+    { name: 'Canva', url: 'https://chrome.google.com/webstore/detail/canva', description: 'Create stunning social graphics instantly', free: true }
+  ],
+  'seo-leads': [
+    { name: 'SEOquake', url: 'https://chrome.google.com/webstore/detail/seoquake', description: 'Instant SEO metrics for any page', free: true },
+    { name: 'Keywords Everywhere', url: 'https://chrome.google.com/webstore/detail/keywords-everywhere', description: 'See search volume on Google', free: false },
+    { name: 'Hunter.io', url: 'https://chrome.google.com/webstore/detail/hunter', description: 'Find email addresses from any website', free: true },
+    { name: 'Ubersuggest', url: 'https://chrome.google.com/webstore/detail/ubersuggest', description: 'SEO insights and keyword ideas', free: true }
+  ],
+  'ads-marketing': [
+    { name: 'Facebook Pixel Helper', url: 'https://chrome.google.com/webstore/detail/facebook-pixel-helper', description: 'Debug your Facebook pixel', free: true },
+    { name: 'Google Tag Assistant', url: 'https://chrome.google.com/webstore/detail/tag-assistant', description: 'Verify Google tags are working', free: true },
+    { name: 'Adblock (for competitor research)', url: 'https://chrome.google.com/webstore/detail/adblock', description: 'See ads competitors are running', free: true }
+  ],
+  'automation': [
+    { name: 'Bardeen', url: 'https://chrome.google.com/webstore/detail/bardeen', description: 'Automate any repetitive browser task', free: true },
+    { name: 'Zapier', url: 'https://chrome.google.com/webstore/detail/zapier', description: 'Connect apps and automate workflows', free: true },
+    { name: 'Data Scraper', url: 'https://chrome.google.com/webstore/detail/data-scraper', description: 'Extract data from web pages', free: true }
+  ],
+  'productivity': [
+    { name: 'Notion Web Clipper', url: 'https://chrome.google.com/webstore/detail/notion-web-clipper', description: 'Save anything to Notion', free: true },
+    { name: 'Loom', url: 'https://chrome.google.com/webstore/detail/loom', description: 'Record quick video messages', free: true },
+    { name: 'Grammarly', url: 'https://chrome.google.com/webstore/detail/grammarly', description: 'Write better emails and docs', free: true },
+    { name: 'Otter.ai', url: 'https://chrome.google.com/webstore/detail/otter', description: 'AI meeting notes & transcription', free: true }
+  ],
+  'research': [
+    { name: 'Similar Web', url: 'https://chrome.google.com/webstore/detail/similarweb', description: 'Website traffic insights', free: true },
+    { name: 'Wappalyzer', url: 'https://chrome.google.com/webstore/detail/wappalyzer', description: 'See what tech websites use', free: true },
+    { name: 'ChatGPT for Google', url: 'https://chrome.google.com/webstore/detail/chatgpt-for-google', description: 'AI answers alongside search', free: true }
+  ],
+  'finance': [
+    { name: 'DocuSign', url: 'https://chrome.google.com/webstore/detail/docusign', description: 'E-sign documents from browser', free: false },
+    { name: 'Expensify', url: 'https://chrome.google.com/webstore/detail/expensify', description: 'Capture receipts instantly', free: true }
+  ],
+  'support': [
+    { name: 'Intercom', url: 'https://chrome.google.com/webstore/detail/intercom', description: 'Customer messaging platform', free: false },
+    { name: 'Zendesk', url: 'https://chrome.google.com/webstore/detail/zendesk', description: 'Support ticket management', free: false },
+    { name: 'Tidio', url: 'https://chrome.google.com/webstore/detail/tidio', description: 'Live chat + AI chatbot', free: true }
+  ]
+};
+
+// Custom GPTs mapped to problem categories
+const CUSTOM_GPTS_DATA = {
+  'content-creation': [
+    { name: 'Canva GPT', url: 'https://chat.openai.com/g/canva', description: 'Design social posts with AI', rating: '4.8' },
+    { name: 'Copywriter GPT', url: 'https://chat.openai.com/g/copywriter', description: 'Write converting ad copy', rating: '4.7' },
+    { name: 'Video Script Writer', url: 'https://chat.openai.com/g/video-script', description: 'Scripts for YouTube & Reels', rating: '4.6' }
+  ],
+  'seo-marketing': [
+    { name: 'SEO GPT', url: 'https://chat.openai.com/g/seo', description: 'Keyword research & optimization', rating: '4.8' },
+    { name: 'Blog Post Generator', url: 'https://chat.openai.com/g/blog-generator', description: 'SEO-optimized articles', rating: '4.7' },
+    { name: 'Landing Page Expert', url: 'https://chat.openai.com/g/landing-page', description: 'High-converting page copy', rating: '4.5' }
+  ],
+  'sales-leads': [
+    { name: 'Cold Email GPT', url: 'https://chat.openai.com/g/cold-email', description: 'Personalized outreach emails', rating: '4.6' },
+    { name: 'Sales Pitch Creator', url: 'https://chat.openai.com/g/sales-pitch', description: 'Compelling sales scripts', rating: '4.5' },
+    { name: 'LinkedIn Outreach', url: 'https://chat.openai.com/g/linkedin-outreach', description: 'Professional connection messages', rating: '4.4' }
+  ],
+  'automation': [
+    { name: 'Automation Expert', url: 'https://chat.openai.com/g/automation', description: 'Design workflow automations', rating: '4.7' },
+    { name: 'Zapier Helper', url: 'https://chat.openai.com/g/zapier-helper', description: 'Build Zaps step by step', rating: '4.5' },
+    { name: 'Excel Formula GPT', url: 'https://chat.openai.com/g/excel-formula', description: 'Complex formulas explained', rating: '4.8' }
+  ],
+  'data-analysis': [
+    { name: 'Data Analyst GPT', url: 'https://chat.openai.com/g/data-analyst', description: 'Analyze data & create charts', rating: '4.9' },
+    { name: 'SQL Expert', url: 'https://chat.openai.com/g/sql-expert', description: 'Write & optimize queries', rating: '4.7' },
+    { name: 'Dashboard Designer', url: 'https://chat.openai.com/g/dashboard', description: 'Plan effective dashboards', rating: '4.5' }
+  ],
+  'legal-contracts': [
+    { name: 'Contract Reviewer', url: 'https://chat.openai.com/g/contract-review', description: 'Spot risky clauses', rating: '4.6' },
+    { name: 'Legal Document Drafter', url: 'https://chat.openai.com/g/legal-drafter', description: 'Draft basic agreements', rating: '4.5' }
+  ],
+  'hr-recruiting': [
+    { name: 'Job Description Writer', url: 'https://chat.openai.com/g/job-description', description: 'Compelling job posts', rating: '4.7' },
+    { name: 'Interview Question GPT', url: 'https://chat.openai.com/g/interview-questions', description: 'Role-specific questions', rating: '4.6' },
+    { name: 'Resume Reviewer', url: 'https://chat.openai.com/g/resume-reviewer', description: 'Screen candidates faster', rating: '4.5' }
+  ],
+  'customer-support': [
+    { name: 'Support Response GPT', url: 'https://chat.openai.com/g/support-response', description: 'Draft customer replies', rating: '4.6' },
+    { name: 'FAQ Generator', url: 'https://chat.openai.com/g/faq-generator', description: 'Build knowledge bases', rating: '4.5' }
+  ],
+  'personal-productivity': [
+    { name: 'Task Prioritizer', url: 'https://chat.openai.com/g/task-prioritizer', description: 'Organize your to-dos', rating: '4.7' },
+    { name: 'Meeting Summarizer', url: 'https://chat.openai.com/g/meeting-summarizer', description: 'Notes from transcripts', rating: '4.8' },
+    { name: 'Learning Coach', url: 'https://chat.openai.com/g/learning-coach', description: 'Personalized study plans', rating: '4.6' }
+  ]
+};
+
+// Function to get relevant extensions based on category
+const getRelevantExtensions = (category, goal) => {
+  const categoryLower = (category || '').toLowerCase();
+  const goalLower = (goal || '').toLowerCase();
+  
+  let extensions = [];
+  
+  if (categoryLower.includes('social') || categoryLower.includes('content') || categoryLower.includes('post')) {
+    extensions = [...(CHROME_EXTENSIONS_DATA['social-media'] || [])];
+  }
+  if (categoryLower.includes('seo') || categoryLower.includes('lead') || categoryLower.includes('google')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['seo-leads'] || [])];
+  }
+  if (categoryLower.includes('ad') || categoryLower.includes('marketing') || categoryLower.includes('roi')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['ads-marketing'] || [])];
+  }
+  if (categoryLower.includes('automate') || categoryLower.includes('workflow') || goalLower.includes('save-time')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['automation'] || [])];
+  }
+  if (categoryLower.includes('meeting') || categoryLower.includes('email') || categoryLower.includes('draft')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['productivity'] || [])];
+  }
+  if (categoryLower.includes('competitor') || categoryLower.includes('research') || categoryLower.includes('trend')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['research'] || [])];
+  }
+  if (categoryLower.includes('finance') || categoryLower.includes('invoice') || categoryLower.includes('expense')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['finance'] || [])];
+  }
+  if (categoryLower.includes('support') || categoryLower.includes('ticket') || categoryLower.includes('chat')) {
+    extensions = [...extensions, ...(CHROME_EXTENSIONS_DATA['support'] || [])];
+  }
+  
+  // Deduplicate and limit
+  const unique = [...new Map(extensions.map(e => [e.name, e])).values()];
+  return unique.slice(0, 4);
+};
+
+// Function to get relevant GPTs based on category
+const getRelevantGPTs = (category, goal, role) => {
+  const categoryLower = (category || '').toLowerCase();
+  const goalLower = (goal || '').toLowerCase();
+  const roleLower = (role || '').toLowerCase();
+  
+  let gpts = [];
+  
+  if (categoryLower.includes('content') || categoryLower.includes('social') || categoryLower.includes('video')) {
+    gpts = [...(CUSTOM_GPTS_DATA['content-creation'] || [])];
+  }
+  if (categoryLower.includes('seo') || categoryLower.includes('blog') || categoryLower.includes('landing')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['seo-marketing'] || [])];
+  }
+  if (categoryLower.includes('lead') || categoryLower.includes('sales') || categoryLower.includes('outreach')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['sales-leads'] || [])];
+  }
+  if (categoryLower.includes('automate') || categoryLower.includes('excel') || goalLower.includes('save-time')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['automation'] || [])];
+  }
+  if (categoryLower.includes('dashboard') || categoryLower.includes('data') || categoryLower.includes('analytics')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['data-analysis'] || [])];
+  }
+  if (categoryLower.includes('contract') || categoryLower.includes('legal') || roleLower.includes('legal')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['legal-contracts'] || [])];
+  }
+  if (categoryLower.includes('hire') || categoryLower.includes('interview') || categoryLower.includes('recruit') || roleLower.includes('hr')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['hr-recruiting'] || [])];
+  }
+  if (categoryLower.includes('support') || categoryLower.includes('ticket') || categoryLower.includes('customer')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['customer-support'] || [])];
+  }
+  if (goalLower.includes('personal') || categoryLower.includes('plan') || categoryLower.includes('learning')) {
+    gpts = [...gpts, ...(CUSTOM_GPTS_DATA['personal-productivity'] || [])];
+  }
+  
+  // Deduplicate and limit
+  const unique = [...new Map(gpts.map(g => [g.name, g])).values()];
+  return unique.slice(0, 3);
+};
+
+// Generate immediate action prompt based on context
+const generateImmediatePrompt = (goal, role, category, requirement) => {
+  const goalText = goal === 'grow-revenue' ? 'increase revenue' : 
+                   goal === 'save-time' ? 'save time and automate' :
+                   goal === 'better-decisions' ? 'make better decisions' : 'improve and grow';
+  
+  return `Act as my expert AI consultant. I need to ${goalText}.
+
+**My Context:**
+- Role: ${role || 'Business Professional'}
+- Problem Area: ${category || 'General business improvement'}
+- Specific Need: ${requirement || '[Describe your specific situation]'}
+
+**Your Task:**
+1. Analyze my situation and identify the TOP 3 quick wins I can implement TODAY
+2. For each quick win, provide:
+   - A clear 2-step action plan
+   - Expected time to complete (be realistic)
+   - Expected impact (low/medium/high)
+3. Then suggest ONE longer-term solution worth investigating
+
+Keep your response actionable and practical. No fluff - just tell me exactly what to do.`;
+};
+
+// ============================================
 // Categories data structure based on CSV - Maps Goal + Role to Categories
+// ============================================
 const CATEGORIES_DATA = {
   'grow-revenue': {
     'founder-owner': [
@@ -1117,7 +1317,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
 
     const botMessage = {
       id: getNextMessageId(),
-      text: `Thank you, ${name}! Let me analyze existing solutions and suggest next steps...`,
+      text: `Thank you, ${name}! 🎯\n\nAnalyzing your requirements and finding the best solutions...`,
       sender: 'bot',
       timestamp: new Date()
     };
@@ -1125,91 +1325,161 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
     setMessages(prev => [...prev, botMessage]);
     setIsTyping(true);
 
-    await saveToSheet(`User Identity: ${name} (${email})`, '', selectedDomain?.name, selectedSubDomain);
+    await saveToSheet(`User Identity: ${name} (${email})`, '', selectedCategory, requirement);
 
     setTimeout(async () => {
       try {
-        const userContext = {
-          role: userRole?.id,
-          roleText: userRole?.text,
-          ...(userRole?.id === 'business-owner' && {
-            businessType: businessContext.businessType,
-            industry: businessContext.industry,
-            targetAudience: businessContext.targetAudience,
-            marketSegment: businessContext.marketSegment
-          }),
-          ...(userRole?.id === 'professional' && {
-            roleAndIndustry: professionalContext.roleAndIndustry,
-            solutionFor: professionalContext.solutionFor,
-            salaryContext: professionalContext.salaryContext
-          }),
-          ...(userRole?.id === 'freelancer' && {
-            freelanceType: businessContext.businessType,
-            challenge: businessContext.targetAudience
-          })
-        };
-
+        // Get goal and role labels for display
+        const goalLabel = goalOptions.find(g => g.id === selectedGoal)?.text || selectedGoal;
+        const roleLabel = roleOptions.find(r => r.id === userRole)?.text || customRole || userRole;
+        
+        // Search for relevant companies from CSV
         const searchResponse = await fetch('/api/search-companies', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            domain: selectedDomain?.id,
-            subdomain: selectedSubDomain,
+            domain: selectedCategory,
+            subdomain: selectedCategory,
             requirement: requirement,
-            userContext: userContext
+            goal: selectedGoal,
+            role: userRole,
+            userContext: {
+              goal: selectedGoal,
+              role: userRole,
+              category: selectedCategory
+            }
           })
         });
 
         const searchData = await searchResponse.json();
-        const relevantCompanies = searchData.companies || [];
-        const helpfulResponse = searchData.helpfulResponse || '';
+        const relevantCompanies = (searchData.companies || []).slice(0, 4);
+        
+        // Get relevant Chrome extensions and GPTs
+        const extensions = getRelevantExtensions(selectedCategory, selectedGoal);
+        const customGPTs = getRelevantGPTs(selectedCategory, selectedGoal, userRole);
+        
+        // Generate the immediate action prompt
+        const immediatePrompt = generateImmediatePrompt(selectedGoal, roleLabel, selectedCategory, requirement);
 
-        let marketAnalysis = '';
+        // Build comprehensive solution response
+        let solutionResponse = `# 🎯 Your Personalized Solution Stack\n\n`;
+        solutionResponse += `> **Goal:** ${goalLabel} | **Role:** ${roleLabel}\n`;
+        solutionResponse += `> **Focus Area:** ${selectedCategory || 'General'}\n\n`;
+        solutionResponse += `---\n\n`;
 
-        if (helpfulResponse) {
-          marketAnalysis = `## Here's what I found for you\n\n${helpfulResponse}\n\n`;
-        } else if (relevantCompanies.length > 0) {
-          marketAnalysis = `## Here are some tools that could help\n\n`;
+        // Section 1: AI-Powered Startups/Companies
+        solutionResponse += `## 🚀 Recommended AI Tools & Startups\n\n`;
+        if (relevantCompanies.length > 0) {
           relevantCompanies.forEach((company, i) => {
-            marketAnalysis += `**${company.name}** - ${company.problem || company.description || 'An AI-powered solution that could help with your needs'}\n\n`;
+            solutionResponse += `### ${i + 1}. ${company.name}\n`;
+            solutionResponse += `${company.problem || company.description || 'AI-powered solution for your needs'}\n\n`;
+            if (company.differentiator) {
+              solutionResponse += `**Why it's different:** ${company.differentiator}\n\n`;
+            }
           });
         } else {
-          marketAnalysis = `## Let me help you\n\nI'm looking into the best tools for your needs in ${selectedDomain?.name || 'this area'}.\n\n`;
+          solutionResponse += `Based on your requirements, I'm searching for the best tools. Meanwhile, try the Chrome extensions and GPTs below!\n\n`;
         }
 
-        marketAnalysis += `---\n\nWhat would you like to do next?`;
+        solutionResponse += `---\n\n`;
+
+        // Section 2: Chrome Extensions
+        solutionResponse += `## 🔌 Chrome Extensions (Install Now)\n\n`;
+        if (extensions.length > 0) {
+          extensions.forEach((ext, i) => {
+            const freeTag = ext.free ? '🆓 Free' : '💰 Paid';
+            solutionResponse += `**${i + 1}. ${ext.name}** - ${ext.description} (${freeTag})\n\n`;
+          });
+        } else {
+          solutionResponse += `- **Bardeen** - Automate browser tasks with AI 🆓\n`;
+          solutionResponse += `- **Notion Web Clipper** - Save anything instantly 🆓\n`;
+          solutionResponse += `- **Grammarly** - Write better, faster 🆓\n\n`;
+        }
+
+        solutionResponse += `---\n\n`;
+
+        // Section 3: Custom GPTs
+        solutionResponse += `## 🤖 Custom GPTs (Use in ChatGPT)\n\n`;
+        if (customGPTs.length > 0) {
+          customGPTs.forEach((gpt, i) => {
+            solutionResponse += `**${i + 1}. ${gpt.name}** ⭐${gpt.rating}\n`;
+            solutionResponse += `${gpt.description}\n\n`;
+          });
+        } else {
+          solutionResponse += `- **Task Prioritizer GPT** - Organize your to-dos ⭐4.7\n`;
+          solutionResponse += `- **Data Analyst GPT** - Analyze data & create charts ⭐4.9\n`;
+          solutionResponse += `- **Automation Expert GPT** - Design workflows ⭐4.7\n\n`;
+        }
+
+        solutionResponse += `---\n\n`;
+
+        // Section 4: Immediate Action Prompt
+        solutionResponse += `## ⚡ Instant Solution - Copy This Prompt\n\n`;
+        solutionResponse += `**Use this prompt in ChatGPT/Claude RIGHT NOW to get immediate help:**\n\n`;
+        solutionResponse += `\`\`\`\n${immediatePrompt}\n\`\`\`\n\n`;
+        solutionResponse += `> 💡 **Pro Tip:** Copy the prompt above, paste it into ChatGPT, and get actionable steps in under 2 minutes!\n\n`;
+
+        solutionResponse += `---\n\n`;
+        solutionResponse += `### What would you like to do next?`;
 
         const finalOutput = {
           id: getNextMessageId(),
-          text: marketAnalysis,
+          text: solutionResponse,
           sender: 'bot',
           timestamp: new Date(),
           showFinalActions: true,
+          showCopyPrompt: true,
+          immediatePrompt: immediatePrompt,
           companies: relevantCompanies,
+          extensions: extensions,
+          customGPTs: customGPTs,
           userRequirement: requirement
         };
 
         setMessages(prev => [...prev, finalOutput]);
         setIsTyping(false);
-        setFlowStage('complete'); // Mark journey as complete
+        setFlowStage('complete');
 
-        saveToSheet('Final Analysis Generated', finalOutput.text, selectedDomain?.name, selectedSubDomain);
+        saveToSheet('Solution Stack Generated', `Goal: ${selectedGoal}, Role: ${userRole}, Category: ${selectedCategory}`, selectedCategory, requirement);
       } catch (error) {
-        console.error('Error generating market analysis:', error);
+        console.error('Error generating solution stack:', error);
+
+        // Fallback response with basic recommendations
+        const goalLabel = goalOptions.find(g => g.id === selectedGoal)?.text || selectedGoal;
+        const roleLabel = roleOptions.find(r => r.id === userRole)?.text || customRole || userRole;
+        const fallbackPrompt = generateImmediatePrompt(selectedGoal, roleLabel, selectedCategory, requirement);
+        
+        let fallbackResponse = `# 🎯 Your Solution Stack\n\n`;
+        fallbackResponse += `> **Goal:** ${goalLabel} | **Role:** ${roleLabel}\n\n`;
+        fallbackResponse += `---\n\n`;
+        fallbackResponse += `## 🔌 Quick Start Tools\n\n`;
+        fallbackResponse += `- **Bardeen** - Automate any browser task with AI 🆓\n`;
+        fallbackResponse += `- **Notion** - Organize everything in one place 🆓\n`;
+        fallbackResponse += `- **Grammarly** - Write better emails & docs 🆓\n\n`;
+        fallbackResponse += `## 🤖 Recommended GPTs\n\n`;
+        fallbackResponse += `- **Data Analyst GPT** - Analyze your data ⭐4.9\n`;
+        fallbackResponse += `- **Task Prioritizer GPT** - Plan your work ⭐4.7\n\n`;
+        fallbackResponse += `---\n\n`;
+        fallbackResponse += `## ⚡ Copy This Prompt for Instant Help\n\n`;
+        fallbackResponse += `\`\`\`\n${fallbackPrompt}\n\`\`\`\n\n`;
+        fallbackResponse += `---\n\n### What would you like to do next?`;
 
         const fallbackOutput = {
           id: getNextMessageId(),
-          text: `## Market Analysis\n\nThank you for sharing your idea in the ${selectedDomain?.name} space!\n\n**We're excited to help bring your vision to life!** 💙`,
+          text: fallbackResponse,
           sender: 'bot',
           timestamp: new Date(),
-          showFinalActions: true
+          showFinalActions: true,
+          showCopyPrompt: true,
+          immediatePrompt: fallbackPrompt,
+          userRequirement: requirement
         };
 
         setMessages(prev => [...prev, fallbackOutput]);
         setIsTyping(false);
-        setFlowStage('complete'); // Mark journey as complete
+        setFlowStage('complete');
       }
     }, 2000);
   };

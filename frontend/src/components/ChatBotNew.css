@@ -932,6 +932,104 @@
   margin: 0.25rem 0;
 }
 
+/* Solution Response Styling */
+.chat-message-text h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.chat-message-text h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #6d28d9;
+  margin: 1.5rem 0 0.75rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-message-text h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.chat-message-text blockquote {
+  background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+  border-left: 4px solid #8b5cf6;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  color: #4c1d95;
+}
+
+.chat-message-text hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1rem 0;
+}
+
+.chat-message-text code {
+  background: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #6d28d9;
+}
+
+.chat-message-text pre {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  position: relative;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-message-text pre code {
+  background: transparent;
+  padding: 0;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+}
+
+/* Copy button for code blocks - will be added via JS */
+.copy-prompt-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 12px;
+  background: rgba(109, 40, 217, 0.8);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copy-prompt-btn:hover {
+  background: #6d28d9;
+  transform: scale(1.05);
+}
+
+.copy-prompt-btn.copied {
+  background: #10b981;
+}
+
 .chat-message-time {
   font-size: 0.75rem;
   color: rgba(0, 0, 0, 0.4);
