@@ -1085,7 +1085,7 @@ const ChatBotNew = () => {
     saveToSheet(`User chose to type custom problem`, '', '', '');
   };
 
-  // Show solution stack directly after category selection - DASHBOARD VERSION
+  // Show solution stack directly after category selection - CHAT VERSION (Stage 1 Format)
   const showSolutionStack = async (category) => {
     setFlowStage('complete');
     setIsTyping(true);
@@ -1117,10 +1117,9 @@ const ChatBotNew = () => {
           })
         });
         const searchData = await searchResponse.json();
-        relevantCompanies = (searchData.companies || []).slice(0, 4);
+        relevantCompanies = (searchData.companies || []).slice(0, 3);
       } catch (e) {
         console.log('Company search failed, using fallback');
-        // Fallback companies
         relevantCompanies = [
           { name: 'Bardeen', problem: 'Automate any browser workflow with AI', differentiator: 'No-code browser automation' },
           { name: 'Zapier', problem: 'Connect 5000+ apps without code', differentiator: 'Largest integration library' },
@@ -1129,69 +1128,166 @@ const ChatBotNew = () => {
       }
       
       // Get relevant Chrome extensions and GPTs
-      const extensions = getRelevantExtensions(category, selectedGoal);
-      const customGPTs = getRelevantGPTs(category, selectedGoal, userRole);
+      let extensions = getRelevantExtensions(category, selectedGoal);
+      let customGPTs = getRelevantGPTs(category, selectedGoal, userRole);
+      
+      // Use fallbacks if empty
+      if (extensions.length === 0) {
+        extensions = [
+          { name: 'Bardeen', description: 'Automate browser tasks with AI', free: true, source: 'Chrome Web Store' },
+          { name: 'Notion Web Clipper', description: 'Save anything instantly', free: true, source: 'Chrome Web Store' },
+          { name: 'Grammarly', description: 'Write better emails & docs', free: true, source: 'Chrome Web Store' }
+        ];
+      }
+      
+      if (customGPTs.length === 0) {
+        customGPTs = [
+          { name: 'Task Prioritizer GPT', description: 'Organize your to-dos efficiently', rating: '4.7' },
+          { name: 'Data Analyst GPT', description: 'Analyze data & create charts', rating: '4.9' },
+          { name: 'Automation Expert GPT', description: 'Design smart workflows', rating: '4.7' }
+        ];
+      }
+      
+      if (relevantCompanies.length === 0) {
+        relevantCompanies = [
+          { name: 'Bardeen', problem: 'Automate any browser workflow with AI', differentiator: 'No-code browser automation' },
+          { name: 'Zapier', problem: 'Connect 5000+ apps without code', differentiator: 'Largest integration library' },
+          { name: 'Make (Integromat)', problem: 'Visual automation builder', differentiator: 'Complex workflow scenarios' }
+        ];
+      }
       
       // Generate the immediate action prompt
       const immediatePrompt = generateImmediatePrompt(selectedGoal, roleLabel, category, category);
 
-      // Set dashboard data and show dashboard
-      setDashboardData({
-        goalLabel,
-        roleLabel,
-        category,
-        companies: relevantCompanies.length > 0 ? relevantCompanies : [
-          { name: 'Bardeen', problem: 'Automate any browser workflow with AI', differentiator: 'No-code browser automation' },
-          { name: 'Zapier', problem: 'Connect 5000+ apps without code', differentiator: 'Largest integration library' },
-          { name: 'Make (Integromat)', problem: 'Visual automation builder', differentiator: 'Complex workflow scenarios' }
-        ],
-        extensions: extensions.length > 0 ? extensions : [
-          { name: 'Bardeen', description: 'Automate browser tasks with AI', free: true },
-          { name: 'Notion Web Clipper', description: 'Save anything instantly', free: true },
-          { name: 'Grammarly', description: 'Write better emails & docs', free: true }
-        ],
-        customGPTs: customGPTs.length > 0 ? customGPTs : [
-          { name: 'Task Prioritizer GPT', description: 'Organize your to-dos efficiently', rating: '4.7' },
-          { name: 'Data Analyst GPT', description: 'Analyze data & create charts', rating: '4.9' },
-          { name: 'Automation Expert GPT', description: 'Design smart workflows', rating: '4.7' }
-        ],
-        immediatePrompt
-      });
+      // Build Stage 1 Desired Output Format - Chat Response
+      let solutionResponse = `## 🎯 Recommended Solution Pathways (Immediate Action)\n\n`;
+      solutionResponse += `I recommend the following solution pathways that you can start implementing immediately, based on your current setup and goals.\n\n`;
+      solutionResponse += `---\n\n`;
+
+      // Section 1: Tools & Extensions (If Google Workspace Is Your Main Stack)
+      solutionResponse += `## 🔌 If Google Tools / Google Workspace Is Your Main Stack\n\n`;
+      solutionResponse += `If Google Workspace is your primary tool stack, here are some tools and extensions that integrate well and can be implemented quickly.\n\n`;
+      solutionResponse += `### Tools & Extensions\n\n`;
       
-      setShowDashboard(true);
+      extensions.slice(0, 3).forEach((ext) => {
+        const freeTag = ext.free ? '🆓 Free' : '💰 Paid';
+        solutionResponse += `**🔧 ${ext.name}** ${freeTag}\n`;
+        solutionResponse += `> **Where this helps:** ${ext.description}\n`;
+        solutionResponse += `> **Where to find:** ${ext.source || 'Chrome Web Store / Official Website'}\n\n`;
+      });
+
+      solutionResponse += `---\n\n`;
+
+      // Section 2: Custom GPTs
+      solutionResponse += `## 🤖 Using Custom GPTs for Task Automation & Decision Support\n\n`;
+      solutionResponse += `You can also leverage Custom GPTs to automate repetitive thinking tasks, research, analysis, and execution support.\n\n`;
+      solutionResponse += `### Custom GPTs\n\n`;
+      
+      customGPTs.slice(0, 3).forEach((gpt) => {
+        solutionResponse += `**🧠 ${gpt.name}** ⭐${gpt.rating}\n`;
+        solutionResponse += `> **What this GPT does:** ${gpt.description}\n\n`;
+      });
+
+      solutionResponse += `---\n\n`;
+
+      // Section 3: AI Companies
+      solutionResponse += `## 🚀 AI Companies Offering Ready-Made Solutions\n\n`;
+      solutionResponse += `If you are looking for AI-powered tools and well-structured, ready-made solutions, here are companies whose products align with your needs.\n\n`;
+      solutionResponse += `### AI Solution Providers\n\n`;
+      
+      relevantCompanies.slice(0, 3).forEach((company) => {
+        solutionResponse += `**🏢 ${company.name}**\n`;
+        solutionResponse += `> **What they do:** ${company.problem || company.description || 'AI-powered solution for your needs'}\n\n`;
+      });
+
+      solutionResponse += `---\n\n`;
+
+      // Section 4: How to Use This Framework
+      solutionResponse += `### 📋 How to Use This Framework\n\n`;
+      solutionResponse += `1. **Start with Google Workspace tools** for quick wins\n`;
+      solutionResponse += `2. **Add Custom GPTs** for intelligence and automation\n`;
+      solutionResponse += `3. **Scale using specialized AI companies** when workflows mature\n\n`;
+      
+      solutionResponse += `---\n\n`;
+      solutionResponse += `### What would you like to do next?`;
+
+      const finalOutput = {
+        id: getNextMessageId(),
+        text: solutionResponse,
+        sender: 'bot',
+        timestamp: new Date(),
+        showFinalActions: true,
+        showCopyPrompt: true,
+        immediatePrompt: immediatePrompt,
+        companies: relevantCompanies,
+        extensions: extensions,
+        customGPTs: customGPTs,
+        userRequirement: category
+      };
+
+      setMessages(prev => [...prev, finalOutput]);
       setIsTyping(false);
 
       saveToSheet('Solution Stack Generated', `Goal: ${goalLabel}, Role: ${roleLabel}, Category: ${category}`, category, category);
     } catch (error) {
       console.error('Error generating solution stack:', error);
 
-      // Fallback dashboard data
+      // Fallback response with Stage 1 format
       const goalLabel = goalOptions.find(g => g.id === selectedGoal)?.text || selectedGoal;
       const roleLabel = roleOptions.find(r => r.id === userRole)?.text || customRole || userRole;
       const fallbackPrompt = generateImmediatePrompt(selectedGoal, roleLabel, category, category);
       
-      setDashboardData({
-        goalLabel,
-        roleLabel,
-        category,
-        companies: [
-          { name: 'Bardeen', problem: 'Automate any browser task with AI', differentiator: 'No-code automation' },
-          { name: 'Notion', problem: 'Organize everything in one place', differentiator: 'All-in-one workspace' },
-          { name: 'Zapier', problem: 'Connect your favorite apps', differentiator: '5000+ integrations' }
-        ],
-        extensions: [
-          { name: 'Bardeen', description: 'Automate browser tasks with AI', free: true },
-          { name: 'Notion Web Clipper', description: 'Save anything instantly', free: true },
-          { name: 'Grammarly', description: 'Write better emails & docs', free: true }
-        ],
-        customGPTs: [
-          { name: 'Data Analyst GPT', description: 'Analyze your data', rating: '4.9' },
-          { name: 'Task Prioritizer GPT', description: 'Plan your work', rating: '4.7' }
-        ],
-        immediatePrompt: fallbackPrompt
-      });
+      let fallbackResponse = `## 🎯 Recommended Solution Pathways (Immediate Action)\n\n`;
+      fallbackResponse += `I recommend the following solution pathways that you can start implementing immediately.\n\n`;
+      fallbackResponse += `---\n\n`;
       
-      setShowDashboard(true);
+      fallbackResponse += `## 🔌 If Google Tools / Google Workspace Is Your Main Stack\n\n`;
+      fallbackResponse += `### Tools & Extensions\n\n`;
+      fallbackResponse += `**🔧 Bardeen** 🆓 Free\n`;
+      fallbackResponse += `> **Where this helps:** Automate browser tasks with AI\n`;
+      fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+      fallbackResponse += `**🔧 Notion Web Clipper** 🆓 Free\n`;
+      fallbackResponse += `> **Where this helps:** Save anything instantly\n`;
+      fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+      fallbackResponse += `**🔧 Grammarly** 🆓 Free\n`;
+      fallbackResponse += `> **Where this helps:** Write better emails & docs\n`;
+      fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+      
+      fallbackResponse += `---\n\n`;
+      fallbackResponse += `## 🤖 Using Custom GPTs for Task Automation & Decision Support\n\n`;
+      fallbackResponse += `### Custom GPTs\n\n`;
+      fallbackResponse += `**🧠 Data Analyst GPT** ⭐4.9\n`;
+      fallbackResponse += `> **What this GPT does:** Analyze your data & create charts\n\n`;
+      fallbackResponse += `**🧠 Task Prioritizer GPT** ⭐4.7\n`;
+      fallbackResponse += `> **What this GPT does:** Plan and organize your work\n\n`;
+      
+      fallbackResponse += `---\n\n`;
+      fallbackResponse += `## 🚀 AI Companies Offering Ready-Made Solutions\n\n`;
+      fallbackResponse += `### AI Solution Providers\n\n`;
+      fallbackResponse += `**🏢 Bardeen**\n`;
+      fallbackResponse += `> **What they do:** Automate any browser workflow with AI\n\n`;
+      fallbackResponse += `**🏢 Zapier**\n`;
+      fallbackResponse += `> **What they do:** Connect 5000+ apps without code\n\n`;
+      
+      fallbackResponse += `---\n\n`;
+      fallbackResponse += `### 📋 How to Use This Framework\n\n`;
+      fallbackResponse += `1. **Start with Google Workspace tools** for quick wins\n`;
+      fallbackResponse += `2. **Add Custom GPTs** for intelligence and automation\n`;
+      fallbackResponse += `3. **Scale using specialized AI companies** when workflows mature\n\n`;
+      fallbackResponse += `---\n\n### What would you like to do next?`;
+
+      const fallbackOutput = {
+        id: getNextMessageId(),
+        text: fallbackResponse,
+        sender: 'bot',
+        timestamp: new Date(),
+        showFinalActions: true,
+        showCopyPrompt: true,
+        immediatePrompt: fallbackPrompt,
+        userRequirement: category
+      };
+
+      setMessages(prev => [...prev, fallbackOutput]);
       setIsTyping(false);
     }
   };
@@ -1513,73 +1609,89 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
         });
 
         const searchData = await searchResponse.json();
-        const relevantCompanies = (searchData.companies || []).slice(0, 4);
+        let relevantCompanies = (searchData.companies || []).slice(0, 3);
         
         // Get relevant Chrome extensions and GPTs
-        const extensions = getRelevantExtensions(selectedCategory, selectedGoal);
-        const customGPTs = getRelevantGPTs(selectedCategory, selectedGoal, userRole);
+        let extensions = getRelevantExtensions(selectedCategory, selectedGoal);
+        let customGPTs = getRelevantGPTs(selectedCategory, selectedGoal, userRole);
+        
+        // Use fallbacks if empty
+        if (extensions.length === 0) {
+          extensions = [
+            { name: 'Bardeen', description: 'Automate browser tasks with AI', free: true, source: 'Chrome Web Store' },
+            { name: 'Notion Web Clipper', description: 'Save anything instantly', free: true, source: 'Chrome Web Store' },
+            { name: 'Grammarly', description: 'Write better emails & docs', free: true, source: 'Chrome Web Store' }
+          ];
+        }
+        
+        if (customGPTs.length === 0) {
+          customGPTs = [
+            { name: 'Task Prioritizer GPT', description: 'Organize your to-dos efficiently', rating: '4.7' },
+            { name: 'Data Analyst GPT', description: 'Analyze data & create charts', rating: '4.9' },
+            { name: 'Automation Expert GPT', description: 'Design smart workflows', rating: '4.7' }
+          ];
+        }
+        
+        if (relevantCompanies.length === 0) {
+          relevantCompanies = [
+            { name: 'Bardeen', problem: 'Automate any browser workflow with AI', differentiator: 'No-code browser automation' },
+            { name: 'Zapier', problem: 'Connect 5000+ apps without code', differentiator: 'Largest integration library' },
+            { name: 'Make (Integromat)', problem: 'Visual automation builder', differentiator: 'Complex workflow scenarios' }
+          ];
+        }
         
         // Generate the immediate action prompt
         const immediatePrompt = generateImmediatePrompt(selectedGoal, roleLabel, selectedCategory, requirement);
 
-        // Build comprehensive solution response
-        let solutionResponse = `# 🎯 Your Personalized Solution Stack\n\n`;
-        solutionResponse += `> **Goal:** ${goalLabel} | **Role:** ${roleLabel}\n`;
-        solutionResponse += `> **Focus Area:** ${selectedCategory || 'General'}\n\n`;
+        // Build Stage 1 Desired Output Format - Chat Response
+        let solutionResponse = `## 🎯 Recommended Solution Pathways (Immediate Action)\n\n`;
+        solutionResponse += `I recommend the following solution pathways that you can start implementing immediately, based on your current setup and goals.\n\n`;
         solutionResponse += `---\n\n`;
 
-        // Section 1: AI-Powered Startups/Companies
-        solutionResponse += `## 🚀 Recommended AI Tools & Startups\n\n`;
-        if (relevantCompanies.length > 0) {
-          relevantCompanies.forEach((company, i) => {
-            solutionResponse += `### ${i + 1}. ${company.name}\n`;
-            solutionResponse += `${company.problem || company.description || 'AI-powered solution for your needs'}\n\n`;
-            if (company.differentiator) {
-              solutionResponse += `**Why it's different:** ${company.differentiator}\n\n`;
-            }
-          });
-        } else {
-          solutionResponse += `Based on your requirements, I'm searching for the best tools. Meanwhile, try the Chrome extensions and GPTs below!\n\n`;
-        }
+        // Section 1: Tools & Extensions (If Google Workspace Is Your Main Stack)
+        solutionResponse += `## 🔌 If Google Tools / Google Workspace Is Your Main Stack\n\n`;
+        solutionResponse += `If Google Workspace is your primary tool stack, here are some tools and extensions that integrate well and can be implemented quickly.\n\n`;
+        solutionResponse += `### Tools & Extensions\n\n`;
+        
+        extensions.slice(0, 3).forEach((ext) => {
+          const freeTag = ext.free ? '🆓 Free' : '💰 Paid';
+          solutionResponse += `**🔧 ${ext.name}** ${freeTag}\n`;
+          solutionResponse += `> **Where this helps:** ${ext.description}\n`;
+          solutionResponse += `> **Where to find:** ${ext.source || 'Chrome Web Store / Official Website'}\n\n`;
+        });
 
         solutionResponse += `---\n\n`;
 
-        // Section 2: Chrome Extensions
-        solutionResponse += `## 🔌 Chrome Extensions (Install Now)\n\n`;
-        if (extensions.length > 0) {
-          extensions.forEach((ext, i) => {
-            const freeTag = ext.free ? '🆓 Free' : '💰 Paid';
-            solutionResponse += `**${i + 1}. ${ext.name}** - ${ext.description} (${freeTag})\n\n`;
-          });
-        } else {
-          solutionResponse += `- **Bardeen** - Automate browser tasks with AI 🆓\n`;
-          solutionResponse += `- **Notion Web Clipper** - Save anything instantly 🆓\n`;
-          solutionResponse += `- **Grammarly** - Write better, faster 🆓\n\n`;
-        }
+        // Section 2: Custom GPTs
+        solutionResponse += `## 🤖 Using Custom GPTs for Task Automation & Decision Support\n\n`;
+        solutionResponse += `You can also leverage Custom GPTs to automate repetitive thinking tasks, research, analysis, and execution support.\n\n`;
+        solutionResponse += `### Custom GPTs\n\n`;
+        
+        customGPTs.slice(0, 3).forEach((gpt) => {
+          solutionResponse += `**🧠 ${gpt.name}** ⭐${gpt.rating}\n`;
+          solutionResponse += `> **What this GPT does:** ${gpt.description}\n\n`;
+        });
 
         solutionResponse += `---\n\n`;
 
-        // Section 3: Custom GPTs
-        solutionResponse += `## 🤖 Custom GPTs (Use in ChatGPT)\n\n`;
-        if (customGPTs.length > 0) {
-          customGPTs.forEach((gpt, i) => {
-            solutionResponse += `**${i + 1}. ${gpt.name}** ⭐${gpt.rating}\n`;
-            solutionResponse += `${gpt.description}\n\n`;
-          });
-        } else {
-          solutionResponse += `- **Task Prioritizer GPT** - Organize your to-dos ⭐4.7\n`;
-          solutionResponse += `- **Data Analyst GPT** - Analyze data & create charts ⭐4.9\n`;
-          solutionResponse += `- **Automation Expert GPT** - Design workflows ⭐4.7\n\n`;
-        }
+        // Section 3: AI Companies
+        solutionResponse += `## 🚀 AI Companies Offering Ready-Made Solutions\n\n`;
+        solutionResponse += `If you are looking for AI-powered tools and well-structured, ready-made solutions, here are companies whose products align with your needs.\n\n`;
+        solutionResponse += `### AI Solution Providers\n\n`;
+        
+        relevantCompanies.slice(0, 3).forEach((company) => {
+          solutionResponse += `**🏢 ${company.name}**\n`;
+          solutionResponse += `> **What they do:** ${company.problem || company.description || 'AI-powered solution for your needs'}\n\n`;
+        });
 
         solutionResponse += `---\n\n`;
 
-        // Section 4: Immediate Action Prompt
-        solutionResponse += `## ⚡ Instant Solution - Copy This Prompt\n\n`;
-        solutionResponse += `**Use this prompt in ChatGPT/Claude RIGHT NOW to get immediate help:**\n\n`;
-        solutionResponse += `\`\`\`\n${immediatePrompt}\n\`\`\`\n\n`;
-        solutionResponse += `> 💡 **Pro Tip:** Copy the prompt above, paste it into ChatGPT, and get actionable steps in under 2 minutes!\n\n`;
-
+        // Section 4: How to Use This Framework
+        solutionResponse += `### 📋 How to Use This Framework\n\n`;
+        solutionResponse += `1. **Start with Google Workspace tools** for quick wins\n`;
+        solutionResponse += `2. **Add Custom GPTs** for intelligence and automation\n`;
+        solutionResponse += `3. **Scale using specialized AI companies** when workflows mature\n\n`;
+        
         solutionResponse += `---\n\n`;
         solutionResponse += `### What would you like to do next?`;
 
@@ -1605,24 +1717,48 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       } catch (error) {
         console.error('Error generating solution stack:', error);
 
-        // Fallback response with basic recommendations
+        // Fallback response with Stage 1 format
         const goalLabel = goalOptions.find(g => g.id === selectedGoal)?.text || selectedGoal;
         const roleLabel = roleOptions.find(r => r.id === userRole)?.text || customRole || userRole;
         const fallbackPrompt = generateImmediatePrompt(selectedGoal, roleLabel, selectedCategory, requirement);
         
-        let fallbackResponse = `# 🎯 Your Solution Stack\n\n`;
-        fallbackResponse += `> **Goal:** ${goalLabel} | **Role:** ${roleLabel}\n\n`;
+        let fallbackResponse = `## 🎯 Recommended Solution Pathways (Immediate Action)\n\n`;
+        fallbackResponse += `I recommend the following solution pathways that you can start implementing immediately.\n\n`;
         fallbackResponse += `---\n\n`;
-        fallbackResponse += `## 🔌 Quick Start Tools\n\n`;
-        fallbackResponse += `- **Bardeen** - Automate any browser task with AI 🆓\n`;
-        fallbackResponse += `- **Notion** - Organize everything in one place 🆓\n`;
-        fallbackResponse += `- **Grammarly** - Write better emails & docs 🆓\n\n`;
-        fallbackResponse += `## 🤖 Recommended GPTs\n\n`;
-        fallbackResponse += `- **Data Analyst GPT** - Analyze your data ⭐4.9\n`;
-        fallbackResponse += `- **Task Prioritizer GPT** - Plan your work ⭐4.7\n\n`;
+        
+        fallbackResponse += `## 🔌 If Google Tools / Google Workspace Is Your Main Stack\n\n`;
+        fallbackResponse += `### Tools & Extensions\n\n`;
+        fallbackResponse += `**🔧 Bardeen** 🆓 Free\n`;
+        fallbackResponse += `> **Where this helps:** Automate browser tasks with AI\n`;
+        fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+        fallbackResponse += `**🔧 Notion Web Clipper** 🆓 Free\n`;
+        fallbackResponse += `> **Where this helps:** Save anything instantly\n`;
+        fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+        fallbackResponse += `**🔧 Grammarly** 🆓 Free\n`;
+        fallbackResponse += `> **Where this helps:** Write better emails & docs\n`;
+        fallbackResponse += `> **Where to find:** Chrome Web Store\n\n`;
+        
         fallbackResponse += `---\n\n`;
-        fallbackResponse += `## ⚡ Copy This Prompt for Instant Help\n\n`;
-        fallbackResponse += `\`\`\`\n${fallbackPrompt}\n\`\`\`\n\n`;
+        fallbackResponse += `## 🤖 Using Custom GPTs for Task Automation & Decision Support\n\n`;
+        fallbackResponse += `### Custom GPTs\n\n`;
+        fallbackResponse += `**🧠 Data Analyst GPT** ⭐4.9\n`;
+        fallbackResponse += `> **What this GPT does:** Analyze your data & create charts\n\n`;
+        fallbackResponse += `**🧠 Task Prioritizer GPT** ⭐4.7\n`;
+        fallbackResponse += `> **What this GPT does:** Plan and organize your work\n\n`;
+        
+        fallbackResponse += `---\n\n`;
+        fallbackResponse += `## 🚀 AI Companies Offering Ready-Made Solutions\n\n`;
+        fallbackResponse += `### AI Solution Providers\n\n`;
+        fallbackResponse += `**🏢 Bardeen**\n`;
+        fallbackResponse += `> **What they do:** Automate any browser workflow with AI\n\n`;
+        fallbackResponse += `**🏢 Zapier**\n`;
+        fallbackResponse += `> **What they do:** Connect 5000+ apps without code\n\n`;
+        
+        fallbackResponse += `---\n\n`;
+        fallbackResponse += `### 📋 How to Use This Framework\n\n`;
+        fallbackResponse += `1. **Start with Google Workspace tools** for quick wins\n`;
+        fallbackResponse += `2. **Add Custom GPTs** for intelligence and automation\n`;
+        fallbackResponse += `3. **Scale using specialized AI companies** when workflows mature\n\n`;
         fallbackResponse += `---\n\n### What would you like to do next?`;
 
         const fallbackOutput = {
