@@ -1623,30 +1623,18 @@ const ChatBotNew = () => {
       timestamp: new Date()
     };
 
-    if (role.id === 'other-role') {
-      // Show input for custom role
-      setFlowStage('custom-role');
-      const botMessage = {
-        id: getNextMessageId(),
-        text: `No problem! Please tell us your role:\n\n**Type your role below:**`,
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, userMessage, botMessage]);
-    } else {
-      // Show categories based on goal + role
-      setFlowStage('category');
-      const categories = CATEGORIES_DATA[selectedGoal]?.[role.id] || [];
-      const botMessage = {
-        id: getNextMessageId(),
-        text: `Perfect!\n\nBased on your selection, here are the categories where your problems might fall:\n\n**Select one that best matches your need:**`,
-        sender: 'bot',
-        timestamp: new Date(),
-        showCategoryOptions: true,
-        categories: categories
-      };
-      setMessages(prev => [...prev, userMessage, botMessage]);
-    }
+    // Show categories based on goal + role
+    setFlowStage('category');
+    const categories = CATEGORIES_DATA[selectedGoal]?.[role.id] || [];
+    const botMessage = {
+      id: getNextMessageId(),
+      text: `Perfect!\n\nBased on your selection, here are the categories where your problems might fall:\n\n**Select one that best matches your need:**`,
+      sender: 'bot',
+      timestamp: new Date(),
+      showCategoryOptions: true,
+      categories: categories
+    };
+    setMessages(prev => [...prev, userMessage, botMessage]);
 
     saveToSheet(`User Role: ${role.text}`, '', '', '');
   };
@@ -2902,7 +2890,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       {/* Main Content */}
       <div className="chat-window">
         {/* Typeform / Flow Stages */}
-        {['goal', 'role', 'category', 'custom-role', 'rca'].includes(flowStage) ? (
+        {['goal', 'role', 'category', 'rca'].includes(flowStage) ? (
             <div className="empty-state">
               {flowStage === 'goal' && (
                  <>
@@ -2931,7 +2919,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                     <h1>Which best describes you?</h1>
                     <p>This helps us tailor the solution</p>
                     <div className="suggestions-grid">
-                      {roleOptions.map((role, index) => (
+                      {roleOptions.filter(role => role.id !== 'other-role').map((role, index) => (
                         <div 
                             key={role.id} 
                             className="suggestion-card" 
@@ -2940,6 +2928,22 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                            <h3>{role.text}</h3>
                         </div>
                       ))}
+                      {/* Inline chat input for Other option */}
+                      <div className="suggestion-card other-input-card">
+                        <input
+                          type="text"
+                          placeholder="Other? Type here..."
+                          value={customRole}
+                          onChange={(e) => setCustomRole(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && customRole.trim()) {
+                              handleCustomRoleSubmit(customRole.trim());
+                            }
+                          }}
+                          className="inline-role-input"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
                     </div>
                     <button 
                         style={{marginTop: '2rem', background: 'transparent', border:'none', color:'#6b7280', cursor:'pointer'}}
@@ -2950,44 +2954,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                  </>
               )}
 
-               {flowStage === 'custom-role' && (
-                 <>
-                    <h1>Tell us about your role</h1>
-                    <div style={{width: '100%', maxWidth: '400px', marginTop: '1rem'}}>
-                         <input
-                            type="text"
-                            placeholder="e.g., Content Creator..."
-                            value={customRole}
-                            onChange={(e) => setCustomRole(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && customRole.trim()) handleCustomRoleSubmit(customRole.trim());
-                            }}
-                            style={{
-                                width: '100%', padding:'1rem', borderRadius: '12px', border: '1px solid #e5e7eb',
-                                fontSize: '1rem', outline: 'none'
-                             }}
-                            autoFocus
-                         />
-                         <button 
-                            onClick={() => customRole.trim() && handleCustomRoleSubmit(customRole.trim())}
-                            style={{
-                                width: '100%', marginTop: '1rem', padding: '1rem', background: '#6d28d9', 
-                                color: 'white', border: 'none', borderRadius: '12px', fontWeight: 600, cursor: 'pointer'
-                            }}
-                         >
-                            Continue
-                         </button>
-                         <button 
-                            onClick={() => { setUserRole(null); setFlowStage('role'); }}
-                            style={{marginTop: '1rem', background: 'transparent', border:'none', color:'#6b7280', cursor:'pointer'}}
-                         >
-                            Back
-                         </button>
-                    </div>
-                 </>
-              )}
-
-              {flowStage === 'category' && (
+               {flowStage === 'category' && (
                  <>
                     {/* Icon removed */}
                     <h1>In which category does your problem fall?</h1>
@@ -3227,7 +3194,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       </div>
 
       {/* Input Area */}
-      {!['goal', 'role', 'category', 'custom-role', 'rca'].includes(flowStage) && (
+      {!['goal', 'role', 'category', 'rca'].includes(flowStage) && (
           <div className="input-area">
             {speechError && <div style={{position:'absolute', top:'-40px', background:'#fee2e2', color:'#b91c1c', padding:'0.5rem 1rem', borderRadius:'8px', fontSize:'0.9rem'}}>{speechError}</div>}
             <div className="input-container">
