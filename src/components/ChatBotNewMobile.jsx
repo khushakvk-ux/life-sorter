@@ -632,10 +632,10 @@ const ChatBotNewMobile = () => {
   ];
 
   const goalOptions = [
-    { id: 'grow-revenue', text: 'Grow Revenue', emoji: '' },
-    { id: 'save-time', text: 'Save Time', emoji: '' },
-    { id: 'better-decisions', text: 'Make Better Decisions', emoji: '' },
-    { id: 'personal-growth', text: 'Personal Growth', emoji: '' }
+    { id: 'grow-revenue', text: 'Grow Revenue', subtext: 'Marketing, Social, SEO, Sales, Ecom', emoji: '' },
+    { id: 'save-time', text: 'Save Time', subtext: 'Automation Workflow, Extract PDF, Bulk Task', emoji: '' },
+    { id: 'better-decisions', text: 'Make Better Decisions', subtext: 'Dashboards, Insights, Trend, Risk', emoji: '' },
+    { id: 'personal-growth', text: 'Personal Growth', subtext: 'Productivity, Career, Learning, Brand', emoji: '' }
   ];
 
   const roleOptions = [
@@ -2050,6 +2050,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                             style={{ animationDelay: `${index * 0.1}s`, animation: 'fadeIn 0.5s ease-out forwards' }}
                         >
                            <h3>{goal.text}</h3>
+                           {goal.subtext && <p className="goal-subtext">{goal.subtext}</p>}
                         </div>
                       ))}
                     </div>

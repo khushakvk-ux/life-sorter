@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3, Chrome, Zap, Brain, Copy, PanelLeftClose, PanelLeftOpen, ExternalLink, Star, Settings, FileText, BarChart3, ScanLine, Video, Calendar } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3, Chrome, Zap, Brain, Copy, PanelLeftClose, PanelLeftOpen, ExternalLink, Star, Settings, FileText, BarChart3, ScanLine, Video, Calendar, Sun, Moon, Type, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBotNew.css';
 import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
@@ -203,6 +203,575 @@ const generateImmediatePrompt = (goal, role, category, requirement) => {
 3. Then suggest ONE longer-term solution worth investigating
 
 Keep your response actionable and practical. No fluff - just tell me exactly what to do.`;
+};
+
+// ============================================
+// ROOT CAUSE ANALYSIS (RCA) DATA STRUCTURE
+// Based on rca.csv - For Founder/Owner persona, Grow Revenue outcome
+// ============================================
+const RCA_DATA = {
+  'grow-revenue': {
+    'founder-owner': {
+      // Sub-outcome area 1: Social Media Content
+      'Social media content (posts, ads, videos, product visuals)': {
+        problemDefinition: [
+          {
+            question: 'Q1. What is the main purpose of your social media content right now?',
+            options: [
+              'Brand awareness',
+              'Generating leads / DMs',
+              'Driving sales',
+              'Retargeting existing users',
+              'Not clearly defined'
+            ]
+          },
+          {
+            question: 'Q2. How do you know content isn\'t working?',
+            options: [
+              'Low reach / views',
+              'Engagement but no inquiries',
+              'Inquiries but no sales',
+              'Inconsistent performance',
+              'Not tracked'
+            ]
+          },
+          {
+            question: 'Q3. Which best describes your current content style?',
+            options: [
+              'Product-focused',
+              'Educational / problem-solving',
+              'Trend / entertainment-based',
+              'Mixed, no clear direction',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q4. Where does the breakdown seem to happen?',
+            options: [
+              'People don\'t see the content',
+              'People see but don\'t engage',
+              'Engage but don\'t inquire',
+              'Inquire but don\'t buy',
+              'Unsure'
+            ]
+          },
+          {
+            question: 'Q5. How consistent is your content output?',
+            options: [
+              'Daily / planned',
+              'Weekly',
+              'Irregular',
+              'Very random',
+              'Almost inactive'
+            ]
+          },
+          {
+            question: 'Q6. How confident are you that content contributes to revenue?',
+            options: [
+              'Very confident',
+              'Somewhat confident',
+              'Weak connection',
+              'Mostly guesswork',
+              'No idea'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Instagram / Facebook / YouTube profile links',
+          'Last 30–60 days of content',
+          'Posts, reels, ads (whatever exists)',
+          'Which platform brings inquiries? (if known)'
+        ]
+      },
+      // Sub-outcome area 2: SEO
+      'Get more leads from Google & website (SEO)': {
+        problemDefinition: [
+          {
+            question: 'Q1. What are you trying to improve via SEO?',
+            options: [
+              'Traffic volume',
+              'Lead quality',
+              'Sales / purchases',
+              'Brand visibility',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q2. What best describes your current traffic?',
+            options: [
+              'Very low',
+              'Decent but not converting',
+              'High but poor quality',
+              'Seasonal / inconsistent',
+              'Not measured'
+            ]
+          },
+          {
+            question: 'Q3. What happens to most visitors?',
+            options: [
+              'Leave immediately',
+              'Browse but don\'t act',
+              'Click but don\'t submit',
+              'Start checkout but abandon',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q4. Your SEO is mostly built around:',
+            options: [
+              'High search volume keywords',
+              'Buyer-intent keywords',
+              'Brand terms',
+              'Random content ideas',
+              'No clear strategy'
+            ]
+          },
+          {
+            question: 'Q5. How clear is your website\'s main action?',
+            options: [
+              'Very clear CTA',
+              'Somewhat clear',
+              'Multiple confusing CTAs',
+              'No strong CTA',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q6. How confident are you in SEO tracking?',
+            options: [
+              'Fully tracked',
+              'Partially tracked',
+              'Conflicting data',
+              'Mostly guessing',
+              'Not tracked'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Website URL',
+          'Top 3 pages they want users to convert from',
+          'Google Search Console access OR screenshots',
+          'Queries',
+          'Pages',
+          'Primary CTA on website'
+        ]
+      },
+      // Sub-outcome area 3: Google & Meta Ads
+      'Run Google and Meta ads + improve ROI': {
+        problemDefinition: [
+          {
+            question: 'Q1. What is the main goal of running ads?',
+            options: [
+              'Immediate sales',
+              'Lead generation',
+              'Retargeting',
+              'Testing demand',
+              'Not clearly defined'
+            ]
+          },
+          {
+            question: 'Q2. What is the biggest concern with ads today?',
+            options: [
+              'High cost',
+              'Low lead quality',
+              'Low conversion',
+              'Fake / inflated performance',
+              'Don\'t know'
+            ]
+          },
+          {
+            question: 'Q3. Do reported conversions match real sales?',
+            options: [
+              'Yes, closely',
+              'Some mismatch',
+              'Large mismatch',
+              'Very confusing',
+              'Not tracked'
+            ]
+          },
+          {
+            question: 'Q4. Where do users drop after clicking ads?',
+            options: [
+              'Landing page',
+              'Lead form',
+              'WhatsApp / call',
+              'Checkout',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q5. Ads are optimized mainly for:',
+            options: [
+              'Clicks',
+              'Leads',
+              'Purchases',
+              'Value / ROAS',
+              'Unsure'
+            ]
+          },
+          {
+            question: 'Q6. How confident are you in ad ROI?',
+            options: [
+              'Very confident',
+              'Somewhat',
+              'Low confidence',
+              'Guessing',
+              'No clarity'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Landing page URL used in ads',
+          'Ad account screenshots (last 30 days)',
+          'Spend',
+          'Conversions',
+          'ROAS / CPL',
+          'What happens after the click',
+          'Checkout / WhatsApp / call'
+        ]
+      },
+      // Sub-outcome area 4: Google Business Profile
+      'Google Business Profile visibility': {
+        problemDefinition: [
+          {
+            question: 'Q1. What action do you want from GBP visitors?',
+            options: [
+              'Calls',
+              'Directions / visits',
+              'WhatsApp messages',
+              'Website visits',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q2. How is your GBP performance currently?',
+            options: [
+              'Strong visibility',
+              'Visible but low actions',
+              'Low visibility',
+              'Inconsistent',
+              'Never checked'
+            ]
+          },
+          {
+            question: 'Q3. Compared to competitors, your reviews are:',
+            options: [
+              'Much better',
+              'Similar',
+              'Worse',
+              'Very few',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q4. What happens after inquiries?',
+            options: [
+              'Convert well',
+              'Some convert',
+              'Mostly drop',
+              'Poor follow-up',
+              'Not tracked'
+            ]
+          },
+          {
+            question: 'Q5. Your business is mostly:',
+            options: [
+              'Location-dependent',
+              'Service-area based',
+              'Hybrid',
+              'Online + offline',
+              'Not sure'
+            ]
+          }
+        ],
+        dataCollection: [
+          'GBP listing link',
+          'Business category',
+          'Reviews count + rating',
+          'Main CTA enabled (call / website / WhatsApp)'
+        ]
+      },
+      // Sub-outcome area 5: Why Customers Don't Convert
+      'Understanding why customers don\'t convert': {
+        problemDefinition: [
+          {
+            question: 'Q1. Where do customers drop most often?',
+            options: [
+              'Before contacting',
+              'After first interaction',
+              'After price',
+              'After follow-up',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q2. Common customer response before leaving:',
+            options: [
+              '"Too expensive"',
+              '"Will think"',
+              '"Comparing options"',
+              'Silent / ghosting',
+              'Varies'
+            ]
+          },
+          {
+            question: 'Q3. Conversion depends mainly on:',
+            options: [
+              'Website checkout',
+              'Human conversation',
+              'Both',
+              'Offline effort',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q4. What do you think is the main issue?',
+            options: [
+              'Price sensitivity',
+              'Trust / credibility',
+              'Unclear value',
+              'Weak follow-up',
+              'Wrong audience'
+            ]
+          },
+          {
+            question: 'Q5. How structured is conversion tracking?',
+            options: [
+              'Very clear',
+              'Partial',
+              'Messy',
+              'Guesswork',
+              'None'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Exact conversion path',
+          'Website → checkout',
+          'Website → WhatsApp',
+          'Ads → call',
+          'Price point',
+          'Any customer messages / chats / objections (anonymized)',
+          'Who handles conversion',
+          'Founder / team / automation'
+        ]
+      },
+      // Sub-outcome area 6: WhatsApp/Instagram Selling
+      'Selling on WhatsApp/Instagram': {
+        problemDefinition: [
+          {
+            question: 'Q1. Where do most chats come from?',
+            options: [
+              'Ads',
+              'Organic social',
+              'Website',
+              'Referrals',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q2. What happens to most chats?',
+            options: [
+              'Convert quickly',
+              'Long conversations, no sale',
+              'Drop after price',
+              'No response from user',
+              'Not tracked'
+            ]
+          },
+          {
+            question: 'Q3. Who handles conversations?',
+            options: [
+              'Dedicated salesperson',
+              'Founder',
+              'Multiple people',
+              'Automation only',
+              'Mixed / unclear'
+            ]
+          },
+          {
+            question: 'Q4. Response time is usually:',
+            options: [
+              'Immediate',
+              'Within hours',
+              'Same day',
+              'Delayed',
+              'Varies'
+            ]
+          },
+          {
+            question: 'Q5. Is there a defined chat-to-sale flow?',
+            options: [
+              'Yes',
+              'Partially',
+              'Very loose',
+              'None',
+              'Not sure'
+            ]
+          }
+        ],
+        dataCollection: [
+          'WhatsApp business setup',
+          'Catalog / quick replies / automation (yes/no)',
+          'Sample chat conversations (anonymized)',
+          'Response time expectation',
+          'Payment flow',
+          'Link / UPI / COD / manual'
+        ]
+      },
+      // Sub-outcome area 7: Lead Qualification & Conversion
+      'Lead Qualification, Follow Up & Conversion': {
+        problemDefinition: [
+          {
+            question: 'Q1. How do you define a "qualified lead"?',
+            options: [
+              'Budget + intent',
+              'Interest shown',
+              'Anyone who inquires',
+              'Not clearly defined'
+            ]
+          },
+          {
+            question: 'Q2. What happens after first contact?',
+            options: [
+              'Structured follow-up',
+              'One-time contact',
+              'Manual reminders',
+              'Often forgotten'
+            ]
+          },
+          {
+            question: 'Q3. Biggest leakage point?',
+            options: [
+              'First call',
+              'Second follow-up',
+              'Price discussion',
+              'No response',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q4. How many follow-ups usually happen?',
+            options: [
+              '3+',
+              '2',
+              '1',
+              'None'
+            ]
+          },
+          {
+            question: 'Q5. Lead tracking is:',
+            options: [
+              'Proper CRM',
+              'Spreadsheet',
+              'WhatsApp only',
+              'No system'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Product listing URLs',
+          'Top 5 products by revenue',
+          'Bundle or combo pages (if any)',
+          'Cart & checkout flow',
+          'Average order value (approx)'
+        ]
+      },
+      // Sub-outcome area 8: Ecommerce Listing SEO
+      'Ecommerce Listing SEO + upsell bundles': {
+        problemDefinition: [
+          {
+            question: 'Q1. What\'s the main revenue issue?',
+            options: [
+              'Low traffic',
+              'Low conversion',
+              'Low order value',
+              'High cart drop',
+              'Not sure'
+            ]
+          },
+          {
+            question: 'Q2. Product listings are optimized for:',
+            options: [
+              'Buyer keywords',
+              'Generic keywords',
+              'Platform suggestions',
+              'Not optimized'
+            ]
+          },
+          {
+            question: 'Q3. Most customers buy:',
+            options: [
+              'One product',
+              'Multiple products',
+              'Bundles',
+              'Depends'
+            ]
+          },
+          {
+            question: 'Q4. Bundles exist mainly to:',
+            options: [
+              'Increase AOV',
+              'Clear inventory',
+              'Solve a use-case',
+              'Discounts only',
+              'No bundles'
+            ]
+          },
+          {
+            question: 'Q5. Drop-off usually happens at:',
+            options: [
+              'Product page',
+              'Cart',
+              'Payment',
+              'Delivery step',
+              'Not sure'
+            ]
+          }
+        ],
+        dataCollection: [
+          'Product listing URLs',
+          'Top 5 products by revenue',
+          'Bundle or combo pages (if any)',
+          'Cart & checkout flow',
+          'Average order value (approx)'
+        ]
+      }
+    }
+  }
+};
+
+// RCA Stages for future expansion
+const RCA_STAGES = [
+  { id: 'problem-definition', name: 'Problem Definition', description: 'Understanding how to define your problem better' },
+  { id: 'data-collection', name: 'Data Collection', description: 'Collecting relevant data for analysis' },
+  { id: 'symptom-identification', name: 'Symptom Identification', description: 'Identifying symptoms that may be going unnoticed' },
+  { id: 'cause-identification', name: 'Cause Identification', description: 'Identifying potential causes' },
+  { id: 'root-cause-validation', name: 'Root Cause Validation', description: 'Validating the root cause' },
+  { id: 'corrective-action', name: 'Corrective Action Plan', description: 'Creating an action plan to address the root cause' }
+];
+
+// Helper function to find RCA data for a category
+const findRCAData = (goal, role, category) => {
+  // Try exact match first
+  const goalData = RCA_DATA[goal];
+  if (!goalData) return null;
+  
+  const roleData = goalData[role];
+  if (!roleData) return null;
+  
+  // Try exact category match
+  if (roleData[category]) return roleData[category];
+  
+  // Try partial match
+  for (const key of Object.keys(roleData)) {
+    if (category.toLowerCase().includes(key.toLowerCase().substring(0, 15)) || 
+        key.toLowerCase().includes(category.toLowerCase().substring(0, 15))) {
+      return roleData[key];
+    }
+  }
+  
+  return null;
 };
 
 // ============================================
@@ -580,6 +1149,43 @@ const ChatBotNew = () => {
   const [speechError, setSpeechError] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // User preferences state
+  const [userPreferences, setUserPreferences] = useState(() => {
+    const saved = localStorage.getItem('ikshan-user-preferences');
+    return saved ? JSON.parse(saved) : {
+      theme: 'light',
+      fontSize: 'medium',
+      language: 'en'
+    };
+  });
+  
+  // Save preferences to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('ikshan-user-preferences', JSON.stringify(userPreferences));
+    // Apply theme to document
+    document.documentElement.setAttribute('data-theme', userPreferences.theme);
+    // Apply font size
+    document.documentElement.setAttribute('data-font-size', userPreferences.fontSize);
+  }, [userPreferences]);
+  
+  // Language options
+  const languageOptions = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'हिंदी (Hindi)' },
+    { code: 'es', name: 'Español (Spanish)' },
+    { code: 'fr', name: 'Français (French)' },
+    { code: 'de', name: 'Deutsch (German)' },
+    { code: 'zh', name: '中文 (Chinese)' }
+  ];
+  
+  // Font size options
+  const fontSizeOptions = [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' }
+  ];
   
   // Products data for sidebar
   const productsData = [
@@ -603,6 +1209,14 @@ const ChatBotNew = () => {
     immediatePrompt: ''
   });
   const [copiedPrompt, setCopiedPrompt] = useState(false);
+  
+  // Root Cause Analysis (RCA) state
+  const [rcaActive, setRcaActive] = useState(false);
+  const [rcaStage, setRcaStage] = useState('problem-definition'); // 'problem-definition', 'data-collection', etc.
+  const [rcaCurrentQuestionIndex, setRcaCurrentQuestionIndex] = useState(0);
+  const [rcaResponses, setRcaResponses] = useState({});
+  const [rcaData, setRcaData] = useState(null);
+  const [rcaDataInputs, setRcaDataInputs] = useState({}); // Store user's data collection inputs
   
   // Load chat history from localStorage on mount
   const [chatHistory, setChatHistory] = useState(() => {
@@ -643,10 +1257,10 @@ const ChatBotNew = () => {
   ];
 
   const goalOptions = [
-    { id: 'grow-revenue', text: 'Grow Revenue', emoji: '' },
-    { id: 'save-time', text: 'Save Time', emoji: '' },
-    { id: 'better-decisions', text: 'Make Better Decisions', emoji: '' },
-    { id: 'personal-growth', text: 'Personal Growth', emoji: '' }
+    { id: 'grow-revenue', text: 'Grow Revenue', subtext: 'Marketing, Social, SEO, Sales, Ecom', emoji: '' },
+    { id: 'save-time', text: 'Save Time', subtext: 'Automation Workflow, Extract PDF, Bulk Task', emoji: '' },
+    { id: 'better-decisions', text: 'Make Better Decisions', subtext: 'Dashboards, Insights, Trend, Risk', emoji: '' },
+    { id: 'personal-growth', text: 'Personal Growth', subtext: 'Productivity, Career, Learning, Brand', emoji: '' }
   ];
 
   const roleOptions = [
@@ -953,6 +1567,14 @@ const ChatBotNew = () => {
       immediatePrompt: ''
     });
     setCopiedPrompt(false);
+    
+    // Reset RCA state
+    setRcaActive(false);
+    setRcaStage('problem-definition');
+    setRcaCurrentQuestionIndex(0);
+    setRcaResponses({});
+    setRcaData(null);
+    setRcaDataInputs({});
 
     // Start fresh with welcome message
     const welcomeMessage = {
@@ -1425,6 +2047,206 @@ const ChatBotNew = () => {
     } catch (error) {
       console.error('Error saving to sheet:', error);
     }
+  };
+
+  // ============================================
+  // ROOT CAUSE ANALYSIS (RCA) HANDLERS
+  // ============================================
+  
+  // Launch Root Cause Analysis
+  const handleLaunchRCA = (category) => {
+    // Find RCA data for the current selection
+    const data = findRCAData(selectedGoal, userRole, category || selectedCategory);
+    
+    if (!data) {
+      // No RCA data available for this combination
+      const noDataMessage = {
+        id: getNextMessageId(),
+        text: `🔍 **Root Cause Analysis**\n\nRoot cause analysis is currently available for:\n- **Persona:** Founder / Owner\n- **Outcome:** Grow Revenue\n\nFor your selected combination, RCA data is coming soon. In the meantime, you can explore the implementation guide or check another idea!`,
+        sender: 'bot',
+        timestamp: new Date(),
+        showFinalActions: true
+      };
+      setMessages(prev => [...prev, noDataMessage]);
+      return;
+    }
+    
+    // Initialize RCA - Go directly to typeform UI
+    setRcaActive(true);
+    setRcaStage('problem-definition');
+    setRcaCurrentQuestionIndex(0);
+    setRcaResponses({});
+    setRcaData(data);
+    setFlowStage('rca'); // This will show the typeform UI
+  };
+  
+  // Handle RCA option selection in Typeform UI
+  const handleRCAOptionSelectTypeform = (option, questionIndex) => {
+    // Save response
+    const newResponses = { ...rcaResponses, [`q${questionIndex + 1}`]: option };
+    setRcaResponses(newResponses);
+    
+    // Move to next question or data collection
+    const nextIndex = questionIndex + 1;
+    if (rcaData && rcaData.problemDefinition && nextIndex < rcaData.problemDefinition.length) {
+      setRcaCurrentQuestionIndex(nextIndex);
+    } else {
+      // Move to data collection stage
+      setRcaStage('data-collection');
+    }
+  };
+  
+  // Show RCA question
+  const showRCAQuestion = (data, questionIndex) => {
+    if (!data || !data.problemDefinition || questionIndex >= data.problemDefinition.length) {
+      // Move to data collection stage
+      showDataCollectionStage(data);
+      return;
+    }
+    
+    const questionData = data.problemDefinition[questionIndex];
+    
+    const questionMessage = {
+      id: getNextMessageId(),
+      text: `**${questionData.question}**`,
+      sender: 'bot',
+      timestamp: new Date(),
+      isRCAQuestion: true,
+      rcaOptions: questionData.options,
+      rcaQuestionIndex: questionIndex
+    };
+    
+    setMessages(prev => [...prev, questionMessage]);
+    setRcaCurrentQuestionIndex(questionIndex);
+  };
+  
+  // Handle RCA option selection
+  const handleRCAOptionSelect = (option, questionIndex) => {
+    // Record user response
+    const userMessage = {
+      id: getNextMessageId(),
+      text: option,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Save response
+    const newResponses = { ...rcaResponses, [`q${questionIndex + 1}`]: option };
+    setRcaResponses(newResponses);
+    
+    // Show next question or move to next stage
+    const nextIndex = questionIndex + 1;
+    if (rcaData && rcaData.problemDefinition && nextIndex < rcaData.problemDefinition.length) {
+      setTimeout(() => {
+        showRCAQuestion(rcaData, nextIndex);
+      }, 300);
+    } else {
+      // Move to data collection stage
+      setTimeout(() => {
+        showDataCollectionStage(rcaData);
+      }, 500);
+    }
+  };
+  
+  // Show Data Collection stage
+  const showDataCollectionStage = (data) => {
+    setRcaStage('data-collection');
+    
+    if (!data || !data.dataCollection || data.dataCollection.length === 0) {
+      // Skip to summary if no data collection items
+      showRCASummary();
+      return;
+    }
+    
+    let dataCollectionText = `## 🎯 You're doing great!\n\n`;
+    dataCollectionText += `Based on your answers, here's what would help us give you the most accurate insights:\n\n`;
+    dataCollectionText += `### Helpful Information\n\n`;
+    
+    data.dataCollection.forEach((item, index) => {
+      dataCollectionText += `${index + 1}. **${item}**\n`;
+    });
+    
+    dataCollectionText += `\n---\n\n`;
+    dataCollectionText += `💡 **No pressure!** Don't worry if you don't have everything — share what you can, and we'll work with that.\n\n`;
+    dataCollectionText += `✨ Even partial information helps us understand your situation better and provide valuable recommendations.`;
+    
+    const dataCollectionMessage = {
+      id: getNextMessageId(),
+      text: dataCollectionText,
+      sender: 'bot',
+      timestamp: new Date(),
+      showRCADataCollectionActions: true
+    };
+    
+    setMessages(prev => [...prev, dataCollectionMessage]);
+  };
+  
+  // Show RCA Summary based on responses
+  const showRCASummary = () => {
+    const goalLabel = goalOptions.find(g => g.id === selectedGoal)?.text || selectedGoal;
+    const roleLabel = roleOptions.find(r => r.id === userRole)?.text || customRole || userRole;
+    
+    let summaryText = `## 📋 Root Cause Analysis Summary\n\n`;
+    summaryText += `**Persona:** ${roleLabel}\n`;
+    summaryText += `**Outcome:** ${goalLabel}\n`;
+    summaryText += `**Problem Area:** ${selectedCategory}\n\n`;
+    summaryText += `---\n\n`;
+    summaryText += `### Your Responses\n\n`;
+    
+    // List all responses
+    if (rcaData && rcaData.problemDefinition) {
+      rcaData.problemDefinition.forEach((q, index) => {
+        const response = rcaResponses[`q${index + 1}`] || 'Not answered';
+        summaryText += `**${q.question}**\n`;
+        summaryText += `→ ${response}\n\n`;
+      });
+    }
+    
+    // List data collection inputs if any were provided
+    if (rcaData && rcaData.dataCollection) {
+      const hasAnyInput = rcaData.dataCollection.some((_, index) => rcaDataInputs[`data_${index}`]);
+      if (hasAnyInput) {
+        summaryText += `---\n\n`;
+        summaryText += `### Information Provided\n\n`;
+        rcaData.dataCollection.forEach((item, index) => {
+          const value = rcaDataInputs[`data_${index}`];
+          if (value && value.trim()) {
+            summaryText += `**${item}**\n`;
+            summaryText += `→ ${value}\n\n`;
+          }
+        });
+      }
+    }
+    
+    summaryText += `---\n\n`;
+    summaryText += `### Next Steps\n\n`;
+    summaryText += `Based on your responses, the following stages are recommended:\n`;
+    summaryText += `- **Symptom Identification** - Coming soon\n`;
+    summaryText += `- **Cause Identification** - Coming soon\n`;
+    summaryText += `- **Root Cause Validation** - Coming soon\n`;
+    summaryText += `- **Corrective Action Plan** - Coming soon\n\n`;
+    summaryText += `📌 *Stay tuned! We're building out the complete RCA framework to provide you with actionable corrective action plans.*`;
+    
+    const summaryMessage = {
+      id: getNextMessageId(),
+      text: summaryText,
+      sender: 'bot',
+      timestamp: new Date(),
+      showFinalActions: true
+    };
+    
+    setMessages(prev => [...prev, summaryMessage]);
+    
+    // Reset RCA state
+    setRcaActive(false);
+    setFlowStage('complete');
+  };
+  
+  // Handle data collection continue
+  const handleRCADataCollectionContinue = () => {
+    showRCASummary();
   };
 
   const handleLearnImplementation = async (companies, userRequirement) => {
@@ -2065,7 +2887,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
             })}
           </div>
           <div className="sidebar-footer">
-            <button className="settings-btn">
+            <button className="settings-btn" onClick={() => setShowSettings(true)}>
               <Settings size={18} /> Settings
             </button>
           </div>
@@ -2080,7 +2902,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       {/* Main Content */}
       <div className="chat-window">
         {/* Typeform / Flow Stages */}
-        {['goal', 'role', 'category', 'custom-role'].includes(flowStage) ? (
+        {['goal', 'role', 'category', 'custom-role', 'rca'].includes(flowStage) ? (
             <div className="empty-state">
               {flowStage === 'goal' && (
                  <>
@@ -2096,6 +2918,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                             style={{ animationDelay: `${index * 0.1}s`, animation: 'fadeIn 0.5s ease-out forwards' }}
                         >
                            <h3>{goal.text}</h3>
+                           {goal.subtext && <p className="goal-subtext">{goal.subtext}</p>}
                         </div>
                       ))}
                     </div>
@@ -2187,6 +3010,97 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                     </div>
                  </>
               )}
+
+              {/* RCA Typeform UI */}
+              {flowStage === 'rca' && rcaData && (
+                 <>
+                    {rcaStage === 'problem-definition' && rcaData.problemDefinition && rcaCurrentQuestionIndex < rcaData.problemDefinition.length && (
+                      <>
+                        <div className="rca-progress-bar">
+                          <div className="rca-progress-fill" style={{ width: `${((rcaCurrentQuestionIndex + 1) / rcaData.problemDefinition.length) * 100}%` }}></div>
+                        </div>
+                        <p className="rca-stage-label">Stage 1: Problem Definition • Question {rcaCurrentQuestionIndex + 1} of {rcaData.problemDefinition.length}</p>
+                        <h1>{rcaData.problemDefinition[rcaCurrentQuestionIndex].question}</h1>
+                        <div className="suggestions-grid rca-options-grid">
+                          {rcaData.problemDefinition[rcaCurrentQuestionIndex].options.map((option, index) => (
+                            <div 
+                              key={index}
+                              className="suggestion-card rca-option-card"
+                              onClick={() => handleRCAOptionSelectTypeform(option, rcaCurrentQuestionIndex)}
+                              style={{ animationDelay: `${index * 0.05}s`, animation: 'fadeIn 0.3s ease-out forwards' }}
+                            >
+                              <h3>{option}</h3>
+                            </div>
+                          ))}
+                        </div>
+                        <button 
+                          onClick={() => {
+                            if (rcaCurrentQuestionIndex > 0) {
+                              setRcaCurrentQuestionIndex(rcaCurrentQuestionIndex - 1);
+                            } else {
+                              setRcaActive(false);
+                              setFlowStage('complete');
+                            }
+                          }}
+                          style={{marginTop: '2rem', background: 'transparent', border:'none', color:'#6b7280', cursor:'pointer'}}
+                        >
+                          ← Back
+                        </button>
+                      </>
+                    )}
+
+                    {rcaStage === 'data-collection' && rcaData.dataCollection && (
+                      <>
+                        <div className="rca-progress-bar">
+                          <div className="rca-progress-fill" style={{ width: '100%' }}></div>
+                        </div>
+                        <p className="rca-stage-label">Stage 2: Data Collection</p>
+                        <h1>You're doing great! 🎯</h1>
+                        <p style={{color: '#6b7280', marginBottom: '0.5rem'}}>Based on your answers, here's what would help us give you the most accurate insights.</p>
+                        <p style={{color: '#9ca3af', marginBottom: '1.5rem', fontSize: '0.9rem'}}>💡 Don't worry if you don't have everything — share what you can, and we'll work with that!</p>
+                        <div className="rca-data-collection-grid">
+                          {rcaData.dataCollection.map((item, index) => (
+                            <div 
+                              key={index}
+                              className="rca-data-input-item"
+                              style={{ animationDelay: `${index * 0.05}s`, animation: 'fadeIn 0.3s ease-out forwards' }}
+                            >
+                              <div className="rca-data-input-header">
+                                <span className="rca-data-number">{index + 1}</span>
+                                <label className="rca-data-label">{item}</label>
+                              </div>
+                              <input
+                                type="text"
+                                className="rca-data-input"
+                                placeholder={`Enter ${item.toLowerCase()}...`}
+                                value={rcaDataInputs[`data_${index}`] || ''}
+                                onChange={(e) => setRcaDataInputs(prev => ({
+                                  ...prev,
+                                  [`data_${index}`]: e.target.value
+                                }))}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <p style={{color: '#9ca3af', marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center'}}>✨ Even partial information helps us understand your situation better</p>
+                        <div style={{marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap'}}>
+                          <button 
+                            onClick={handleRCADataCollectionContinue}
+                            className="action-btn primary"
+                          >
+                            Continue to Summary
+                          </button>
+                          <button 
+                            onClick={handleStartNewIdea}
+                            className="action-btn secondary"
+                          >
+                            <Sparkles size={16}/> Check Another Idea
+                          </button>
+                        </div>
+                      </>
+                    )}
+                 </>
+              )}
             </div>
         ) : (
              /* Chat Message List */
@@ -2227,6 +3141,67 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                                      Learn Implementation
                                    </button>
                                 )}
+                                {/* Launch RCA Button - Only show when we have a category selected */}
+                                {selectedCategory && selectedGoal === 'grow-revenue' && userRole === 'founder-owner' && (
+                                   <button
+                                     onClick={() => handleLaunchRCA(message.userRequirement || selectedCategory)}
+                                     className="action-btn rca"
+                                   >
+                                     <Brain size={16}/> Launch Root Cause Analysis
+                                   </button>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* RCA Question Options */}
+                        {message.isRCAQuestion && message.rcaOptions && (
+                            <div className="rca-options-container" style={{marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                                {message.rcaOptions.map((option, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleRCAOptionSelect(option, message.rcaQuestionIndex)}
+                                        className="rca-option-btn"
+                                        style={{
+                                            padding: '0.75rem 1rem',
+                                            background: 'var(--ikshan-surface)',
+                                            border: '1px solid var(--ikshan-border)',
+                                            borderRadius: '0.75rem',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            fontSize: '0.95rem',
+                                            color: 'var(--ikshan-text-primary)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.borderColor = 'var(--ikshan-purple)';
+                                            e.target.style.background = 'var(--ikshan-chat-bubble-user)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.borderColor = 'var(--ikshan-border)';
+                                            e.target.style.background = 'var(--ikshan-surface)';
+                                        }}
+                                    >
+                                        ☐ {option}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {/* RCA Data Collection Actions */}
+                        {message.showRCADataCollectionActions && (
+                            <div style={{marginTop: '1.5rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap'}}>
+                                <button 
+                                    onClick={handleRCADataCollectionContinue}
+                                    className="action-btn primary"
+                                >
+                                    Continue to Summary
+                                </button>
+                                <button 
+                                    onClick={handleStartNewIdea}
+                                    className="action-btn secondary"
+                                >
+                                    <Sparkles size={16}/> Check Another Idea
+                                </button>
                             </div>
                         )}
                      </div>
@@ -2252,7 +3227,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       </div>
 
       {/* Input Area */}
-      {!['goal', 'role', 'category', 'custom-role'].includes(flowStage) && (
+      {!['goal', 'role', 'category', 'custom-role', 'rca'].includes(flowStage) && (
           <div className="input-area">
             {speechError && <div style={{position:'absolute', top:'-40px', background:'#fee2e2', color:'#b91c1c', padding:'0.5rem 1rem', borderRadius:'8px', fontSize:'0.9rem'}}>{speechError}</div>}
             <div className="input-container">
@@ -2310,6 +3285,82 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
              >
                 Continue without signing in
              </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="settings-overlay" onClick={() => setShowSettings(false)}>
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="settings-header">
+              <h2>Settings</h2>
+              <button className="settings-close" onClick={() => setShowSettings(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="settings-content">
+              {/* Theme Toggle */}
+              <div className="settings-section">
+                <div className="settings-label">
+                  <span className="settings-icon">{userPreferences.theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}</span>
+                  <span>Theme</span>
+                </div>
+                <div className="theme-toggle">
+                  <button 
+                    className={`theme-btn ${userPreferences.theme === 'light' ? 'active' : ''}`}
+                    onClick={() => setUserPreferences(prev => ({ ...prev, theme: 'light' }))}
+                  >
+                    <Sun size={16} /> Light
+                  </button>
+                  <button 
+                    className={`theme-btn ${userPreferences.theme === 'dark' ? 'active' : ''}`}
+                    onClick={() => setUserPreferences(prev => ({ ...prev, theme: 'dark' }))}
+                  >
+                    <Moon size={16} /> Dark
+                  </button>
+                </div>
+              </div>
+
+              {/* Font Size */}
+              <div className="settings-section">
+                <div className="settings-label">
+                  <span className="settings-icon"><Type size={18} /></span>
+                  <span>Font Size</span>
+                </div>
+                <div className="font-size-options">
+                  {fontSizeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      className={`font-size-btn ${userPreferences.fontSize === option.value ? 'active' : ''}`}
+                      onClick={() => setUserPreferences(prev => ({ ...prev, fontSize: option.value }))}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Language */}
+              <div className="settings-section">
+                <div className="settings-label">
+                  <span className="settings-icon"><Globe size={18} /></span>
+                  <span>Language</span>
+                </div>
+                <select 
+                  className="language-select"
+                  value={userPreferences.language}
+                  onChange={(e) => setUserPreferences(prev => ({ ...prev, language: e.target.value }))}
+                >
+                  {languageOptions.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       )}
