@@ -258,7 +258,7 @@
 /* Input Area - Floating & Elevated */
 .input-area {
   padding: 1.5rem;
-  padding-bottom: 100px;
+  padding-bottom: 50px;
   background: linear-gradient(to top, var(--ikshan-bg) 80%, transparent);
   display: flex;
   justify-content: center;
