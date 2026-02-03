@@ -7,3 +7,25 @@ dist
 .gitignore
 *.md
 .vscode
+
+# Additional performance optimizations
+.venv/
+venv/
+__pycache__/
+build/
+logs/
+media/videos/
+*.mp4
+knowledge-base/data/
+*.csv
+frontend/
+services/api/
+database/operations/
+expansion/
+solution-framework/
+implementation task/
+ai-engines/
+database-automation/
+context-file/
+.idea/
+.DS_Store

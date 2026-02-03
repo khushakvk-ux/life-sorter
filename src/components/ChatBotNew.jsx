@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3, Chrome, Zap, Brain, Copy, PanelLeftClose, PanelLeftOpen, ExternalLink, Star, Settings, FileText, BarChart3, ScanLine, Video, Calendar, Sun, Moon, Type, Globe } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Package, Box, Gift, ArrowLeft, Plus, MessageSquare, ShoppingCart, Scale, Users, Sparkles, Youtube, History, X, Menu, Edit3, Chrome, Zap, Brain, Copy, PanelLeftClose, PanelLeftOpen, ExternalLink, Star, Settings, FileText, BarChart3, ScanLine, Video, Calendar, Sun, Moon, Type, Globe, TrendingUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './ChatBotNew.css';
 import { formatCompaniesForDisplay, analyzeMarketGaps } from '../utils/csvParser';
+import MarketIntelligencePanel from './MarketIntelligencePanel';
+import MarketIntelligenceView from './MarketIntelligenceView';
 
 // Generate unique message IDs to prevent React key conflicts
 const generateUniqueId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -1150,6 +1152,8 @@ const ChatBotNew = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState('products'); // 'products' | 'market-intel'
+  const [activeMainView, setActiveMainView] = useState('chat'); // 'chat' | 'market-intel'
   
   // User preferences state
   const [userPreferences, setUserPreferences] = useState(() => {
@@ -2851,10 +2855,23 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
         </div>
       </header>
 
-      {/* Left Sidebar - Products Panel */}
+      {/* Left Sidebar - Products & Market Intelligence Panel */}
       <div className={`left-sidebar ${leftSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h3>Products</h3>
+          <div className="sidebar-tabs">
+            <button 
+              className={`sidebar-tab ${activeMainView === 'chat' ? 'active' : ''}`}
+              onClick={() => { setActiveMainView('chat'); setLeftSidebarOpen(false); }}
+            >
+              <MessageSquare size={14} /> Chat
+            </button>
+            <button 
+              className={`sidebar-tab ${activeMainView === 'market-intel' ? 'active' : ''}`}
+              onClick={() => { setActiveMainView('market-intel'); setLeftSidebarOpen(false); }}
+            >
+              <TrendingUp size={14} /> Intel
+            </button>
+          </div>
           <button className="sidebar-close" onClick={() => setLeftSidebarOpen(false)}>
             <X size={18} />
           </button>
@@ -2887,7 +2904,15 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
         <div className="sidebar-overlay" onClick={() => setLeftSidebarOpen(false)} />
       )}
       
-      {/* Main Content */}
+      {/* Main Content - Market Intelligence View */}
+      {activeMainView === 'market-intel' && (
+        <div className="chat-window">
+          <MarketIntelligenceView />
+        </div>
+      )}
+      
+      {/* Main Content - Chat View */}
+      {activeMainView === 'chat' && (
       <div className="chat-window">
         {/* Typeform / Flow Stages */}
         {['goal', 'role', 'category', 'rca'].includes(flowStage) ? (
@@ -3176,9 +3201,10 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
              </div>
         )}
       </div>
+      )}
 
-      {/* Input Area */}
-      {!['goal', 'category', 'rca'].includes(flowStage) && (
+      {/* Input Area - Only show in chat view */}
+      {activeMainView === 'chat' && !['goal', 'category', 'rca'].includes(flowStage) && (
           <div className="input-area">
             {speechError && <div style={{position:'absolute', top:'-40px', background:'#fee2e2', color:'#b91c1c', padding:'0.5rem 1rem', borderRadius:'8px', fontSize:'0.9rem'}}>{speechError}</div>}
             <div className="input-container">

@@ -1,0 +1,485 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "market_intelligence_schemas",
+  "title": "Market Intelligence Entity - JSON Schemas",
+  "description": "Validation schemas for all 4 phases and consolidated report",
+  
+  "definitions": {
+    
+    "confidenceField": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string" },
+              "selector": { "type": "string" },
+              "type": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["value", "confidence"]
+    },
+    
+    "evidenceItem": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "selector": { "type": "string" },
+        "method": { "enum": ["api", "scrape", "search", "dom", "manual"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["source", "confidence"]
+    },
+
+    "phase1Output": {
+      "type": "object",
+      "title": "Phase 1 - Website Extraction Output",
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "extracted_at": { "type": "string", "format": "date-time" },
+        "phase": { "const": "phase1_website_extraction" },
+        "model_used": { "type": "string" },
+        "business_identity": {
+          "type": "object",
+          "properties": {
+            "name": { "$ref": "#/definitions/confidenceField" },
+            "location": {
+              "type": "object",
+              "properties": {
+                "country": { "type": "string" },
+                "city": { "type": "string" },
+                "confidence": { "type": "number" }
+              }
+            },
+            "category": { "$ref": "#/definitions/confidenceField" }
+          }
+        },
+        "primary_offerings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "rank": { "type": "integer", "minimum": 1 },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "source": { "type": "string" },
+              "excerpt": { "type": "string" }
+            },
+            "required": ["name", "rank", "confidence"]
+          }
+        },
+        "proof_assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "enum": ["testimonial", "case_study", "award", "cert", "other"] },
+              "excerpt": { "type": "string" },
+              "location_url": { "type": "string" },
+              "selector": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["type", "confidence"]
+          }
+        },
+        "offer_structure": {
+          "type": "object",
+          "properties": {
+            "packages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "inclusions": { "type": "array", "items": { "type": "string" } },
+                  "guarantee": { "type": "string" },
+                  "timeline": { "type": "string" },
+                  "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "snapshots": { "type": "array", "items": { "type": "string" } },
+            "selectors": { "type": "object" }
+          }
+        },
+        "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["url", "extracted_at", "phase", "overall_confidence"]
+    },
+
+    "phase2Output": {
+      "type": "object",
+      "title": "Phase 2 - External Presence Output",
+      "properties": {
+        "extracted_at": { "type": "string", "format": "date-time" },
+        "phase": { "const": "phase2_external_presence" },
+        "model_used": { "type": "string" },
+        "business": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "website": { "type": "string" },
+            "location": { "type": "object" }
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "properties": {
+            "social": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "platform": { "enum": ["instagram", "linkedin", "facebook", "x", "youtube", "tiktok", "other"] },
+                  "profile_url": { "type": "string" },
+                  "followers": { "type": "integer" },
+                  "last_post_date": { "type": "string" },
+                  "post_count_30_days": { "type": "integer" }
+                },
+                "required": ["platform", "profile_url"]
+              }
+            },
+            "google_business_profile": {
+              "type": ["object", "null"],
+              "properties": {
+                "rating": { "type": "number", "minimum": 0, "maximum": 5 },
+                "review_count": { "type": "integer" },
+                "categories": { "type": "array", "items": { "type": "string" } },
+                "services": { "type": "array", "items": { "type": "string" } },
+                "profile_url": { "type": "string" }
+              }
+            },
+            "play_store": {
+              "type": ["object", "null"],
+              "properties": {
+                "app_name": { "type": "string" },
+                "rating": { "type": "number" },
+                "review_count": { "type": "integer" },
+                "store_url": { "type": "string" }
+              }
+            },
+            "b2b_listings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "platform": { "type": "string" },
+                  "profile_url": { "type": "string" },
+                  "rating": { "type": "number" },
+                  "review_count": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "social_perception": {
+          "type": "object",
+          "properties": {
+            "last_30_posts": {
+              "type": "object",
+              "properties": {
+                "top_comment_themes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "theme": { "type": "string" },
+                      "frequency": { "type": "integer" },
+                      "sentiment": { "enum": ["positive", "neutral", "negative"] }
+                    }
+                  }
+                },
+                "top_caption_themes": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "sentiment_distribution": {
+              "type": "object",
+              "properties": {
+                "positive": { "type": "number", "minimum": 0, "maximum": 1 },
+                "neutral": { "type": "number", "minimum": 0, "maximum": 1 },
+                "negative": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        },
+        "owner_response_behavior": {
+          "type": "object",
+          "properties": {
+            "replies_exist": { "type": "boolean" },
+            "reply_rate_estimate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "median_response_time_hours": { "type": ["number", "null"] },
+            "tone_patterns": {
+              "type": "array",
+              "items": { "enum": ["empathetic", "professional", "defensive", "templated", "personalized"] }
+            }
+          }
+        },
+        "evidence": { "type": "array", "items": { "$ref": "#/definitions/evidenceItem" } },
+        "profiles_discovered": { "type": "integer" },
+        "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["extracted_at", "phase", "profiles_discovered", "overall_confidence"]
+    },
+
+    "phase3Output": {
+      "type": "object",
+      "title": "Phase 3 - Marketing & Conversion Output",
+      "properties": {
+        "url": { "type": "string" },
+        "extracted_at": { "type": "string", "format": "date-time" },
+        "phase": { "const": "phase3_marketing_conversion" },
+        "model_used": { "type": "string" },
+        "marketing": {
+          "type": "object",
+          "properties": {
+            "channels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "channel": { "type": "string" },
+                  "evidence": { "type": "array" },
+                  "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "tracking_tags": { "type": "array", "items": { "type": "string" } },
+            "ad_platform_ids": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "platform": { "type": "string" },
+                  "id": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "landing_pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string" },
+              "offer_headline": { "type": "string" },
+              "offer_summary": { "type": "string" },
+              "primary_ctas": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "enum": ["form", "button", "link", "chat", "phone", "whatsapp", "booking", "email"] },
+                    "selector": { "type": "string" },
+                    "text": { "type": "string" },
+                    "target": { "type": "string" },
+                    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+                  },
+                  "required": ["type", "confidence"]
+                }
+              },
+              "supporting_ctas": { "type": "array" }
+            }
+          }
+        },
+        "engagement_paths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path_id": { "type": "string" },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step": { "type": "string" },
+                    "action": { "type": "string" },
+                    "cta_type": { "type": "string" },
+                    "fields": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              },
+              "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "sales_process": {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["demo-led", "product-led", "consultative", "rfp", "hybrid", null] },
+            "inbound": { "type": "string" },
+            "outbound": { "type": "string" },
+            "evidence": { "type": "array" }
+          }
+        },
+        "product_journey": {
+          "type": "object",
+          "properties": {
+            "entry_offers": { "type": "array", "items": { "type": "string" } },
+            "core_product": { "type": "string" },
+            "upsells": { "type": "array" },
+            "cross_sells": { "type": "array" }
+          }
+        },
+        "total_ctas": { "type": "integer" },
+        "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["url", "extracted_at", "phase", "total_ctas", "overall_confidence"]
+    },
+
+    "phase4Output": {
+      "type": "object",
+      "title": "Phase 4 - Competitor Analysis Output",
+      "properties": {
+        "extracted_at": { "type": "string", "format": "date-time" },
+        "phase": { "const": "phase4_competitor_analysis" },
+        "model_used": { "type": "string" },
+        "business_id": { "type": "string" },
+        "seed_keywords": { "type": "array", "items": { "type": "string" } },
+        "competitors": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "domain": { "type": "string" },
+              "rank": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "why_picked": { "type": "array", "items": { "type": "string" } },
+              "score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "positioning": { "type": "string" },
+              "primary_offerings": { "type": "array", "items": { "type": "string" } },
+              "offer_highlights": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string" },
+                    "evidence": { "type": "object" }
+                  }
+                }
+              },
+              "gbp_snapshot": {
+                "type": "object",
+                "properties": {
+                  "found": { "type": "boolean" },
+                  "profile_url": { "type": "string" },
+                  "rating": { "type": "number" },
+                  "review_count": { "type": "integer" },
+                  "primary_category": { "type": "string" },
+                  "services": { "type": "array", "items": { "type": "string" } },
+                  "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "extraction_method": { "type": "string" }
+                }
+              },
+              "seo_metrics": {
+                "type": "object",
+                "properties": {
+                  "avg_serp_rank": { "type": "number" },
+                  "top_keywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "keyword": { "type": "string" },
+                        "position": { "type": "integer" }
+                      }
+                    }
+                  },
+                  "est_monthly_traffic": { "type": "integer" }
+                }
+              },
+              "social_presence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "platform": { "type": "string" },
+                    "profile_url": { "type": "string" },
+                    "followers": { "type": "integer" }
+                  }
+                }
+              },
+              "evidence": { "type": "array", "items": { "$ref": "#/definitions/evidenceItem" } }
+            },
+            "required": ["name", "domain", "rank", "score"]
+          }
+        },
+        "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["extracted_at", "phase", "business_id", "competitors", "overall_confidence"]
+    },
+
+    "consolidatedReport": {
+      "type": "object",
+      "title": "Consolidated Market Intelligence Report",
+      "properties": {
+        "report_id": { "type": "string" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "model_used": { "type": "string" },
+        "report_markdown": { "type": "string" },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "business_name": { "type": "string" },
+            "business_url": { "type": "string" },
+            "category": { "type": "string" },
+            "location": { "type": "object" },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "profiles_discovered": { "type": "integer" },
+                "gbp_rating": { "type": ["number", "null"] },
+                "gbp_reviews": { "type": ["integer", "null"] },
+                "total_ctas": { "type": "integer" },
+                "competitors_identified": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "phase_confidences": {
+          "type": "object",
+          "properties": {
+            "phase1_website_extraction": { "type": "number" },
+            "phase2_external_presence": { "type": "number" },
+            "phase3_marketing_conversion": { "type": "number" },
+            "phase4_competitor_analysis": { "type": "number" }
+          }
+        },
+        "data_quality": {
+          "type": "object",
+          "properties": {
+            "phases_completed": { "type": "array", "items": { "type": "string" } },
+            "phases_missing": { "type": "array", "items": { "type": "string" } },
+            "low_confidence_areas": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "phase_outputs": {
+          "type": "object",
+          "properties": {
+            "phase1": { "$ref": "#/definitions/phase1Output" },
+            "phase2": { "$ref": "#/definitions/phase2Output" },
+            "phase3": { "$ref": "#/definitions/phase3Output" },
+            "phase4": { "$ref": "#/definitions/phase4Output" }
+          }
+        }
+      },
+      "required": ["report_id", "generated_at", "overall_confidence"]
+    }
+  }
+}

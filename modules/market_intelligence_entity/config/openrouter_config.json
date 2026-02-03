@@ -1,0 +1,103 @@
+{
+  "$schema": "openrouter_config_schema",
+  "$description": "OpenRouter API configuration with best LLM selection per phase",
+  
+  "api": {
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "defaultTimeout": 60000,
+    "maxRetries": 3,
+    "retryDelayMs": 2000
+  },
+  
+  "phases": {
+    "phase1_website_extraction": {
+      "name": "Website Extraction",
+      "description": "Extract business identity, offerings, proof assets from website",
+      "primaryModel": "anthropic/claude-sonnet-4",
+      "fallbackModel": "openai/gpt-4.1",
+      "reason": "Claude Sonnet 4 excels at structured data extraction with high accuracy and precise JSON output",
+      "temperature": 0.1,
+      "maxTokens": 4000,
+      "requiresJson": true
+    },
+    
+    "phase2_external_presence": {
+      "name": "External Presence & Social Perception",
+      "description": "Discover social profiles, analyze sentiment, detect response patterns",
+      "primaryModel": "anthropic/claude-sonnet-4",
+      "fallbackModel": "openai/gpt-4.1",
+      "reason": "Claude Sonnet 4 is excellent at theme extraction, sentiment analysis, and nuanced tone detection",
+      "temperature": 0.2,
+      "maxTokens": 4000,
+      "requiresJson": true
+    },
+    
+    "phase3_marketing_conversion": {
+      "name": "Marketing, Reachout & Conversion",
+      "description": "Detect CTAs, engagement paths, sales processes, product journeys",
+      "primaryModel": "openai/gpt-4.1",
+      "fallbackModel": "anthropic/claude-sonnet-4",
+      "reason": "GPT-4.1 excels at marketing analysis, CTA detection, and sales funnel understanding",
+      "temperature": 0.2,
+      "maxTokens": 4000,
+      "requiresJson": true
+    },
+    
+    "phase4_competitor_analysis": {
+      "name": "Competitor Identification & Quick-Facts",
+      "description": "Identify competitors, extract positioning, compare offerings",
+      "primaryModel": "openai/gpt-4.1",
+      "fallbackModel": "anthropic/claude-sonnet-4",
+      "reason": "GPT-4.1 is strong at comparative analysis, ranking, and synthesizing competitive intelligence",
+      "temperature": 0.3,
+      "maxTokens": 5000,
+      "requiresJson": true
+    },
+    
+    "report_consolidation": {
+      "name": "Final Report Consolidation",
+      "description": "Synthesize all phases into executive summary and actionable insights",
+      "primaryModel": "anthropic/claude-sonnet-4",
+      "fallbackModel": "openai/gpt-4.1",
+      "reason": "Claude Sonnet 4 produces exceptional narrative synthesis and executive summaries",
+      "temperature": 0.4,
+      "maxTokens": 8000,
+      "requiresJson": false
+    }
+  },
+  
+  "modelCapabilities": {
+    "anthropic/claude-sonnet-4": {
+      "strengths": [
+        "Structured data extraction",
+        "JSON schema adherence",
+        "Nuanced sentiment analysis",
+        "Narrative synthesis",
+        "Evidence-based reasoning"
+      ],
+      "contextWindow": 200000,
+      "costPer1kTokens": { "input": 0.003, "output": 0.015 }
+    },
+    "openai/gpt-4.1": {
+      "strengths": [
+        "Marketing analysis",
+        "Comparative reasoning",
+        "CTA and conversion optimization",
+        "Sales process understanding",
+        "Ranking and scoring"
+      ],
+      "contextWindow": 128000,
+      "costPer1kTokens": { "input": 0.01, "output": 0.03 }
+    },
+    "google/gemini-2.0-flash-001": {
+      "strengths": [
+        "Fast processing",
+        "Multi-modal analysis",
+        "Large context handling",
+        "Cost-effective"
+      ],
+      "contextWindow": 1000000,
+      "costPer1kTokens": { "input": 0.00025, "output": 0.001 }
+    }
+  }
+}

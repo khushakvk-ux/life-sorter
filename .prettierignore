@@ -1,0 +1,12 @@
+# Performance optimization - exclude heavy folders
+.venv/
+venv/
+node_modules/
+dist/
+build/
+logs/
+media/
+knowledge-base/
+frontend/
+services/
+database/

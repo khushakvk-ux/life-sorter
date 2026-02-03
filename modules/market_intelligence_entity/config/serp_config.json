@@ -1,0 +1,80 @@
+{
+  "$schema": "serp_config_schema",
+  "$description": "SERP API and search configuration for market intelligence discovery",
+  
+  "api": {
+    "provider": "serpapi",
+    "alternativeProviders": ["valueserp", "serper", "brightdata"],
+    "apiKeyEnvVar": "SERP_API_KEY",
+    "baseUrl": "https://serpapi.com/search",
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "retryDelayMs": 2000
+  },
+  
+  "search": {
+    "engine": "google",
+    "defaultLocation": "United States",
+    "defaultLanguage": "en",
+    "safeSearch": true,
+    "resultsPerQuery": 10,
+    "includeAds": true,
+    "includeLocalPack": true,
+    "includePeopleAlsoAsk": true,
+    "includeRelatedSearches": true
+  },
+  
+  "queryTemplates": {
+    "nearMe": "{service} near me",
+    "versus": "{service} vs",
+    "best": "best {service} in {location}",
+    "alternatives": "{service} alternatives",
+    "reviews": "{service} reviews {year}",
+    "comparison": "{service} comparison",
+    "topProviders": "top {service} providers {location}"
+  },
+  
+  "rateLimiting": {
+    "enabled": true,
+    "requestsPerMinute": 10,
+    "minDelayBetweenRequestsMs": 3000,
+    "maxDelayBetweenRequestsMs": 8000,
+    "humanPacingEnabled": true
+  },
+  
+  "extraction": {
+    "captureOrganicResults": true,
+    "captureAds": true,
+    "captureLocalPack": true,
+    "capturePeopleAlsoAsk": true,
+    "captureKnowledgeGraph": true,
+    "captureRelatedSearches": true,
+    "maxOrganicResults": 10,
+    "maxAdsResults": 5
+  },
+  
+  "filtering": {
+    "excludeDomains": [
+      "wikipedia.org",
+      "youtube.com",
+      "facebook.com",
+      "twitter.com",
+      "linkedin.com",
+      "instagram.com",
+      "pinterest.com",
+      "reddit.com"
+    ],
+    "excludePatterns": [
+      "*.gov",
+      "*.edu"
+    ],
+    "minDomainOccurrences": 1
+  },
+  
+  "output": {
+    "format": "json",
+    "includeRawResponse": false,
+    "includeTimestamps": true,
+    "includeConfidenceScores": true
+  }
+}

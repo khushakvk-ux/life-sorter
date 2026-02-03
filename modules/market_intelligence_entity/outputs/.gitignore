@@ -1,0 +1,5 @@
+# Output files for Market Intelligence Entity
+# JSON outputs are generated during execution
+
+*.json
+!.gitkeep

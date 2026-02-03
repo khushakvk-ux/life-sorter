@@ -1,0 +1,49 @@
+{
+  "_metadata": {
+    "description": "Template for SERP discovery output",
+    "generatedAt": null,
+    "filename": "serp_discovery.json",
+    "entityVersion": "1.0.0"
+  },
+  "executionId": null,
+  "timestamp": null,
+  "input": {
+    "service": "",
+    "location": "",
+    "year": ""
+  },
+  "queries": [],
+  "results": [
+    {
+      "query": "",
+      "timestamp": "",
+      "success": true,
+      "organicResults": [
+        {
+          "position": 1,
+          "title": "",
+          "url": "",
+          "domain": "",
+          "snippet": "",
+          "hasSitelinks": false,
+          "hasRichSnippet": false
+        }
+      ],
+      "ads": [],
+      "localPack": [],
+      "peopleAlsoAsk": [],
+      "relatedSearches": [],
+      "domainFrequency": [],
+      "confidenceScore": 0
+    }
+  ],
+  "aggregatedDomains": [
+    {
+      "domain": "",
+      "occurrences": 0,
+      "positions": [],
+      "firstSeen": {}
+    }
+  ],
+  "confidenceScore": 0
+}

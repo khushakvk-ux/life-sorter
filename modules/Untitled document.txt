@@ -1,0 +1,567 @@
+﻿Phase 1 — Website Extraction (Formal Specification)
+Purpose
+Produce a validated, auditable JSON profile for a business from a single website URL. The output must capture identity, core offers, hard evidence on-site, and structured offer details (packages, inclusions, guarantees, timelines) — no pricing.
+________________
+
+
+1. Inputs
+* Single website URL (user-provided)
+* Optional: domain snapshot / HTML snapshot (for reproducibility)
+________________
+
+
+2. Outputs (canonical JSON fields)
+{
+  "url": "https://example.com",
+  "extracted_at": "2026-02-03T00:00:00+05:30",
+  "business_identity": {
+    "name": {"value":"", "confidence":0.0, "sources":[{"url":"", "selector":""}]},
+    "location": {"country":"", "city":"", "confidence":0.0, "sources":[]},
+    "category": {"value":"", "taxonomy":"", "confidence":0.0, "sources":[]}
+  },
+  "primary_offerings": [
+    {"name":"", "rank":1, "confidence":0.0, "source":"", "excerpt":""}
+  ],
+  "proof_assets": [
+    {"type":"testimonial|case_study|award|cert", "excerpt":"", "location_url":"", "selector":"", "confidence":0.0}
+  ],
+  "offer_structure": {
+    "packages":[
+      {"name":"", "inclusions":[""], "guarantee":"", "timeline":"", "confidence":0.0}
+    ]
+  },
+  "evidence": {
+    "snapshots":["s3://..."],
+    "selectors": {"name_selector":"", "testimonials_selector":""}
+  }
+}
+
+
+________________
+
+
+3. Extraction Pipeline (stepwise)
+1. Fetch & Render
+   * Headless browser render (Playwright) to capture dynamic content and produce full HTML snapshot.
+2. Boilerplate removal & segmentation
+   * Readability / trafilatura + DOM heuristics to split into logical blocks: hero, about, services, testimonials, contact, footer.
+3. Deterministic candidate detection
+   * Schema.org JSON-LD, Open Graph, meta tags
+   * Regex patterns for addresses, phone numbers, keywords (testimonial, case study, award, package, include, guarantee, timeline)
+4. Embedding + clustering
+   * Sentence-level embeddings for offerings, to deduplicate and rank.
+5. LLM structural extraction
+   * Supply segmented content + deterministic candidates to the LLM with a strict JSON schema prompt to extract normalized fields and confidence scores.
+6. Validation & reconciliation
+   * Cross-check LLM outputs against deterministic hits (schema.org, meta tags, repeated text) — compute composite confidence.
+7. Store evidence
+   * Save HTML snapshot, selectors, and snippets.
+________________
+
+
+4. Tools & Technologies (recommended)
+* Rendering / crawling: Playwright (primary), Puppeteer (alternate)
+* Text extraction: trafilatura, Readability, BeautifulSoup (where suitable)
+* LLMs: GPT-4.1 / GPT-4 Turbo for structured extraction (primary). Claude 3 as comparator for entity resolution.
+* Embeddings & Vector DB: OpenAI embeddings or Cohere + Qdrant / Pinecone / Weaviate
+* Backend / API: FastAPI (Python) or Node + Express/Next.js API
+* Storage: Postgres (metadata), S3 (snapshots), Vector DB (embeddings)
+________________
+
+
+5. Prompting & Schema Enforcement
+* System prompt: “You are a strict extraction engine. Return only valid JSON matching the given schema. Do not invent facts. Attach confidence per field (0.0–1.0) and list sources (URL + CSS/XPath).”
+* Validation: run JSON schema validator. If invalid, retry with the same LLM up to 1 retry with clarified instructions; otherwise mark field as confidence: 0.0 and supply deterministic evidence if present.
+________________
+
+
+6. Acceptance Criteria & QA
+* Field-level minimums
+   * name: precision ≥ 95% (on testset)
+   * location (country): precision ≥ 90%
+   * primary_offerings top-3: mean average precision ≥ 85%
+   * proof_assets detection: recall ≥ 80% on labeled set
+* Confidence thresholds
+   * Automatic pass: field confidence ≥ 0.75
+   * Human review required: 0.4 ≤ confidence < 0.75
+   * Auto-flagged (possible fail): confidence < 0.4
+* Gold validation:
+   * Create a labeled dataset of 200 sites; compute precision/recall for each field.
+________________
+
+
+7. Edge Cases & Heuristics
+* Single-page marketing sites — rely on hero, CTA and schema.org; use heuristics to detect offered services listed as bullets.
+* Multiple locations — return locations array; set primary=true based on contact/address block or schema.org primaryLocation.
+* Non-English pages — detect language; either use LLM multilingual extraction or translate key blocks before extraction.
+* Noisy JS / gated content — capture snapshot before interaction; if content requires login, mark as gated=true and return minimal deterministic data.
+________________
+
+
+8. Legal / Compliance
+* Respect robots.txt and explicit site TOS.
+* Don’t store PII unnecessarily; when captured, mark and optionally redact if storing long-term.
+* Rate-limit and respect platform rules. Provide opt-out and data deletion workflow.
+________________
+
+
+9. Deliverables (Phase 1)
+1. JSON Schema (production)
+2. Playwright + extraction prototype (single-URL) — code + runbook
+3. LLM prompt suite for extraction (system + user prompts)
+4. QA script and labeled testset evaluation report
+________________
+
+
+Phase 2 — External Presence & Social Perception (Formal Specification)
+Purpose
+Given a business identity (from Phase 1), discover and normalize public external presence (social platforms, directories, GBP, Play Store, other B2B listings), extract social perception themes from recent content, and measure owner response behavior signals. Provide evidence and confidence for each datum.
+________________
+
+
+1. Inputs
+* Business identity object (from Phase 1) including name, url, location
+* Optional: explicit profile URLs (if user provides)
+________________
+
+
+2. Outputs (canonical JSON fields)
+{
+  "business": {"name":"", "website":"", "location":{ "country":"", "city":"" }},
+  "profiles": {
+    "social": [
+      {"platform":"instagram|linkedin|facebook|x|youtube", "profile_url":"", "followers":1234, "last_post_date":"", "post_count_30_days":10}
+    ],
+    "google_business_profile": { "rating":4.2, "review_count":120, "categories":[""], "services":[""], "profile_url":"" },
+    "play_store": { "app_name":"", "rating":4.0, "review_count":234, "categories":[""], "store_url":"" },
+    "b2b_listings": [
+      {"platform":"Clutch|G2|Capterra|Justdial|IndiaMart", "profile_url":"", "rating":4.5, "review_count":12}
+    ]
+  },
+  "social_perception": {
+    "last_30_posts": {"top_comment_themes":[{"theme":"", "frequency":0, "sentiment":"positive|neutral|negative"}], "top_caption_themes":[""]},
+    "sentiment_distribution":{"positive":0.6,"neutral":0.3,"negative":0.1}
+  },
+  "owner_response_behavior": {
+    "replies_exist": true,
+    "reply_rate_estimate": 0.45,
+    "median_response_time_hours": 24,
+    "tone_patterns":["empathetic","templated"]
+  },
+  "evidence": [{"source_url":"", "method":"api|scrape|search", "confidence":0.0}]
+}
+
+
+________________
+
+
+3. Discovery Engine (reliable order)
+1. Website-linked profiles (footer / header / sameAs JSON-LD) — highest trust.
+2. Search-based discovery (SerpAPI / Google CSE) with name + location filters.
+3. Platform API verification (where available).
+4. Name & address similarity matching (Levenshtein + token similarity) before marking profile as official.
+________________
+
+
+4. Platform-specific Data Collection (high-level)
+* Social platforms
+   * Prefer official APIs (Facebook Graph API for FB/IG, YouTube Data API, X API where available).
+   * If API not available or limited, use Playwright-based scraping of public pages with rate limiting.
+   * Collect last 30 posts’ captions, timestamps, top comments (sample), follower counts, and owner replies.
+* Google Business Profile
+   * Source: Google Places API (preferred) or SERP local pack scraping (fallback).
+   * Collect: rating, review count, categories, listed services, recent reviews (sample).
+* Google Play Store
+   * If app exists: parse Play Store listing (rating, reviews, downloads if visible, description).
+   * Use store scraping or third-party APIs (rate-limited).
+* B2B Listings
+   * Target: Clutch, G2, Capterra, Justdial, GoodFirms, IndiaMart, etc.
+   * Collect profile URL, rating, reviews, categories, and verification badges.
+________________
+
+
+5. Social Perception Analysis (method)
+1. Data preparation
+   * Clean captions and comments (remove spam, duplicate auto-posts, bot-like patterns).
+2. Embeddings + clustering
+   * Embed captions and comments; cluster to surface repeated themes.
+3. LLM labeling
+   * Use GPT-4.1 / Claude 3 to label clusters and generate theme names and representative excerpts.
+4. Sentiment analysis
+   * LLM-assisted sentiment tagging and aggregate distribution.
+5. Representative outputs
+   * Top N comment themes (frequency + sentiment)
+   * Top content themes in captions/descriptions
+   * Example comments (with URLs and selector paths)
+________________
+
+
+6. Owner Response Behavior Signals (method & metrics)
+* Signals
+   * replies_exist (boolean)
+   * reply_rate_estimate = (replies found) / (review/comment sample size)
+   * median_response_time_hours computed if timestamps of comments & replies available
+   * tone_patterns (LLM-labeled): empathetic, professional, defensive, templated
+   * consistency_score across platforms (0–1)
+* Computation
+   * Use comment + reply timestamps to compute response time distribution.
+   * Use embeddings + LLM to detect templated vs personalized replies (templated → high lexical similarity across replies).
+   * Flag automated behavior if replies are instant and identical.
+________________
+
+
+7. Tools & Technologies (recommended)
+* Discovery / Search: SerpAPI, Google Custom Search API
+* Platform APIs: Facebook/Instagram Graph API, YouTube Data API, Google Places API
+* Crawling / Scraping (fallback): Playwright (with strict rate-limits)
+* Embeddings & LLMs: OpenAI embeddings + GPT-4.1; Claude 3 as comparator for labeling/tone detection
+* Vector DB: Qdrant or Pinecone
+* Storage & Backend: Postgres + S3 + FastAPI
+________________
+
+
+8. Evidence & Trust Model
+* For every datum include:
+   1. source_url, extraction_method (api|scrape|search), confidence
+   2. evidence_snippet and selector (CSS/XPath)
+* Trust hierarchy:
+   1. Site-linked official profile (highest)
+   2. API-confirmed profiles
+   3. High-similarity search matches (medium)
+   4. Low-confidence matches (flagged for manual review)
+________________
+
+
+9. Acceptance Criteria & QA
+* Profile discovery: official profile detection precision ≥ 90% on test set
+* Follower counts: match within ±5% when API available
+* Social perception themes: human-validated relevance ≥ 85% on a 100-site sample
+* Owner reply detection: recall ≥ 80% for public replies
+________________
+
+
+10. Legal & Ethical Constraints
+* Use official platform APIs where possible. If scraping, obey robots.txt and platform terms; do not access private or login-protected content.
+* Do not store or expose PII beyond what is required for business signals. Provide data deletion and dispute workflows.
+________________
+
+
+11. Deliverables (Phase 2)
+1. Unified JSON schema extension for external profiles and social perception.
+2. Discovery decision tree + matching algorithm spec.
+3. LLM prompts for theme extraction & tone analysis.
+4. Prototype script to fetch GBP + one social platform (API or scraping fallback) and return the JSON snapshot.
+5. Test plan & labeled dataset (50–100 businesses) for evaluation.
+________________
+
+
+Cross-Phase Considerations & Integration
+* Canonical ID: unify Phase 1 and Phase 2 outputs under a canonical business_id so multiple runs across time and sources can be reconciled.
+* Versioning & Snapshots: store HTML and profile snapshots with timestamps; keep incremental differences for audits.
+* Human Review Workbench: build a review UI that shows low-confidence fields, evidence snippets, and a single-click override.
+* Operational safety: centralize rate-limits and platform credentials; implement circuit-breakers for noisy targets.
+* Monitoring & Metrics: instrument accuracy metrics, API error rates, crawl success rate, and LLM cost per extraction.
+________________
+
+
+Phase 3 — Marketing, Reachout & Conversion (Formal Specification)
+Purpose
+Detect, extract, model, and evidence a business’s public marketing channels, landing-page offers and CTAs, customer engagement paths, visible sales processes, and product journey (entry → core → upsell/cross-sell). Output is an auditable, production-ready JSON profile per site, with selectors, snapshots, and confidence scores.
+________________
+
+
+1) Inputs
+* Canonical business_identity (Phase 1 output: name, website, location, category)
+* Website URL (single page or domain snapshot)
+* Optional: discovered profiles from Phase 2 (social, GBP, app links)
+* Optional: client-provided analytics tag IDs or GTM access
+________________
+
+
+2) Outputs (canonical JSON schema — minimal)
+{
+  "business_id":"biz_123",
+  "url":"https://example.com",
+  "extracted_at":"2026-02-03T00:00:00+05:30",
+  "marketing": {
+    "channels":[
+      {"channel":"organic_search","evidence":[{"url":"","selector":"","method":"dom|search|api"}],"confidence":0.9}
+    ],
+    "tracking_tags":["ga4","gtm","fb-pixel"],
+    "ad_platform_ids":[{"platform":"google_ads","id":"AW-XXXXX"}]
+  },
+  "landing_pages":[
+    {
+      "url":"https://example.com/landing",
+      "offer_headline":"Get 30-day audit",
+      "offer_summary":"Short summary...",
+      "primary_ctas":[
+        {"type":"form","selector":"#hero form","text":"Book Demo","target":"https://calendly.com/...","confidence":0.95}
+      ],
+      "supporting_ctas":[],
+      "evidence":[{"selector":"#hero .cta","screenshot":"s3://.../hero.png"}]
+    }
+  ],
+  "engagement_paths":[
+    {
+      "path_id":"path_1",
+      "steps":[{"step":"landing","action":"click_cta","cta_type":"form"},{"step":"form","action":"submit","fields":["name","email","phone"]},{"step":"sales","action":"call","notes":"inside sales"}],
+      "probability":0.82,
+      "confidence":0.78
+    }
+  ],
+  "sales_process":{
+    "inbound":"form -> crm -> sales_call -> demo -> proposal",
+    "outbound":"cold_email -> demo -> proposal",
+    "evidence":[]
+  },
+  "product_journey":{
+    "entry_offers":["lead magnet","free trial","demo"],
+    "core_product":"Subscription plan A",
+    "upsells":[{"name":"Premium Onboarding","trigger":"post-purchase","evidence":[ ]}],
+    "cross_sells":[{"name":"Ads Management","placement":"checkout|post-demo","evidence":[]}]
+  },
+  "evidence":[]
+}
+
+
+________________
+
+
+3) Acceptance Criteria (operational)
+* Primary CTA detection: precision ≥ 95% on labeled landing pages.
+* Engagement path reconstruction: correctness ≥ 85% on testset.
+* Sales process classification: accuracy ≥ 80% across common patterns (demo-led, product-led, consultative, RFP).
+* Upsell/cross-sell detection: recall ≥ 75% for explicit in-site signals.
+________________
+
+
+4) Pipeline (step-by-step)
+1. Render & snapshot
+   * Full browser render (Playwright) to capture dynamic CTAs, modals, chat widgets, event listeners; store HTML + screenshot.
+2. Deterministic DOM scan
+   * Extract CTA candidates (<a>, <button>, forms, tel:, mailto:, wa.me, calendaring links).
+   * Detect scripts for chat vendors and tag IDs (Intercom, Drift, gtag, GTM-, fbq).
+3. Form & flow analysis
+   * Parse form fields, action endpoints, hidden inputs (e.g., data-crm, hubspotutk) to infer CRM/automation.
+   * Capture destinations (calendly, payment gateways).
+4. Behavioral inference
+   * Use deterministic hits as high-confidence signals.
+   * Provide LLM (GPT-4.1) with page hero text, CTA snippets, form HTML, and script lists to:
+      * Summarize the landing offer.
+      * Rank CTAs and map likely engagement paths.
+      * Infer a probable sales process.
+5. Cross-source corroboration
+   * Cross-check CTAs and campaigns against Phase 2 profiles (social CTAs, GBP action buttons, Play Store listing if applicable).
+   * If analytics IDs exist and client grants access, validate via tag presence.
+6. Confidence aggregation
+   * Combine rule-based evidence (high weight), LLM inference (medium), repetition across pages (bonus) into final confidence score.
+7. Persistence
+   * Save snapshots (HTML, screenshots), selectors, and a small replay trace of interactions (clicks that reveal modals) for audit.
+________________
+
+
+5) Heuristics & Rules (practical)
+* Primary CTA ranking: Hero > Sticky header > Floating chat > Footer. If identical CTA repeats across placements, boost confidence.
+* Call/WhatsApp path: tel: or wa.me links → direct-call/WhatsApp path.
+* Booking detection: Calendly / HubSpot Meetings / Acuity / YouCanBook.me links → booking path.
+* Form intent: Phone field presence → sales-intent lead; email-only → top-of-funnel.
+* Chat detection: presence of vendor script (intercom, tawk) → live chat enabled; if chat auto-responds with booking link, infer automation.
+* Upsell signs: “Add-on”, “Upgrade”, “Compare Plans”, or “Also purchased” sections in checkout or plans pages.
+________________
+
+
+6) Tools & Integrations (recommended)
+* Rendering: Playwright (Python / Node)
+* DOM parsing: BeautifulSoup / Cheerio + custom heuristics
+* LLM: GPT-4.1 / GPT-4 Turbo for labeling and path synthesis
+* Embeddings/Vector DB: OpenAI embeddings + Qdrant (for CTA clustering across pages)
+* Vendor detection: Wappalyzer API (optional), custom script regex
+* Storage: Postgres (metadata), S3 (snapshots), Vector DB (embeddings)
+* Backend: FastAPI / Node serverless
+________________
+
+
+7) QA & Evaluation
+* Build labeled dataset (~200 landing pages) annotated for CTAs, engagement paths, and sales processes.
+* Compute precision/recall and surface low-confidence items for human review.
+* Deploy continuous evaluation: sample 1% of runs for manual audit weekly.
+________________
+
+
+8) Edge Cases & Mitigations
+* CTAs behind interactions: simulate common user actions (cookie accept, scroll, click) to reveal CTAs.
+* Single-page apps: listen to route changes and dynamic DOM inserts.
+* Language variants: auto-detect language and use multilingual LLM prompts or translate to English for extraction.
+* Gated content: mark as gated=true; collect deterministic metadata only.
+________________
+
+
+9) Legal & Operational Constraints
+* Respect robots.txt and site TOS. Rate-limit and implement politeness backoff.
+* If analytics or GTM access is requested, require explicit client consent and secure credentials.
+* Treat captured PII carefully: redact or store encrypted; provide delete workflow.
+________________
+
+
+10) Deliverables (Phase 3)
+1. Production JSON schema for the Marketing & CTA module.
+2. Playwright + Python prototype to extract CTAs, forms, chat detection for one URL (with evidence).
+3. LLM prompt templates and validator for engagement path synthesis.
+4. QA test plan and annotation template for building the labeled dataset.
+________________
+
+
+Phase 4 — Competitor Identification & Quick-Facts (Formal Specification)
+Purpose
+Automatically identify the Top-3 competitors for a given business identity and produce concise, evidence-backed quick facts for each: positioning, primary offerings, GBP snapshot (when available), SEO presence, and evidence of social/traffic signals.
+________________
+
+
+1) Inputs
+* business_identity (Phase 1): name, website, location, category, top_keywords.
+* Optional: user-provided seed keywords or local search radius (km).
+* Optional: Phase 2 discovery outputs (profiles, GBP, social).
+________________
+
+
+2) Outputs (canonical JSON schema — minimal)
+{
+  "business_id":"biz_123",
+  "extracted_at":"2026-02-03T00:00:00+05:30",
+  "competitors":[
+    {
+      "name":"Competitor A",
+      "domain":"https://competitor.example",
+      "why_picked":["local category","SERP"],
+      "score":0.92,
+      "positioning":"Local e-commerce SEO specialists for retailers",
+      "primary_offerings":["Listing Optimization","Local SEO","Product Feeds"],
+      "offer_highlights":[
+        {"text":"Dedicated account manager","evidence":{"url":"", "selector":""}}
+      ],
+      "gbp_snapshot": {
+        "found": true,
+        "profile_url":"https://maps.google.com/?cid=...",
+        "rating":4.5,
+        "review_count":210,
+        "primary_category":"Digital Marketing Agency",
+        "services":["Listing Optimization"],
+        "confidence":0.9,
+        "extraction_method":"google_places_api|serp_fallback"
+      },
+      "seo_metrics": {"avg_serp_rank":2.1,"top_keywords":[{"keyword":"listing optimization","position":1}],"est_monthly_traffic":12000},
+      "social_presence":[{"platform":"instagram","profile_url":"","followers":12000}],
+      "evidence":[{"source":"serpapi","url":"","confidence":0.9}]
+    }
+  ]
+}
+
+
+________________
+
+
+3) Why & How Competitors Are Picked (ranking signals)
+Primary methods (in order of reliability)
+1. Local category matches (Google Places / GBP)
+   * Businesses with same primary category within radius; scored by proximity, rating, and review count.
+2. SERP competitors
+   * Domains appearing frequently in top organic results for the business’s seed keywords; ranked by frequency and average position.
+3. Directory & marketplace leaders
+   * High-visibility listings on Clutch, G2, Capterra, Justdial, IndiaMart.
+4. Traffic & backlink overlap (secondary)
+   * Estimated traffic and backlink similarity (when paid APIs available) for tie-breaking.
+5. Social & app signals
+   * Presence of active social audience or app store presence (Google Play) that aligns with category.
+Scoring weights (example)
+* SERP presence: 35%
+* Local GBP match: 30%
+* GBP strength (rating × log(reviews)): 15%
+* Traffic/backlinks: 10%
+* Social presence: 10%
+________________
+
+
+4) Pipeline (step-by-step)
+1. Seed keyword generation
+   * Extract keywords from the site H1, services, meta description, FAQs; optionally expand via related searches or embeddings.
+2. SERP crawl
+   * Query SerpAPI / Google CSE for top N results per keyword; collect domains, ranks, snippets.
+3. Local GBP query
+   * Use Google Places API (preferred) or SERP local pack to fetch businesses by category within radius.
+4. Directory extraction
+   * Query targeted directories for category-specific listings.
+5. Aggregate candidates & feature extraction
+   * Build candidate pool; compute features: avg SERP rank, SERP frequency, GBP rating & reviews, distance, estimated traffic.
+6. Score & select top 3
+   * Compute combined score; select top 3 competitors.
+7. Quick-facts extraction
+   * Crawl competitor sites (Playwright) and extract hero positioning, top offerings (Phase 1 extraction), USPs, guarantees.
+   * Fetch GBP snapshot for competitor (use Google Places API where available).
+   * Gather optional SEO metrics (SimilarWeb / Ahrefs) if API keys available.
+8. Normalization & LLM polish
+   * Use LLM (GPT-4.1) to synthesize concise positioning statements and normalize offer highlight bullets from raw excerpts.
+9. Return JSON with evidence
+   * Attach evidence objects: source (serpapi/google_places), url, selector, confidence.
+________________
+
+
+5) GBP Snapshot Procedure
+For each competitor, attempt to fetch a Google Business Profile snapshot using the Google Places API. If not available, use SERP fallback.
+Fields to return
+* profile_url (maps link / place_id)
+* rating (float)
+* review_count (int)
+* primary_category + additional_categories
+* services listed (if any)
+* recent_reviews (2–5 excerpts)
+* confidence & extraction_method
+(Reference used for clarity) Google Business Profile
+________________
+
+
+6) Tools & Integrations (recommended)
+* SERP access: SerpAPI (structured); Google CSE fallback
+* Google Places / GBP: Google Places API (preferred)
+* Crawling: Playwright + trafilatura / Readability
+* LLM: GPT-4.1 for normalization & summarization; Claude 3 as comparator optionally
+* SEO metrics (optional paid): Ahrefs / Semrush / SimilarWeb
+* Embeddings / Vector DB: OpenAI embeddings + Qdrant for keyword clustering
+* Storage: Postgres + S3 + Vector DB
+________________
+
+
+7) Acceptance Criteria & QA
+* Competitor relevance: top 3 must align with human judgement ≥ 85% across testset.
+* GBP snapshot accuracy: rating ±0.1 and review_count within ±5% when API used.
+* Positioning synthesis quality: human validation ≥ 85% (brief statement correctly represents site message).
+* Offer highlight extraction: evidence-backed (selector/snippet) for each highlighted USP.
+Evaluation approach
+* Labeled testset of 200 businesses across categories; measure precision/recall for competitor identification and field-level accuracy.
+________________
+
+
+8) Edge Cases & Mitigations
+* Many local competitors with identical names: use address proximity and website match to disambiguate.
+* Franchises / multi-location brands: return competitors at the brand level and optionally list nearest brand location(s).
+* Paid-only SERP dominance: if organic results sparse due to heavy ads, fall back to directory and GBP signals.
+* Paid SEO metrics unavailable: compute fallback scores from SERP frequency and GBP strength.
+________________
+
+
+9) Legal & Operational Constraints
+* Prefer API-first approaches (SerpAPI, Google Places) to avoid scraping violations.
+* Respect third-party API TOS and quota limits.
+* Document sources and do not infer GBP data when API or explicit page evidence is absent — mark as confidence: low and flag for review.
+________________
+
+
+10) Deliverables (Phase 4)
+1. Production JSON schema for Competitor module.
+2. SerpAPI + Playwright prototype (Python) that: accepts seed keywords, returns candidate domains, and outputs Top-3 competitor quick facts (site crawl + GBP snapshot).
+3. LLM prompt templates for positioning and evidence-backed highlight normalization.
+4. Evaluation plan and labeled annotation template for a 200-business testset.
+________________
+
+
+If you want, I will now produce one of the Phase 3 or Phase 4 artifacts immediately (pick one): JSON schema, LLM prompt set, Playwright+Python prototype for a single URL, or QA/test-plan + annotation templates. Which artifact should I deliver first?

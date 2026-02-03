@@ -20,6 +20,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -28,3 +29,33 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Python virtual environment (CRITICAL FOR PERFORMANCE)
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Large media files (should be hosted externally)
+*.mp4
+*.mov
+*.avi
+*.webm
+# Allow small images but ignore large ones
+# *.png
+# *.jpg
+
+# Build artifacts and caches
+.cache/
+.parcel-cache/
+.vite/
+*.tsbuildinfo
+
+# Duplicate folders (being consolidated)
+frontend/
+services/api/
+database/operations/

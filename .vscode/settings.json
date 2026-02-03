@@ -1,0 +1,81 @@
+{
+  // === PERFORMANCE OPTIMIZATIONS ===
+  
+  // File watching - reduce CPU/RAM usage
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/venv/**": true,
+    "**/__pycache__/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.cache/**": true,
+    "**/logs/**": true,
+    "**/media/videos/**": true,
+    "**/knowledge-base/data/**": true,
+    "**/frontend/**": true,
+    "**/services/**": true,
+    "**/database/operations/**": true
+  },
+  
+  // Search exclusions - faster file search
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.venv": true,
+    "**/venv": true,
+    "**/__pycache__": true,
+    "**/logs": true,
+    "**/media/videos": true,
+    "**/knowledge-base/data": true,
+    "**/*.csv": true,
+    "**/frontend": true,
+    "**/services": true,
+    "**/database/operations": true
+  },
+  
+  // Disable auto-fetch in git (reduces background CPU)
+  "git.autofetch": false,
+  "git.autorefresh": false,
+  
+  // TypeScript/JavaScript performance
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  
+  // ESLint performance
+  "eslint.workingDirectories": [
+    { "mode": "auto" }
+  ],
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "jsx"
+  ],
+  
+  // Disable unnecessary features
+  "editor.codeLens": false,
+  "editor.suggest.preview": false,
+  
+  // Optimize file associations
+  "files.associations": {
+    "*.css": "css",
+    "*.jsx": "javascriptreact"
+  },
+  
+  // Limit number of file changes VS Code can handle
+  "files.maxMemoryForLargeFilesMB": 4096,
+  
+  // Python settings (if using Python extension)
+  "python.analysis.exclude": [
+    "**/.venv/**",
+    "**/node_modules/**",
+    "**/dist/**"
+  ],
+  "python.analysis.autoImportCompletions": false,
+  
+  // Disable telemetry
+  "telemetry.telemetryLevel": "off"
+}

@@ -22,6 +22,7 @@ import chatHandler from './api/chat.js';
 import searchCompaniesHandler from './api/search-companies.js';
 import companiesHandler from './api/companies.js';
 import speakHandler from './api/speak.js';
+import marketIntelligenceHandler from './api/market-intelligence.js';
 
 // API routes
 app.post('/api/chat', async (req, res) => {
@@ -38,6 +39,10 @@ app.get('/api/companies', async (req, res) => {
 
 app.post('/api/speak', async (req, res) => {
   await speakHandler(req, res);
+});
+
+app.post('/api/market-intelligence', async (req, res) => {
+  await marketIntelligenceHandler(req, res);
 });
 
 // Serve static files from public folder
@@ -63,6 +68,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`   - POST /api/search-companies`);
   console.log(`   - GET /api/companies`);
   console.log(`   - POST /api/speak (TTS)`);
+  console.log(`   - POST /api/market-intelligence`);
   if (process.env.NODE_ENV === 'production') {
     console.log(`   Frontend: Serving built files from /dist`);
   }

@@ -1,0 +1,116 @@
+{
+  "$schema": "entity_settings_schema",
+  "$description": "Master configuration for the Market Intelligence Entity",
+  
+  "entity": {
+    "name": "Market Intelligence Entity",
+    "version": "1.0.0",
+    "description": "SERP-driven market discovery and competitive intelligence module",
+    "author": "System",
+    "createdAt": "2026-02-03"
+  },
+  
+  "execution": {
+    "mode": "sequential",
+    "parallelExecutionAllowed": false,
+    "resumableSteps": true,
+    "checkpointEnabled": true,
+    "maxExecutionTimeMinutes": 30,
+    "gracefulShutdownTimeoutMs": 5000
+  },
+  
+  "humanPacing": {
+    "enabled": true,
+    "minDelayMs": 2000,
+    "maxDelayMs": 7000,
+    "randomizeDelays": true,
+    "simulateReadingTime": true,
+    "readingSpeedWPM": 200
+  },
+  
+  "competitorSelection": {
+    "maxCompetitors": 3,
+    "selectionCriteria": {
+      "serpFrequencyWeight": 0.35,
+      "localRelevanceWeight": 0.25,
+      "perceivedAuthorityWeight": 0.25,
+      "offerClarityWeight": 0.15
+    },
+    "minimumConfidenceScore": 0.6,
+    "requireReasonForSelection": true
+  },
+  
+  "enrichment": {
+    "visitWebsite": true,
+    "capturePositioning": true,
+    "captureCoreOffer": true,
+    "captureTrustSignals": true,
+    "captureCtaStyle": true,
+    "captureGoogleBusinessProfile": false,
+    "maxPagesPerCompetitor": 3,
+    "timeoutPerPageMs": 15000
+  },
+  
+  "aiAgents": {
+    "userIntentAgent": {
+      "enabled": true,
+      "perspective": "user",
+      "outputFormat": "structured",
+      "maxTokens": 2000,
+      "temperature": 0.3
+    },
+    "comparisonAgent": {
+      "enabled": true,
+      "perspective": "user_comparing_options",
+      "outputFormat": "structured",
+      "maxTokens": 2500,
+      "temperature": 0.4
+    }
+  },
+  
+  "confidenceScoring": {
+    "enabled": true,
+    "levels": {
+      "high": { "min": 0.8, "label": "High Confidence" },
+      "medium": { "min": 0.5, "label": "Medium Confidence" },
+      "low": { "min": 0.0, "label": "Low Confidence" }
+    }
+  },
+  
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "logToFile": true,
+    "logFilePath": "./logs/entity.log",
+    "maxLogFileSizeMb": 10,
+    "includeTimestamps": true,
+    "includeStepDurations": true
+  },
+  
+  "errorHandling": {
+    "failSilently": true,
+    "maxRetries": 3,
+    "retryDelayMs": 2000,
+    "logErrors": true,
+    "notifyOnCriticalError": false
+  },
+  
+  "outputs": {
+    "directory": "./outputs",
+    "files": {
+      "serpDiscovery": "serp_discovery.json",
+      "competitorsEnriched": "competitors_enriched.json",
+      "competitiveVerdict": "competitive_verdict.json"
+    },
+    "includeMetadata": true,
+    "prettyPrint": true
+  },
+  
+  "isolation": {
+    "noSharedState": true,
+    "noDirectDbWrites": true,
+    "communicationMode": "file_based",
+    "inputConfigPath": "./config/",
+    "outputPath": "./outputs/"
+  }
+}
