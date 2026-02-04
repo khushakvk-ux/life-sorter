@@ -2028,7 +2028,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
               {flowStage === 'goal' && (
                  <>
                     {/* Icon removed */}
-                    <h1>What do you want to improve?</h1>
+                    <h1>Professional expertise, on-demand—without the salary or recruiting.</h1>
                     <p>Select what matters most to you right now</p>
                     <div className="suggestions-grid">
                       {goalOptions.map((goal, index) => (
@@ -2043,6 +2043,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
                         </div>
                       ))}
                     </div>
+                    <p style={{ marginTop: '3rem', fontSize: '0.8rem', fontStyle: 'italic', color: '#6b7280', opacity: 0.7, textAlign: 'center' }}>"I don't have time or team to figure out AI" - Netizen</p>
                  </>
               )}
 
