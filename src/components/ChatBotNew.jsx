@@ -1169,8 +1169,8 @@ const ChatBotNew = () => {
   // Save preferences to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('ikshan-user-preferences', JSON.stringify(userPreferences));
-    // Apply theme to document
-    document.documentElement.setAttribute('data-theme', userPreferences.theme);
+    // Always force light theme
+    document.documentElement.setAttribute('data-theme', 'light');
     // Apply font size
     document.documentElement.setAttribute('data-font-size', userPreferences.fontSize);
   }, [userPreferences]);
@@ -3296,28 +3296,6 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
             </div>
             
             <div className="settings-content">
-              {/* Theme Toggle */}
-              <div className="settings-section">
-                <div className="settings-label">
-                  <span className="settings-icon">{userPreferences.theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}</span>
-                  <span>Theme</span>
-                </div>
-                <div className="theme-toggle">
-                  <button 
-                    className={`theme-btn ${userPreferences.theme === 'light' ? 'active' : ''}`}
-                    onClick={() => setUserPreferences(prev => ({ ...prev, theme: 'light' }))}
-                  >
-                    <Sun size={16} /> Light
-                  </button>
-                  <button 
-                    className={`theme-btn ${userPreferences.theme === 'dark' ? 'active' : ''}`}
-                    onClick={() => setUserPreferences(prev => ({ ...prev, theme: 'dark' }))}
-                  >
-                    <Moon size={16} /> Dark
-                  </button>
-                </div>
-              </div>
-
               {/* Font Size */}
               <div className="settings-section">
                 <div className="settings-label">
