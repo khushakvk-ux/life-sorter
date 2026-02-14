@@ -1,4 +1,4 @@
-import { ArrowLeft, Target, Zap, Brain, TrendingUp, ShoppingCart, Users, Youtube, Sparkles, FileText, Shield, Rocket } from 'lucide-react';
+import { ArrowLeft, Target, Zap, Brain, TrendingUp, ShoppingCart, Users, Youtube, Sparkles, FileText, Shield, Rocket, BarChart3, Lightbulb, Cpu } from 'lucide-react';
 import './About.css';
 
 const About = ({ onBack }) => {
@@ -7,6 +7,12 @@ const About = ({ onBack }) => {
     { icon: Brain, title: 'The AI Overwhelm', desc: 'The AI landscape is noisy. Founders waste hours trying to piece together fragmented tools instead of actually using them to drive revenue.' },
     { icon: Target, title: 'Blind Spots in Growth', desc: "Without the bandwidth for deep market, competitor, and internal analysis, companies miss hidden gaps in their customer funnels, brand positioning, and core value propositions." },
     { icon: Zap, title: 'The Execution Bottleneck', desc: 'Even when a strategy is clear, executing complex operational, sales, and marketing tasks delays momentum and burns out small teams.' },
+  ];
+
+  const howItWorks = [
+    { icon: BarChart3, title: 'Deep Analysis', desc: 'Through our AI Agents, Ikshan deeply analyzes your overall company, your competitors, and the market. We build the massive context needed to pinpoint the exact gaps holding you back.' },
+    { icon: Lightbulb, title: 'Custom Strategy', desc: 'From there, we hand you a customized action plan covering over 150+ revenue-growth categories. Generate more leads, improve sales conversion, build bulletproof strategy.' },
+    { icon: Cpu, title: 'One-Click Execution', desc: "We don't stop at strategy. Ikshan connects you directly to the best DIY automation and AI tools, letting you execute complex tasks with a single click\u2014all before you ever need to hire." },
   ];
 
   const pillars = [
@@ -37,22 +43,27 @@ const About = ({ onBack }) => {
       <div className="about-content">
         {/* Hero */}
         <section className="about-hero">
-          <p className="about-eyebrow">About Ikshan</p>
-          <h1 className="about-hero-title">
-            Elite Growth Strategy & Execution
-            <span className="about-highlight">&mdash;Unlocked by AI.</span>
-          </h1>
-          <p className="about-hero-desc">
-            Most small businesses and startups leave money on the table every single day. Not because they lack vision, but because hiring elite, full-time growth experts or agencies is financially out of reach. At the same time, founders know they need AI to scale, but figuring out how to practically integrate it across their operations is confusing and time-consuming.
-          </p>
-          <p className="about-hero-desc">
-            Ikshan was built to change that. We believe that world-class business growth shouldn't be a luxury reserved for massive enterprises. We are bridging the gap between high-level strategy and everyday execution by giving you on-demand AI growth expertise that diagnoses your business gaps, ships the perfect strategy, and provides the DIY tools to execute it.
-          </p>
+          <div className="about-hero-left">
+            <p className="about-eyebrow">About Ikshan</p>
+            <h1 className="about-hero-title">
+              Elite Growth Strategy & Execution<span className="about-highlight">&mdash;Unlocked by AI.</span>
+            </h1>
+          </div>
+          <div className="about-hero-right">
+            <p className="about-hero-desc">
+              Most small businesses and startups leave money on the table every single day. Not because they lack vision, but because hiring elite, full-time growth experts or agencies is financially out of reach. At the same time, founders know they need AI to scale, but figuring out how to practically integrate it across their operations is confusing and time-consuming.
+            </p>
+            <p className="about-hero-desc">
+              Ikshan was built to change that. We believe that world-class business growth shouldn't be a luxury reserved for massive enterprises. We are bridging the gap between high-level strategy and everyday execution by giving you on-demand AI growth expertise that diagnoses your business gaps, ships the perfect strategy, and provides the DIY tools to execute it.
+            </p>
+          </div>
         </section>
+
+        <div className="about-divider" />
 
         {/* Problem Section */}
         <section className="about-section">
-          <div className="about-section-label">The Problem We Are Solving</div>
+          <h2 className="about-section-title">The Problem We Are Solving</h2>
           <p className="about-section-desc">
             Growing a business is hard. Scaling it without breaking the bank is even harder. We built Ikshan to dismantle the four biggest roadblocks founders face:
           </p>
@@ -62,6 +73,32 @@ const About = ({ onBack }) => {
               return (
                 <div key={i} className="about-card">
                   <div className="about-card-icon">
+                    <Icon size={20} />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="about-divider" />
+
+        {/* How It Works */}
+        <section className="about-section">
+          <h2 className="about-section-title">How Ikshan Works</h2>
+          <p className="about-section-subtitle">Your AI-Powered Growth Engine</p>
+          <p className="about-section-desc">
+            Ikshan doesn't just tell you what to do; it helps you do it.
+          </p>
+          <div className="about-how-grid">
+            {howItWorks.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="about-how-card">
+                  <div className="about-how-num">{i + 1}</div>
+                  <div className="about-how-icon">
                     <Icon size={22} />
                   </div>
                   <h3>{item.title}</h3>
@@ -72,23 +109,11 @@ const About = ({ onBack }) => {
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="about-section">
-          <div className="about-section-label">How Ikshan Works: Your AI-Powered Growth Engine</div>
-          <p className="about-section-desc">
-            Ikshan doesn't just tell you what to do; it helps you do it.
-          </p>
-          <p className="about-section-desc">
-            Through our AI Agents, Ikshan deeply analyzes your overall company, your competitors, and the market. We build the massive context needed to pinpoint the exact gaps holding you back. From there, we hand you a customized action plan covering over 150+ revenue-growth categories.
-          </p>
-          <p className="about-section-desc">
-            But we don't stop at strategy. Ikshan connects you directly to the best DIY automation and AI tools, letting you execute complex tasks with a single click. Generate more leads, improve sales conversion, build bulletproof strategy, and save time in operations&mdash;all before you ever need to hire.
-          </p>
-        </section>
+        <div className="about-divider" />
 
         {/* Journey Section */}
         <section className="about-section">
-          <div className="about-section-label">The Ikshan Journey</div>
+          <h2 className="about-section-title">The Ikshan Journey</h2>
           <p className="about-section-desc">
             It starts with a simple promise: <strong>Make your business run better&mdash;starting today.</strong> You select a goal, and we instantly build your action plan across four core pillars:
           </p>
@@ -98,7 +123,7 @@ const About = ({ onBack }) => {
               return (
                 <div key={i} className="about-pillar">
                   <div className="about-pillar-icon">
-                    <Icon size={20} />
+                    <Icon size={18} />
                   </div>
                   <div>
                     <h3>{item.title}</h3>
@@ -116,9 +141,12 @@ const About = ({ onBack }) => {
           </div>
         </section>
 
+        <div className="about-divider" />
+
         {/* Arsenal Section */}
         <section className="about-section">
-          <div className="about-section-label">Our Arsenal: Built for Immediate Impact</div>
+          <h2 className="about-section-title">Our Arsenal</h2>
+          <p className="about-section-subtitle">Built for Immediate Impact</p>
           <p className="about-section-desc">
             Ikshan comes equipped with a growing suite of specialized AI products designed to replace expensive agency retainers with instant, scalable output:
           </p>
@@ -138,9 +166,11 @@ const About = ({ onBack }) => {
           </div>
         </section>
 
+        <div className="about-divider" />
+
         {/* Founder */}
         <section className="about-section about-founder">
-          <div className="about-section-label">Meet the Founder</div>
+          <h2 className="about-section-title">Meet the Founder</h2>
           <div className="about-founder-card">
             <div className="about-founder-avatar">VG</div>
             <div className="about-founder-info">

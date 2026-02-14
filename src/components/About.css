@@ -1,5 +1,5 @@
 /* ========================================
-   ABOUT PAGE — Minimalist Design
+   ABOUT PAGE
    ======================================== */
 
 .about-page {
@@ -44,35 +44,48 @@
 .about-content {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem 2rem 3rem;
+  padding: 0;
   scroll-behavior: smooth;
 }
 
+/* Divider between sections */
+.about-divider {
+  height: 1px;
+  background: var(--ikshan-border);
+  margin: 0;
+}
+
 /* ========================================
-   HERO
+   HERO — Split layout
    ======================================== */
 .about-hero {
-  max-width: 100%;
-  margin: 0 auto 2.5rem;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+  padding: 2rem 2rem;
+}
+
+.about-hero-left {
+  position: sticky;
+  top: 2rem;
 }
 
 .about-eyebrow {
   font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ikshan-purple);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .about-hero-title {
   font-family: 'Poppins', var(--font-sans);
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--ikshan-text-primary);
-  margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
@@ -83,37 +96,50 @@
   background-clip: text;
 }
 
+.about-hero-right {
+  padding-top: 0.25rem;
+}
+
 .about-hero-desc {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.7;
   color: var(--ikshan-text-secondary);
-  max-width: 700px;
-  margin: 0 auto 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.about-hero-desc:last-child {
+  margin-bottom: 0;
 }
 
 /* ========================================
    SECTIONS
    ======================================== */
 .about-section {
-  max-width: 100%;
-  margin: 0 auto 2.5rem;
+  padding: 2rem 2rem;
 }
 
-.about-section-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ikshan-text-secondary);
-  margin-bottom: 1rem;
-  opacity: 0.7;
+.about-section-title {
+  font-family: 'Poppins', var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ikshan-text-primary);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
+}
+
+.about-section-subtitle {
+  font-size: 0.8rem;
+  color: var(--ikshan-purple);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .about-section-desc {
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: 0.85rem;
+  line-height: 1.65;
   color: var(--ikshan-text-secondary);
   margin-bottom: 0.5rem;
+  max-width: 600px;
 }
 
 .about-section-desc strong {
@@ -121,70 +147,130 @@
 }
 
 /* ========================================
-   PROBLEM CARDS (2x2 grid)
+   PROBLEM CARDS (2x2)
    ======================================== */
 .about-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.625rem;
   margin-top: 1rem;
 }
 
 .about-card {
-  padding: 1.25rem;
-  border-radius: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--ikshan-border);
   background: var(--ikshan-surface);
   transition: all 0.15s ease;
 }
 
 .about-card:hover {
-  border-color: rgba(109, 40, 217, 0.25);
-  transform: translateY(-1px);
+  border-color: rgba(109, 40, 217, 0.2);
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.06);
 }
 
 .about-card-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  background: rgba(109, 40, 217, 0.08);
+  color: var(--ikshan-purple);
+  margin-bottom: 0.5rem;
+}
+
+.about-card h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ikshan-text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.about-card p {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ikshan-text-secondary);
+  margin: 0;
+}
+
+/* ========================================
+   HOW IT WORKS (3-column cards with numbers)
+   ======================================== */
+.about-how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
+  margin-top: 1rem;
+}
+
+.about-how-card {
+  position: relative;
+  padding: 1.25rem 1rem 1rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--ikshan-border);
+  background: var(--ikshan-surface);
+  transition: all 0.15s ease;
+}
+
+.about-how-card:hover {
+  border-color: rgba(109, 40, 217, 0.2);
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.06);
+}
+
+.about-how-num {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ikshan-purple);
+  opacity: 0.4;
+}
+
+.about-how-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 0.5rem;
   background: rgba(109, 40, 217, 0.08);
   color: var(--ikshan-purple);
   margin-bottom: 0.625rem;
 }
 
-.about-card h3 {
-  font-size: 0.85rem;
+.about-how-card h3 {
+  font-size: 0.825rem;
   font-weight: 600;
   color: var(--ikshan-text-primary);
   margin-bottom: 0.25rem;
 }
 
-.about-card p {
-  font-size: 0.8rem;
+.about-how-card p {
+  font-size: 0.75rem;
   line-height: 1.55;
   color: var(--ikshan-text-secondary);
   margin: 0;
 }
 
 /* ========================================
-   PILLARS (4-column row)
+   PILLARS (4-column)
    ======================================== */
 .about-pillars {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  gap: 0.625rem;
   margin-top: 1rem;
 }
 
 .about-pillar {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--ikshan-border);
   background: var(--ikshan-surface);
 }
@@ -193,24 +279,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
   background: rgba(109, 40, 217, 0.08);
   color: var(--ikshan-purple);
   flex-shrink: 0;
 }
 
 .about-pillar h3 {
-  font-size: 0.825rem;
+  font-size: 0.775rem;
   font-weight: 600;
   color: var(--ikshan-text-primary);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
 .about-pillar p {
-  font-size: 0.75rem;
-  line-height: 1.5;
+  font-size: 0.7rem;
+  line-height: 1.45;
   color: var(--ikshan-text-secondary);
   margin: 0;
 }
@@ -220,10 +306,10 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(109, 40, 217, 0.15);
+  margin-top: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(109, 40, 217, 0.12);
   background: rgba(109, 40, 217, 0.03);
 }
 
@@ -234,8 +320,8 @@
 }
 
 .about-callout p {
-  font-size: 0.825rem;
-  line-height: 1.6;
+  font-size: 0.775rem;
+  line-height: 1.55;
   color: var(--ikshan-text-secondary);
   margin: 0;
 }
@@ -245,50 +331,50 @@
 }
 
 /* ========================================
-   PRODUCTS (3-column grid)
+   PRODUCTS (3-column)
    ======================================== */
 .about-products {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+  gap: 0.625rem;
   margin-top: 1rem;
 }
 
 .about-product-card {
-  padding: 1.25rem;
-  border-radius: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--ikshan-border);
   background: var(--ikshan-surface);
   transition: all 0.15s ease;
 }
 
 .about-product-card:hover {
-  border-color: rgba(109, 40, 217, 0.25);
-  background: var(--ikshan-chat-bubble-user);
+  border-color: rgba(109, 40, 217, 0.2);
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.06);
 }
 
 .about-product-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
   background: rgba(109, 40, 217, 0.08);
   color: var(--ikshan-purple);
-  margin-bottom: 0.625rem;
+  margin-bottom: 0.5rem;
 }
 
 .about-product-card h3 {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--ikshan-text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .about-product-card p {
-  font-size: 0.775rem;
-  line-height: 1.55;
+  font-size: 0.725rem;
+  line-height: 1.5;
   color: var(--ikshan-text-secondary);
   margin: 0;
 }
@@ -297,18 +383,23 @@
    FOUNDER
    ======================================== */
 .about-founder {
-  margin-bottom: 2rem;
+  padding-bottom: 2.5rem;
 }
 
 .about-founder-card {
   display: flex;
   align-items: flex-start;
-  gap: 1.25rem;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--ikshan-border);
+  background: var(--ikshan-surface);
 }
 
 .about-founder-avatar {
-  width: 3rem;
-  height: 3rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--ikshan-purple), var(--ikshan-purple-light));
   color: white;
@@ -316,29 +407,29 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 
 .about-founder-info h3 {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--ikshan-text-primary);
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.05rem;
 }
 
 .about-founder-role {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--ikshan-purple);
   font-weight: 500;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.625rem;
 }
 
 .about-founder-bio {
-  font-size: 0.825rem;
-  line-height: 1.65;
+  font-size: 0.775rem;
+  line-height: 1.6;
   color: var(--ikshan-text-secondary);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
 }
 
 .about-founder-bio:last-child {
@@ -349,23 +440,25 @@
    RESPONSIVE
    ======================================== */
 @media (max-width: 768px) {
-  .about-content {
-    padding: 1.5rem 1rem 2.5rem;
-  }
-
   .about-hero {
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
   }
 
   .about-hero-title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
   }
 
-  .about-hero-desc {
-    font-size: 0.85rem;
+  .about-section {
+    padding: 1.5rem 1rem;
   }
 
   .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-how-grid {
     grid-template-columns: 1fr;
   }
 
@@ -385,6 +478,10 @@
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
+  .about-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .about-pillars {
     grid-template-columns: repeat(2, 1fr);
   }
