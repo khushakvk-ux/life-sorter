@@ -44,7 +44,7 @@
 .about-content {
   flex: 1;
   overflow-y: auto;
-  padding: 3rem 1.5rem 4rem;
+  padding: 2rem 2rem 3rem;
   scroll-behavior: smooth;
 }
 
@@ -52,8 +52,8 @@
    HERO
    ======================================== */
 .about-hero {
-  max-width: 600px;
-  margin: 0 auto 4rem;
+  max-width: 100%;
+  margin: 0 auto 2.5rem;
   text-align: center;
 }
 
@@ -68,11 +68,11 @@
 
 .about-hero-title {
   font-family: 'Poppins', var(--font-sans);
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--ikshan-text-primary);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
@@ -84,10 +84,10 @@
 }
 
 .about-hero-desc {
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.65;
   color: var(--ikshan-text-secondary);
-  max-width: 480px;
+  max-width: 540px;
   margin: 0 auto;
 }
 
@@ -95,8 +95,8 @@
    SECTIONS
    ======================================== */
 .about-section {
-  max-width: 600px;
-  margin: 0 auto 3.5rem;
+  max-width: 100%;
+  margin: 0 auto 2.5rem;
 }
 
 .about-section-label {
@@ -113,21 +113,19 @@
    STEPS (How it works)
    ======================================== */
 .about-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
 }
 
 .about-step {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--ikshan-border);
-}
-
-.about-step:last-child {
-  border-bottom: none;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ikshan-border);
+  background: var(--ikshan-surface);
 }
 
 .about-step-num {
@@ -163,7 +161,7 @@
    ======================================== */
 .about-caps-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -210,26 +208,26 @@
    PRODUCTS LIST
    ======================================== */
 .about-products {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
 }
 
 .about-product-row {
   display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 0.875rem 0;
-  border-bottom: 1px solid var(--ikshan-border);
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ikshan-border);
+  background: var(--ikshan-surface);
   cursor: default;
   transition: all 0.15s ease;
 }
 
-.about-product-row:last-child {
-  border-bottom: none;
-}
-
 .about-product-row:hover {
-  padding-left: 0.5rem;
+  border-color: rgba(109, 40, 217, 0.25);
+  background: var(--ikshan-chat-bubble-user);
 }
 
 .about-product-icon {
@@ -264,14 +262,7 @@
 }
 
 .about-product-arrow {
-  color: var(--ikshan-text-secondary);
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  flex-shrink: 0;
-}
-
-.about-product-row:hover .about-product-arrow {
-  opacity: 0.5;
+  display: none;
 }
 
 /* ========================================
@@ -373,6 +364,17 @@
 
 [data-theme="dark"] .about-step {
   border-color: var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .about-product-row {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .about-product-row:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-accent);
 }
 
 [data-theme="dark"] .about-caps-grid {
@@ -392,10 +394,6 @@
 [data-theme="dark"] .about-product-icon {
   background: rgba(251, 191, 36, 0.1);
   color: var(--accent-primary);
-}
-
-[data-theme="dark"] .about-product-row {
-  border-color: var(--border-primary);
 }
 
 [data-theme="dark"] .about-founder-avatar {
@@ -457,6 +455,17 @@
 
 [data-theme="blue"] .about-step {
   border-color: var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+[data-theme="blue"] .about-product-row {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="blue"] .about-product-row:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-accent);
 }
 
 [data-theme="blue"] .about-caps-grid {
@@ -476,10 +485,6 @@
 [data-theme="blue"] .about-product-icon {
   background: rgba(96, 165, 250, 0.1);
   color: var(--accent-primary);
-}
-
-[data-theme="blue"] .about-product-row {
-  border-color: var(--border-primary);
 }
 
 [data-theme="blue"] .about-founder-avatar {
@@ -541,6 +546,17 @@
 
 [data-theme="green"] .about-step {
   border-color: var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+[data-theme="green"] .about-product-row {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="green"] .about-product-row:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-accent);
 }
 
 [data-theme="green"] .about-caps-grid {
@@ -562,10 +578,6 @@
   color: var(--accent-primary);
 }
 
-[data-theme="green"] .about-product-row {
-  border-color: var(--border-primary);
-}
-
 [data-theme="green"] .about-founder-avatar {
   background: var(--accent-gradient);
 }
@@ -579,27 +591,31 @@
    ======================================== */
 @media (max-width: 768px) {
   .about-content {
-    padding: 2rem 1rem 3rem;
+    padding: 1.5rem 1rem 2.5rem;
   }
 
   .about-hero {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
   .about-hero-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
 
   .about-hero-desc {
-    font-size: 0.925rem;
+    font-size: 0.875rem;
   }
 
-  .about-caps-grid {
+  .about-steps {
     grid-template-columns: 1fr;
   }
 
-  .about-cap {
-    padding: 1.25rem;
+  .about-caps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-products {
+    grid-template-columns: 1fr;
   }
 
   .about-founder-card {
