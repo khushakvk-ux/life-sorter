@@ -2861,17 +2861,11 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
       <div className={`left-sidebar ${leftSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-tabs">
-            <button 
+            <button
               className={`sidebar-tab ${activeMainView === 'chat' ? 'active' : ''}`}
               onClick={() => { setActiveMainView('chat'); setLeftSidebarOpen(false); }}
             >
               <MessageSquare size={14} /> Chat
-            </button>
-            <button 
-              className={`sidebar-tab ${activeMainView === 'market-intel' ? 'active' : ''}`}
-              onClick={() => { setActiveMainView('market-intel'); setLeftSidebarOpen(false); }}
-            >
-              <TrendingUp size={14} /> Intel
             </button>
           </div>
           <button className="sidebar-close" onClick={() => setLeftSidebarOpen(false)}>
@@ -2909,13 +2903,6 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
         <div className="sidebar-overlay" onClick={() => setLeftSidebarOpen(false)} />
       )}
       
-      {/* Main Content - Market Intelligence View */}
-      {activeMainView === 'market-intel' && (
-        <div className="chat-window">
-          <MarketIntelligenceView />
-        </div>
-      )}
-
       {/* Main Content - About View */}
       {activeMainView === 'about' && (
         <div className="chat-window">
