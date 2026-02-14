@@ -2006,16 +2006,6 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
             <h2>Ikshan</h2>
         </div>
 
-        <div className="header-products">
-            <div className="products-scroll">
-                 <div className="product-chip"><ShoppingCart size={14}/> <span>Ecom Listing SEO</span></div>
-                 <div className="product-chip"><TrendingUp size={14}/> <span>Learn from Competitors</span></div>
-                 <div className="product-chip"><Users size={14}/> <span>B2B Lead Gen</span></div>
-                 <div className="product-chip"><Youtube size={14}/> <span>Youtube Helper</span></div>
-                 <div className="product-chip"><Sparkles size={14}/> <span>AI Team</span></div>
-                 <div className="product-chip"><FileText size={14}/> <span>Content Creator</span></div>
-            </div>
-        </div>
         
         <div className="header-actions">
            <button onClick={() => setShowAbout(!showAbout)} title="About Us" className={showAbout ? 'active' : ''}><Info size={20}/></button>
