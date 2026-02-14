@@ -2033,6 +2033,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
 
       {/* Main Content */}
       {!showAbout && (
+      <>
       <div className="chat-window">
         {/* Typeform / Flow Stages */}
         {['goal', 'role', 'category'].includes(flowStage) ? (
@@ -2207,6 +2208,7 @@ This solution helps at the **${subDomainName}** stage of your ${domainName} oper
             </div>
           </div>
       )}
+      </>
       )}
 
        {showChatHistory && (
