@@ -1,4 +1,4 @@
-import { ArrowLeft, Target, Zap, Brain, TrendingUp, ShoppingCart, Users, Youtube, Sparkles, FileText, Shield, Rocket, BarChart3, Lightbulb, Cpu } from 'lucide-react';
+import { ArrowLeft, Target, Zap, Brain, TrendingUp, ShoppingCart, Users, Youtube, Sparkles, FileText, Shield, Rocket, BarChart3, Lightbulb, Cpu, Linkedin } from 'lucide-react';
 import './About.css';
 
 const About = ({ onBack }) => {
@@ -184,6 +184,15 @@ const About = ({ onBack }) => {
               <p className="about-founder-bio">
                 With a track record that includes two previously acquired startups, Vivek brings a fiercely pragmatic approach to business building. He has spent his career mastering the transition from raw startup hustle to highly efficient, systemized scale.
               </p>
+              <a
+                href="https://www.linkedin.com/in/vivek88/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="about-founder-linkedin"
+              >
+                <Linkedin size={16} />
+                <span>Connect on LinkedIn</span>
+              </a>
             </div>
           </div>
         </section>
